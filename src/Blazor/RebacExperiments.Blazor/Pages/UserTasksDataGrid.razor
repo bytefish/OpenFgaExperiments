@@ -1,0 +1,46 @@
+﻿@page "/UserTasks"
+@using RebacExperiments.Blazor.Components
+@using RebacExperiments.Blazor.Shared.Models;
+@using RebacExperiments.Shared.ApiSdk;
+@using RebacExperiments.Shared.ApiSdk.Models;
+
+@inject ApiClient ApiClient
+
+<PageTitle>User Tasks</PageTitle>
+
+<h1>User Tasks</h1>
+
+<FluentDataGrid @ref="DataGrid" ItemsProvider="@UserTasksProvider" Pagination="@Pagination" TGridItem=UserTask>
+    <PropertyColumn Title="Customer ID" Property="@(c => c!.Id)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <NumericFilter TItem="int" PropertyName="Id" FilterState="FilterState"></NumericFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Title" Property="@(c => c.Title)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Title" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Description" Property="@(c => c.Description)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Description" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Due" Property="@(c => c!.DueDateTime)" Format="yyyy-MM-dd mm:ss" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <DateTimeFilter PropertyName="DueDateTime" FilterState="FilterState"></DateTimeFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Reminder" Property="@(c => c!.ReminderDateTime)" Format="yyyy-MM-dd mm:ss" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <DateTimeFilter PropertyName="ReminderDateTime" FilterState="FilterState"></DateTimeFilter>
+        </ColumnOptions>
+   </PropertyColumn>
+    <PropertyColumn Title="Completed" Property="@(c => c!.CompletedDateTime)" Format="yyyy-MM-dd mm:ss" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <DateTimeFilter PropertyName="CompletedDateTime" FilterState="FilterState"></DateTimeFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+</FluentDataGrid>
+
+<FluentPaginator State="@Pagination" />

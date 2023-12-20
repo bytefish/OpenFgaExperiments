@@ -1,0 +1,105 @@
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+
+using RebacExperiments.Server.Api.Infrastructure.Database;
+using RebacExperiments.Server.Api.Models;
+
+namespace RebacExperiments.Server.Api.Services
+{
+    public interface IAclService
+    {
+        /// <summary>
+        /// Checks if a <typeparamref name="TSubjectType"/> is authorized to access an <typeparamref name="TObjectType"/>. 
+        /// </summary>
+        /// <typeparam name="TObjectType">Object Type</typeparam>
+        /// <typeparam name="TSubjectType">Subject Type</typeparam>
+        /// <param name="objectId">Object Key</param>
+        /// <param name="relation">Relation</param>
+        /// <param name="subjectId">SubjectKey</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns><see cref="true"/>, if the <typeparamref name="TSubjectType"/> is authorized; else <see cref="false"/></returns>
+        Task<bool> CheckObjectAsync<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, CancellationToken cancellationToken)
+            where TObjectType : Entity
+            where TSubjectType : Entity;
+
+        /// <summary>
+        /// Checks if a <see cref="User"/> is authorized to access an <typeparamref name="TObjectType"/>. 
+        /// </summary>
+        /// <typeparam name="TObjectType">Object Type</typeparam>
+        /// <param name="objectId">Object Key</param>
+        /// <param name="relation">Relation</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns><see cref="true"/>, if the <typeparamref name="TSubjectType"/> is authorized; else <see cref="false"/></returns>
+        Task<bool> CheckUserObjectAsync<TObjectType>(int userId, int objectId, string relation, CancellationToken cancellationToken)
+            where TObjectType : Entity;
+
+        /// <summary>
+        /// Checks if a <see cref="User"/> is authorized to access an <typeparamref name="TObjectType"/>. 
+        /// </summary>
+        /// <typeparam name="TObjectType">Object Type</typeparam>
+        /// <param name="context">DbContext</param>
+        /// <param name="objectId">Object Key</param>
+        /// <param name="relation">Relation</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns><see cref="true"/>, if the <typeparamref name="TSubjectType"/> is authorized; else <see cref="false"/></returns>
+        Task<bool> CheckUserObjectAsync<TObjectType>(int userId, TObjectType @object, string relation, CancellationToken cancellationToken)
+            where TObjectType : Entity;
+
+        /// <summary>
+        /// Returns all <typeparamref name="TObjectType"/> for a given <typeparamref name="TSubjectType"/> and <paramref name="relation"/>.
+        /// </summary>
+        /// <param name="subjectId">Subject Key to resolve</param>
+        /// <param name="relation">Relation between the Object and Subject</param>
+        /// <returns>All <typeparamref name="TEntityType"/> the user is related to</returns>
+        Task<List<TObjectType>> ListObjectsAsync<TObjectType, TSubjectType>(int subjectId, string relation, CancellationToken cancellationToken)
+            where TObjectType : Entity
+            where TSubjectType : Entity;
+
+
+        /// <summary>
+        /// Returns all <typeparamref name="TEntityType"/> for a given <paramref name="userId"/> and <paramref name="relation"/>.
+        /// </summary>
+        /// <param name="userId">UserID</param>
+        /// <param name="relation">Relation between the User and a <typeparamref name="TEntityType"/></param>
+        /// <returns>All <typeparamref name="TEntityType"/> the user is related to</returns>
+        Task<List<TEntityType>> ListUserObjectsAsync<TEntityType>(int userId, string relation, CancellationToken cancellationToken)
+            where TEntityType : Entity;
+
+        /// <summary>
+        /// Creates a Relationship between a <typeparamref name="TObjectType"/> and a <typeparamref name="TSubjectType"/>.
+        /// </summary>
+        /// <typeparam name="TObjectType">Type of the Object</typeparam>
+        /// <typeparam name="TSubjectType">Type of the Subject</typeparam>
+        /// <param name="objectId">Object Entity</param>
+        /// <param name="relation">Relation between Object and Subject</param>
+        /// <param name="subjectId">Subject Entity</param>
+        /// <param name="subjectRelation">Relation to the Subject</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>An awaitable Task</returns>
+        Task AddRelationshipAsync<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
+            where TObjectType : Entity
+            where TSubjectType : Entity;
+
+        /// <summary>
+        /// Creates a Relationship between a <typeparamref name="TObjectType"/> and a <typeparamref name="TSubjectType"/>.
+        /// </summary>
+        /// <param name="tuples">Tuples to write to the Store</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>An awaitable Task</returns>
+        Task AddRelationshipsAsync(ICollection<(string Object, string Relation, string User)> tuples, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Creates a new Object-Relation-User Tuple for the given Object and Subject.
+        /// </summary>
+        /// <typeparam name="TObjectType">Type of the Object</typeparam>
+        /// <typeparam name="TSubjectType">Type of the Subject</typeparam>
+        /// <param name="objectId">Object Entity</param>
+        /// <param name="relation">Relation between Object and Subject</param>
+        /// <param name="subjectId">Subject Entity</param>
+        /// <param name="subjectRelation">Relation to the Subject</param>
+        /// <returns>Object-Relation-User Tuple</returns>
+        (string Object, string Relation, string User) GetRelationshipTuple<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation)
+            where TObjectType : Entity
+            where TSubjectType : Entity;
+    }
+}

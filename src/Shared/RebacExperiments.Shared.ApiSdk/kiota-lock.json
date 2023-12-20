@@ -1,0 +1,32 @@
+{
+  "descriptionHash": "DF5D5614CD54340DB46F8EEA6DD975D6A3FDE319056C29D9AC950ECA6C1CBC23A5FD2505E358EBE4EF62FD0C7A237F1E55559E127A6FDA96654E2D640C02881B",
+  "descriptionLocation": "https://localhost:5000/odata/openapi.json",
+  "lockFileVersion": "1.0.0",
+  "kiotaVersion": "1.8.1",
+  "clientClassName": "ApiClient",
+  "clientNamespaceName": "RebacExperiments.Shared.ApiSdk",
+  "language": "CSharp",
+  "usesBackingStore": false,
+  "excludeBackwardCompatible": false,
+  "includeAdditionalData": true,
+  "serializers": [
+    "Microsoft.Kiota.Serialization.Json.JsonSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Text.TextSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Form.FormSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Multipart.MultipartSerializationWriterFactory"
+  ],
+  "deserializers": [
+    "Microsoft.Kiota.Serialization.Json.JsonParseNodeFactory",
+    "Microsoft.Kiota.Serialization.Text.TextParseNodeFactory",
+    "Microsoft.Kiota.Serialization.Form.FormParseNodeFactory"
+  ],
+  "structuredMimeTypes": [
+    "application/json;q=1",
+    "text/plain;q=0",
+    "application/x-www-form-urlencoded;q=0",
+    "multipart/form-data;q=0"
+  ],
+  "includePatterns": [],
+  "excludePatterns": [],
+  "disabledValidationRules": []
+}

@@ -1,0 +1,18 @@
+﻿@using RebacExperiments.Blazor.Shared.Models
+@using RebacExperiments.Blazor.Infrastructure
+
+@namespace RebacExperiments.Blazor.Components
+
+@inherits FluentComponentBase
+<FluentSelect @attributes="AdditionalAttributes" class="@Class" style="@Style"
+              Id="@Id"
+              AriaLabel="@Title"
+              Disabled="@Disabled"
+              Items="@FilterOperators"
+              OptionText="@(i => Loc.TranslateEnum(i))"
+              OptionValue="@(i => i.ToString())"
+              TOption=FilterOperatorEnum
+              Value=@_value
+              SelectedOption=@_filterOperator
+              SelectedOptionChanged="OnSelectedValueChanged">
+</FluentSelect>

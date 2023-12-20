@@ -1,0 +1,81 @@
+﻿@RebacExperiments.Server.Api_HostAddress = https://localhost:5000/odata
+
+### Sign In "philipp@bytefish.de"
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/SignInUser
+Content-Type: application/json
+
+{
+  "username": "philipp@bytefish.de",
+  "password": "5!F25GbKwU3P",
+  "rememberMe": true
+}
+
+### Get all UserTasks for "philipp@bytefish.de"
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+
+### Get the first task and return the total count of Entities visible to "philipp@bytefish.de"
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks?$top=1&$orderby=id&$count=true
+
+
+### Sign Out "philipp@bytefish.de"
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/SignOutUser
+
+### Check for 401 Unauthorized when not Authenticated
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+
+### Sign In as "max@mustermann.local"
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/SignInUser
+Content-Type: application/json
+
+{
+  "username": "max@mustermann.local",
+  "password": "5!F25GbKwU3P",
+  "rememberMe": true
+}
+
+### Get all UserTasks for "max@mustermann.local"
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+
+### Create a new UserTask "API HTTP File Example" as "max@mustermann.local"
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+Content-Type: application/json
+
+{
+    "title": "API HTTP File Example",
+    "description": "API HTTP File Example",
+    "dueDateTime": null,
+    "reminderDateTime": null,
+    "completedDateTime": null,
+    "assignedTo": null,
+    "userTaskPriority": "Normal",
+    "userTaskStatus": "NotStarted"
+}
+
+### Get all UserTasks for "max@mustermann.local"
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+
+
+### Sign In "philipp@bytefish.de"
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/SignInUser
+Content-Type: application/json
+
+{
+  "username": "philipp@bytefish.de",
+  "password": "5!F25GbKwU3P",
+  "rememberMe": true
+}
+
+### Get all UserTasks for "philipp@bytefish.de"
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+

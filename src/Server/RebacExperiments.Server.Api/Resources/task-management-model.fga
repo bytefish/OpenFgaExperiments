@@ -1,0 +1,26 @@
+model
+  schema 1.1
+
+type User
+
+type Role
+    relations
+        define member: [User]
+
+type Organization
+    relations
+        define member: [User] or owner
+        define owner: [User]
+
+type Team
+  relations
+    define member: [User]
+
+type UserTask
+    relations
+        define can_change_owner: owner
+        define can_read: viewer or owner
+        define can_share: owner
+        define can_write: owner
+        define owner: [User]
+        define viewer: [User, User:*, Organization#member, Team#member]

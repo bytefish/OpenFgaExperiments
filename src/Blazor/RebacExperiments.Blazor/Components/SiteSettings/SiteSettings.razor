@@ -1,0 +1,7 @@
+﻿@inject IDialogService DialogService
+
+@namespace RebacExperiments.Blazor.Components
+
+<FluentButton BackgroundColor="var(--neutral-layer-4)" OnClick="OpenSiteSettingsAsync" Title="Site settings">
+    <FluentIcon Value="@(new Icons.Regular.Size20.Settings())" Color="Color.Neutral" Title="Site settings" />
+</FluentButton>

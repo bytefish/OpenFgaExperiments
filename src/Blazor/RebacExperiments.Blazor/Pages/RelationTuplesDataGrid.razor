@@ -1,0 +1,51 @@
+﻿@page "/RelationTuples"
+@using RebacExperiments.Blazor.Components
+@using RebacExperiments.Blazor.Shared.Models;
+@using RebacExperiments.Shared.ApiSdk;
+@using RebacExperiments.Shared.ApiSdk.Models;
+
+@inject ApiClient ApiClient
+
+<PageTitle>All Relation Tuples</PageTitle>
+
+<h1>Relation Tuples</h1>
+
+<FluentDataGrid @ref="DataGrid" ItemsProvider="@RelationTuplesProvider" Pagination="@Pagination" TGridItem=RelationTuple>
+    <PropertyColumn Title="RelationTuple ID" Property="@(c => c.Id)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <NumericFilter TItem="int" PropertyName="Id" FilterState="FilterState"></NumericFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Object" Property="@(c => c.ObjectNamespace)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="ObjectNamespace" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Object ID" Property="@(c => c.ObjectKey)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <NumericFilter PropertyName="ObjectKey" FilterState="FilterState" TItem="int"></NumericFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Object Relation" Property="@(c => c.ObjectRelation)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="ObjectRelation" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Subject" Property="@(c => c.SubjectNamespace)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="SubjectNamespace" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+   </PropertyColumn>
+    <PropertyColumn Title="Subject ID" Property="@(c => c.SubjectKey)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <NumericFilter PropertyName="SubjectKey" FilterState="FilterState" TItem="int"></NumericFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Subject Relation" Property="@(c => c.SubjectRelation)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="SubjectRelation" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+</FluentDataGrid>
+
+<FluentPaginator State="@Pagination" />
