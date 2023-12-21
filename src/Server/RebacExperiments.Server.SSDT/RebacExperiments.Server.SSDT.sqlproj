@@ -67,7 +67,6 @@
     <Folder Include="Identity\Sequences" />
     <Folder Include="Identity\Stored Procedures" />
     <Folder Include="Identity\Tables" />
-    <Folder Include="Identity\Functions" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment1.sql" />
@@ -76,14 +75,10 @@
     <Build Include="Identity\Stored Procedures\usp_TemporalTables_DeactivateTemporalTables.sql" />
     <Build Include="Identity\Stored Procedures\usp_TemporalTables_ReactivateTemporalTables.sql" />
     <Build Include="Identity\Identity.sql" />
-    <Build Include="Identity\Sequences\sq_RelationTuple.sql" />
-    <Build Include="Identity\Functions\tvf_RelationTuples_ListObjects.sql" />
-    <Build Include="Identity\Functions\udf_RelationTuples_Check.sql" />
-    <Build Include="Identity\Tables\RelationTuple.sql" />
     <Build Include="Application\Tables\UserTask.sql" />
     <Build Include="Application\Tables\UserTaskPriority.sql" />
     <Build Include="Application\Tables\UserTaskStatus.sql" />
-    <Build Include="Application\Sequences\sq_UserTask.sql" />
+    <Build Include="Application\Sequences\sq_TaskItem.sql" />
     <Build Include="Application\Stored Procedures\usp_TemporalTables_DeactivateTemporalTables.sql" />
     <Build Include="Application\Stored Procedures\usp_TemporalTables_ReactivateTemporalTables.sql" />
     <Build Include="Application\Application.sql" />
@@ -91,13 +86,9 @@
     <Build Include="Application\Indexes\UX_Application_UserTaskPriority_Name.sql" />
     <None Include="Scripts\Application\pds-100-ins-application-task-priority.sql" />
     <None Include="Scripts\Application\pds-110-ins-application-task-status.sql" />
-    <Build Include="Identity\Indexes\UX_RelationTuple_UniqueObjectSubjectRelation.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Identity\pds-120-ins-identity-relation-tuples.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Application\pds-120-ins-application-user-task.sql" />
+    <None Include="Scripts\Application\pds-120-ins-application-task-item.sql" />
     <Build Include="Application\Tables\Organization.sql" />
     <Build Include="Application\Sequences\sq_Organization.sql" />
     <None Include="Scripts\Application\pds-130-ins-application-organization.sql" />
@@ -110,5 +101,16 @@
     <Build Include="Identity\Sequences\sq_Role.sql" />
     <None Include="Scripts\Identity\pds-110-ins-identity-roles.sql" />
     <Build Include="Identity\Indexes\UX_Role_Name.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Application\Sequences\sq_TeamRole.sql" />
+    <Build Include="Application\Sequences\sq_OrganizationRole.sql" />
+    <Build Include="Application\Tables\TeamRole.sql" />
+    <Build Include="Application\Tables\OrganizationRole.sql" />
+    <Build Include="Application\Tables\UserTaskItem.sql" />
+    <Build Include="Application\Sequences\sq_UserTaskItem.sql" />
+    <None Include="Scripts\Application\pds-150-ins-application-organization-role.sql" />
+    <None Include="Scripts\Application\pds-160-ins-application-team-role.sql" />
+    <None Include="Scripts\Application\pds-170-ins-application-user-task-item.sql" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,59 @@
+I am currently working on an end-to-end example for using OpenFGA in .NET applications, and I would like to ask or discuss ideas or best practices. The result should be something similar to the Oso GitCloud example (https://github.com/osohq/gitcloud). My main goal here is to basically apply OpenFGA in an OData Service, so I can serve something similar to a "Graph API" for data sources.
+
+The ideas I came up with, are quite similar to what the Oso example does. First thing I did was making some assumptions in the domain model, for example there's an `Entity` base class with an `Id` and we could use both in OpenFGA and the Application. 
+
+The code in the application for reading all `TaskItem` for a given User ID would look like this:
+
+```csharp
+public async Task<List<TaskItem>> GetTaskItemsByUserIdAsync(int userId, CancellationToken cancellationToken)
+{
+    _logger.TraceMethodEntry();
+
+    var taskItems = await _aclService
+        .ListUserObjectsAsync<TaskItem>(userId, Relations.Viewer, cancellationToken)
+        .ConfigureAwait(false);
+
+    return taskItems;
+}
+```
+
+```csharp
+public async Task<TaskItem> CreateTaskItemAsync(TaskItem taskItem, int currentUserId, CancellationToken cancellationToken)
+{
+    _logger.TraceMethodEntry();
+
+    using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+    {
+        // Make sure the Current User is the last editor:
+        taskItem.LastEditedBy = currentUserId;
+
+        // Add the new Task, the HiLo Pattern automatically assigns a new Id using the HiLo Pattern
+        await context
+            .AddAsync(taskItem, cancellationToken)
+            .ConfigureAwait(false);
+
+        // The Current User should automatically be the Owner:
+        var TaskItemItem = new TaskItemItem {
+            UserId = currentUserId,
+            TaskItemId = taskItem.Id,
+            Role = Relations.Owner,
+        };
+
+        await context
+            .AddAsync(TaskItemItem, cancellationToken)
+            .ConfigureAwait(false);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        // Acl
+        await _aclService
+            .AddRelationshipAsync<TaskItem, User>(taskItem.Id, Relations.Owner, currentUserId, null)
+            .ConfigureAwait(false);
+
+        return taskItem;
+    }
+}
+```
+
+For any Read Operation you are basically reading the list of Allowed IDs, and then you join them with EntityFramework Core (the Go-To ORM for .NET), so the rest of the data is loaded.
+

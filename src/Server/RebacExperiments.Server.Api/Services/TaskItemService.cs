@@ -38,17 +38,22 @@ namespace RebacExperiments.Server.Api.Services
                     .ConfigureAwait(false);
 
                 // The Current User should automatically be the Owner:
-                var TaskItemItem = new TaskItemItem {
+                var userTaskItem = new UserTaskItem {
                     UserId = currentUserId,
                     TaskItemId = taskItem.Id,
                     Role = Relations.Owner,
                 };
 
                 await context
-                    .AddAsync(TaskItemItem, cancellationToken)
+                    .AddAsync(userTaskItem, cancellationToken)
                     .ConfigureAwait(false);
 
                 await context.SaveChangesAsync(cancellationToken);
+
+                // Acl
+                await _aclService
+                    .AddRelationshipAsync<TaskItem, User>(taskItem.Id, Relations.Owner, currentUserId, null)
+                    .ConfigureAwait(false);
 
                 return taskItem;
             }
@@ -93,15 +98,11 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Probably inefficient ...?
-                var TaskItems = await _aclService
-                    .ListUserObjectsAsync<TaskItem>(userId, Relations.Viewer, cancellationToken)
-                    .ConfigureAwait(false);
+            var taskItems = await _aclService
+                .ListUserObjectsAsync<TaskItem>(userId, Relations.Viewer, cancellationToken)
+                .ConfigureAwait(false);
 
-                return TaskItems;
-            }
+            return taskItems;
         }
 
         public async Task<TaskItem> UpdateTaskItemAsync(TaskItem TaskItem, int currentUserId, CancellationToken cancellationToken)
@@ -179,8 +180,8 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                // After removing all possible references, delete the TaskItem itself
-                int rowsAffected = await context.TaskItems
+                
+                await context.TaskItems
                     .Where(t => t.Id == TaskItem.Id)
                     .ExecuteDeleteAsync(cancellationToken);
 

@@ -40,4 +40,29 @@ AS BEGIN
 		ALTER TABLE [Application].[Team] DROP PERIOD FOR SYSTEM_TIME;
 	END
 
+        
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[OrganizationRole]'), 'TableTemporalType') = 2
+	BEGIN
+		PRINT 'Deactivate Temporal Table for [Application].[OrganizationRole]'
+
+		ALTER TABLE [Application].[OrganizationRole] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[OrganizationRole] DROP PERIOD FOR SYSTEM_TIME;
+	END
+
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TeamRole]'), 'TableTemporalType') = 2
+	BEGIN
+		PRINT 'Deactivate Temporal Table for [Application].[TeamRole]'
+
+		ALTER TABLE [Application].[TeamRole] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[TeamRole] DROP PERIOD FOR SYSTEM_TIME;
+	END
+    
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTaskItem]'), 'TableTemporalType') = 2
+	BEGIN
+		PRINT 'Deactivate Temporal Table for [Application].[TeamRole]'
+
+		ALTER TABLE [Application].[UserTaskItem] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[UserTaskItem] DROP PERIOD FOR SYSTEM_TIME;
+	END
+
 END

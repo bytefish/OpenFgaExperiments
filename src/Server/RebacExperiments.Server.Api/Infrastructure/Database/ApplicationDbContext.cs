@@ -56,6 +56,11 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
         public DbSet<UserRole> UserRoles { get; set; } = null!;
 
         /// <summary>
+        /// Gets or sets the UserRoles.
+        /// </summary>
+        public DbSet<UserTaskItem> UserTaskItems { get; set; } = null!;
+
+        /// <summary>
         /// Gets or sets the UserTeams.
         /// </summary>
         public DbSet<TeamRole> TeamRoles { get; set; } = null!;
@@ -206,6 +211,63 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
                     .IsRequired(true);
             });
 
+            modelBuilder.HasSequence<int>("sq_OrganizationRole", schema: "Application")
+                .StartsAt(38187)
+                .IncrementsBy(1);
+
+            modelBuilder.Entity<OrganizationRole>(entity =>
+            {
+                entity.ToTable("OrganizationRole", "Application");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(x => x.Id)
+                    .HasColumnType("INT")
+                    .HasColumnName("OrganizationRoleID")
+                    .UseHiLo("sq_OrganizationRole", "Application")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.OrganizationId)
+                    .HasColumnType("INT")
+                    .HasColumnName("OrganizationID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.UserId)
+                    .HasColumnType("INT")
+                    .HasColumnName("UserID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.Role)
+                    .HasColumnType("NVARCHAR(255)")
+                    .HasColumnName("Name")
+                    .IsRequired(true)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.RowVersion)
+                    .HasColumnType("ROWVERSION")
+                    .HasColumnName("RowVersion")
+                    .IsConcurrencyToken()
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidFrom)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidFrom")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidTo)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidTo")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.LastEditedBy)
+                    .HasColumnType("INT")
+                    .HasColumnName("LastEditedBy")
+                    .IsRequired(true);
+            });
+
             modelBuilder.HasSequence<int>("sq_Team", schema: "Application")
                 .StartsAt(38187)
                 .IncrementsBy(1);
@@ -233,6 +295,63 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
                     .HasColumnName("Description")
                     .IsRequired(true)
                     .HasMaxLength(2000);
+
+                entity.Property(e => e.RowVersion)
+                    .HasColumnType("ROWVERSION")
+                    .HasColumnName("RowVersion")
+                    .IsConcurrencyToken()
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidFrom)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidFrom")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidTo)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidTo")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.LastEditedBy)
+                    .HasColumnType("INT")
+                    .HasColumnName("LastEditedBy")
+                    .IsRequired(true);
+            });
+
+            modelBuilder.HasSequence<int>("sq_TeamRole", schema: "Application")
+                .StartsAt(38187)
+                .IncrementsBy(1);
+
+            modelBuilder.Entity<TeamRole>(entity =>
+            {
+                entity.ToTable("TeamRole", "Application");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(x => x.Id)
+                    .HasColumnType("INT")
+                    .HasColumnName("TeamRoleID")
+                    .UseHiLo("sq_TeamRole", "Application")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.TeamId)
+                    .HasColumnType("INT")
+                    .HasColumnName("TeamID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.UserId)
+                    .HasColumnType("INT")
+                    .HasColumnName("UserID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.Role)
+                    .HasColumnType("NVARCHAR(255)")
+                    .HasColumnName("Name")
+                    .IsRequired(true)
+                    .HasMaxLength(255);
 
                 entity.Property(e => e.RowVersion)
                     .HasColumnType("ROWVERSION")
@@ -377,6 +496,66 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
                     .HasColumnName("LastEditedBy")
                     .IsRequired(true);
             });
+
+
+            modelBuilder.HasSequence<int>("sq_UserTaskItem", schema: "Application")
+                .StartsAt(38187)
+                .IncrementsBy(1);
+
+            modelBuilder.Entity<UserTaskItem>(entity =>
+            {
+                entity.ToTable("UserTaskItem", "Application");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(x => x.Id)
+                    .HasColumnType("INT")
+                    .HasColumnName("UserTaskItemID")
+                    .UseHiLo("sq_UserTaskItem", "Application")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.TaskItemId)
+                    .HasColumnType("INT")
+                    .HasColumnName("TaskItemID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.UserId)
+                    .HasColumnType("INT")
+                    .HasColumnName("UserID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.Role)
+                    .HasColumnType("NVARCHAR(255)")
+                    .HasColumnName("Name")
+                    .IsRequired(true)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.RowVersion)
+                    .HasColumnType("ROWVERSION")
+                    .HasColumnName("RowVersion")
+                    .IsConcurrencyToken()
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidFrom)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidFrom")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidTo)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidTo")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.LastEditedBy)
+                    .HasColumnType("INT")
+                    .HasColumnName("LastEditedBy")
+                    .IsRequired(true);
+            });
+
+
 
             base.OnModelCreating(modelBuilder);
         }

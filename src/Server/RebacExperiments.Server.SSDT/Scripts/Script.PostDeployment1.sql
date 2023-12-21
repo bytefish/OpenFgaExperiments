@@ -47,6 +47,15 @@ GO
 :r .\Application\pds-140-ins-application-team.sql
 GO
 
+:r .\Application\pds-150-ins-application-organization-role.sql
+GO
+
+:r .\Application\pds-160-ins-application-team-role.sql
+GO
+
+:r .\Application\pds-170-ins-application-user-task-item.sql
+GO
+
 /*
   We need to reactivate all Temporal Tables after the initial data load.
 */

@@ -2,7 +2,7 @@
 
 namespace RebacExperiments.Server.Api.Models
 {
-    public class TaskItemItem : Entity
+    public class UserTaskItem : Entity
     {
         /// <summary>
         /// Gets or sets the UserId.
