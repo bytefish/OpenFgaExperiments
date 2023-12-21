@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
+using RebacExperiments.Server.Api.Infrastructure.Authorization;
 using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Models;
 
@@ -81,12 +82,30 @@ namespace RebacExperiments.Server.Api.Services
             where TSubjectType : Entity;
 
         /// <summary>
-        /// Creates a Relationship between a <typeparamref name="TObjectType"/> and a <typeparamref name="TSubjectType"/>.
+        /// Deletes a List of Relations.
+        /// </summary>
+        /// <param name="tuples">Tuples to delete from the Store</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns></returns>
+        Task DeleteRelationshipAsync<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
+            where TObjectType : Entity
+            where TSubjectType : Entity;
+
+        /// <summary>
+        /// Creates a List of Relations.
         /// </summary>
         /// <param name="tuples">Tuples to write to the Store</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns>An awaitable Task</returns>
-        Task AddRelationshipsAsync(ICollection<(string Object, string Relation, string User)> tuples, CancellationToken cancellationToken);
+        Task AddRelationshipsAsync(ICollection<RelationTuple> tuples, CancellationToken cancellationToken);
+        
+        /// <summary>
+        /// Creates a List of Relations.
+        /// </summary>
+        /// <param name="tuples">Tuples to write to the Store</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>An awaitable Task</returns>
+        Task DeleteRelationshipsAsync(ICollection<RelationTuple> tuples, CancellationToken cancellationToken);
 
         /// <summary>
         /// Creates a new Object-Relation-User Tuple for the given Object and Subject.
@@ -98,8 +117,30 @@ namespace RebacExperiments.Server.Api.Services
         /// <param name="subjectId">Subject Entity</param>
         /// <param name="subjectRelation">Relation to the Subject</param>
         /// <returns>Object-Relation-User Tuple</returns>
-        (string Object, string Relation, string User) GetRelationshipTuple<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation)
+        RelationTuple GetRelationshipTuple<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation)
             where TObjectType : Entity
             where TSubjectType : Entity;
+
+        /// <summary>
+        /// Reads all stored Relation Tuples off the Store.
+        /// </summary>
+        /// <typeparam name="TObjectType">Type of the Object</typeparam>
+        /// <param name="objectId">Object Entity</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>All Relationships found in Store</returns>
+        Task<List<RelationTuple>> ReadAllRelationshipsByObjectAsync<TObjectType>(int objectId, CancellationToken cancellationToken = default)
+            where TObjectType : Entity;
+
+        /// <summary>
+        /// Reads all stored Relation Tuples off the Store.
+        /// </summary>
+        /// <typeparam name="TObjectType">Type of the Object</typeparam>
+        /// <param name="objectId">Object Entity</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>All Relationships found in Store</returns>
+        Task<List<RelationTuple>> ReadAllRelationshipsBySubjectAsync<TSubjectType>(int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
+            where TSubjectType : Entity;
+
+
     }
 }

@@ -6,6 +6,7 @@ using RebacExperiments.Server.Api.Infrastructure.Logging;
 using System.Globalization;
 using RebacExperiments.Server.Api.Models;
 using OpenFga.Sdk.Model;
+using RebacExperiments.Server.Api.Infrastructure.Authorization;
 
 namespace RebacExperiments.Server.Api.Services
 {
@@ -142,23 +143,214 @@ namespace RebacExperiments.Server.Api.Services
             await _openFgaClient.WriteTuples(tuples, null, cancellationToken).ConfigureAwait(false);
         }
 
-        public (string Object, string Relation, string User) GetRelationshipTuple<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation)
+
+        public async Task DeleteRelationshipAsync<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
             where TObjectType : Entity
             where TSubjectType : Entity
         {
             _logger.TraceMethodEntry();
 
-            return (ToZanzibarNotation<TObjectType>(objectId), relation, ToZanzibarNotation<TSubjectType>(subjectId, subjectRelation));
+            var tuples = new List<ClientTupleKey>()
+            {
+                new ClientTupleKey
+                {
+                    Object = ToZanzibarNotation<TObjectType>(objectId),
+                    Relation = relation,
+                    User = ToZanzibarNotation<TSubjectType>(subjectId, subjectRelation)
+                }
+            };
+
+            await _openFgaClient.DeleteTuples(tuples, null, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task AddRelationshipsAsync(ICollection<(string Object, string Relation, string User)> tuples, CancellationToken cancellationToken)
+        public async Task<List<RelationTuple>> ReadAllRelationshipsByObjectAsync<TObjectType>(int objectId, CancellationToken cancellationToken = default)
+            where TObjectType : Entity
         {
-            var clientTupleKeys = tuples
+            _logger.TraceMethodEntry();
+
+            var body = new ClientReadRequest
+            {
+                Object = ToZanzibarNotation<TObjectType>(objectId),
+            };
+
+            var readResult = new List<RelationTuple>();
+
+            string? continuationToken = null;
+
+            do
+            {
+                var options = new ClientReadOptions
+                {
+                    PageSize = 100,
+                    ContinuationToken = continuationToken
+                };
+
+                var response = await _openFgaClient
+                    .Read(body, options, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (response == null)
+                {
+                    throw new InvalidOperationException("No Response received");
+                }
+
+                if (response.Tuples != null)
+                {
+                    foreach (var tuple in response.Tuples)
+                    {
+                        var relationTuple = new RelationTuple
+                        {
+                            Object = tuple.Key?.Object ?? string.Empty,
+                            Relation = tuple.Key?.Relation ?? string.Empty,
+                            Subject = tuple.Key?.User ?? string.Empty,
+                        };
+
+                        readResult.Add(relationTuple);
+                    }
+                }
+
+                // Set the new Continuation Token to get more data ...
+                continuationToken = response.ContinuationToken;
+
+            } while (continuationToken != null);
+
+            return readResult;
+        }
+
+
+        public async Task<List<RelationTuple>> ReadAllRelationshipsBySubjectAsync<TSubjectType>(int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
+            where TSubjectType : Entity
+        {
+            _logger.TraceMethodEntry();
+
+            var body = new ClientReadRequest
+            {
+                User = ToZanzibarNotation<TSubjectType>(subjectId, subjectRelation),
+            };
+
+            var readResult = new List<RelationTuple>();
+
+            string? continuationToken = null;
+
+            do
+            {
+                var options = new ClientReadOptions
+                {
+                    PageSize = 100,
+                    ContinuationToken = continuationToken
+                };
+
+                var response = await _openFgaClient
+                    .Read(body, options, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (response == null)
+                {
+                    throw new InvalidOperationException("No Response received");
+                }
+
+                if (response.Tuples != null)
+                {
+                    foreach (var tuple in response.Tuples)
+                    {
+                        var relationTuple = new RelationTuple
+                        {
+                            Object = tuple.Key?.Object ?? string.Empty,
+                            Relation = tuple.Key?.Relation ?? string.Empty,
+                            Subject = tuple.Key?.User ?? string.Empty,
+                        };
+
+                        readResult.Add(relationTuple);
+                    }
+                }
+
+                // Set the new Continuation Token to get more data ...
+                continuationToken = response.ContinuationToken;
+
+            } while (continuationToken != null);
+
+            return readResult;
+        }
+
+        public async Task<List<RelationTuple>> ReadAllRelationships<TObjectType, TSubjectType>(int? objectId, string? relation, int? subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
+            where TObjectType : Entity
+            where TSubjectType : Entity
+        {
+            _logger.TraceMethodEntry();
+
+            var body = new ClientReadRequest
+            {
+                Object = ToZanzibarNotation<TObjectType>(objectId),
+                Relation = relation,
+                User = ToZanzibarNotation<TSubjectType>(subjectId, subjectRelation),
+            };
+
+            var readResult = new List<RelationTuple>();
+
+            string? continuationToken = null;
+
+            do
+            {
+                var options = new ClientReadOptions
+                {
+                    PageSize = 100,
+                    ContinuationToken = continuationToken
+                };
+
+                var response = await _openFgaClient
+                    .Read(body, options, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (response == null)
+                {
+                    throw new InvalidOperationException("No Response received");
+                }
+
+                if (response.Tuples != null)
+                {
+                    foreach (var tuple in response.Tuples)
+                    {
+                        var relationTuple = new RelationTuple
+                        {
+                            Object = tuple.Key?.Object ?? string.Empty,
+                            Relation = tuple.Key?.Relation ?? string.Empty,
+                            Subject = tuple.Key?.User ?? string.Empty,
+                        };
+
+                        readResult.Add(relationTuple);
+                    }
+                }
+
+                // Set the new Continuation Token to get more data ...
+                continuationToken = response.ContinuationToken;
+
+            } while (continuationToken != null);
+
+            return readResult;
+        }
+
+        public RelationTuple GetRelationshipTuple<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, string? subjectRelation)
+            where TObjectType : Entity
+            where TSubjectType : Entity
+        {
+            _logger.TraceMethodEntry();
+
+            return new RelationTuple
+            {
+                Object = ToZanzibarNotation<TObjectType>(objectId),
+                Relation = relation,
+                Subject = ToZanzibarNotation<TSubjectType>(subjectId, subjectRelation)
+            };
+        }
+
+        public async Task AddRelationshipsAsync(ICollection<RelationTuple> relationTuples, CancellationToken cancellationToken)
+        {
+            var clientTupleKeys = relationTuples
                 .Select(x => new ClientTupleKey
                 {
                     Object = x.Object,
                     Relation = x.Relation,
-                    User = x.User
+                    User = x.Subject
                 })
                 .ToList();
     
@@ -167,15 +359,33 @@ namespace RebacExperiments.Server.Api.Services
                 .ConfigureAwait(false);
         }
 
-        private static string ToZanzibarNotation<TEntity>(int id, string? relation = null)
+        public async Task DeleteRelationshipsAsync(ICollection<RelationTuple> relationTuples, CancellationToken cancellationToken)
+        {
+            var clientTupleKeys = relationTuples
+                .Select(x => new ClientTupleKey
+                {
+                    Object = x.Object,
+                    Relation = x.Relation,
+                    User = x.Subject
+                })
+                .ToList();
+
+            await _openFgaClient
+                .DeleteTuples(clientTupleKeys, null, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private static string ToZanzibarNotation<TEntity>(int? id, string? relation = null)
             where TEntity : Entity
         {
+            var strId = id == null ? "*" : id.ToString();
+
             if (string.IsNullOrWhiteSpace(relation))
             {
-                return $"{typeof(TEntity).Name}:{id}";
+                return $"{typeof(TEntity).Name}:{strId}";
             }
 
-            return $"{typeof(TEntity).Name}:{id}#{relation}";
+            return $"{typeof(TEntity).Name}:{strId}#{relation}";
         }
 
         private static (string Type, int Id, string? relation) FromZanzibarNotation(string s)

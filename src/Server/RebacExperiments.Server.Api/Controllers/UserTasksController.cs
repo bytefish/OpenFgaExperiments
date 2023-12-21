@@ -41,7 +41,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var userTask = await userTaskService.GetTaskIemByUserIdAsync(key, User.GetUserId(), cancellationToken);
+                var userTask = await userTaskService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
 
                 return Ok(userTask);
             }
@@ -65,7 +65,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var userTasks = await userTaskService.GetTasksItemsAsync(User.GetUserId(), cancellationToken);
+                var userTasks = await userTaskService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
 
                 return Ok(queryOptions.ApplyTo(userTasks.AsQueryable()));
             }
@@ -115,7 +115,7 @@ namespace RebacExperiments.Server.Api.Controllers
             try
             {
                 // Get the UserTask with the current values:
-                var userTask = await userTaskService.GetTaskIemByUserIdAsync(key, User.GetUserId(), cancellationToken);
+                var userTask = await userTaskService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
 
                 // Patch the Values to it:
                 delta.Patch(userTask);

@@ -25,7 +25,7 @@ namespace RebacExperiments.Server.Api.Services
         /// <param name="currentUserId"><see cref="User"/> ID</param>
         /// <param name="cancellationToken">CancellationToken to cancel asynchronous processing</param>
         /// <returns>The <see cref="TaskItem"/> for the given ID</returns>
-        Task<TaskItem> GetTaskIemByUserIdAsync(int userTaskId, int currentUserId, CancellationToken cancellationToken);
+        Task<TaskItem> GetTaskItemByIdAsync(int taskItemId, int currentUserId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets all <see cref="TaskItem"/> the given User has Viewer or Owner access to.
@@ -33,7 +33,7 @@ namespace RebacExperiments.Server.Api.Services
         /// <param name="currentUserId"><see cref="User"/> ID</param>
         /// <param name="cancellationToken">CancellationToken to cancel asynchronous processing</param>
         /// <returns>The <see cref="TaskItem"/> for the given ID</returns>
-        Task<List<TaskItem>> GetTasksItemsAsync(int currentUserId, CancellationToken cancellationToken);
+        Task<List<TaskItem>> GetTaskItemsByUserIdAsync(int userId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Updates a <see cref="TaskItem"/> for the current user.
@@ -42,7 +42,7 @@ namespace RebacExperiments.Server.Api.Services
         /// <param name="currentUserId"><see cref="User"/> ID</param>
         /// <param name="cancellationToken">CancellationToken to cancel asynchronous processing</param>
         /// <returns>The Updated <see cref="TaskItem"/></returns>
-        Task<TaskItem> UpdateTaskItemAsync(TaskItem taskItem, int currentUserId, CancellationToken cancellationToken);
+        Task<TaskItem> UpdateTaskItemAsync(TaskItem userTask, int currentUserId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes a <see cref="TaskItem"/> and all of its relationships.

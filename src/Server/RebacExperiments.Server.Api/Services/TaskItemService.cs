@@ -54,7 +54,7 @@ namespace RebacExperiments.Server.Api.Services
             }
         }
 
-        public async Task<TaskItem> GetTaskIemByUserIdAsync(int userTaskId, int currentUserId, CancellationToken cancellationToken)
+        public async Task<TaskItem> GetTaskItemByIdAsync(int taskItemId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -62,14 +62,14 @@ namespace RebacExperiments.Server.Api.Services
             {
                 var taskItem = await context.UserTasks
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == userTaskId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
 
                 if (taskItem == null)
                 {
                     throw new EntityNotFoundException()
                     {
                         EntityName = nameof(TaskItem),
-                        EntityId = userTaskId,
+                        EntityId = taskItemId,
                     };
                 }
 
@@ -80,7 +80,7 @@ namespace RebacExperiments.Server.Api.Services
                     throw new EntityUnauthorizedAccessException()
                     {
                         EntityName = nameof(TaskItem),
-                        EntityId = userTaskId,
+                        EntityId = taskItemId,
                         UserId = currentUserId,
                     };
                 }
@@ -89,14 +89,15 @@ namespace RebacExperiments.Server.Api.Services
             }
         }
 
-        public async Task<List<TaskItem>> GetTasksItemsAsync(int currentUserId, CancellationToken cancellationToken)
+        public async Task<List<TaskItem>> GetTaskItemsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
+                // Probably inefficient ...?
                 var userTasks = await _aclService
-                    .ListUserObjectsAsync<TaskItem>(currentUserId, Relations.Viewer, cancellationToken)
+                    .ListUserObjectsAsync<TaskItem>(userId, Relations.Viewer, cancellationToken)
                     .ConfigureAwait(false);
 
                 return userTasks;
@@ -147,7 +148,7 @@ namespace RebacExperiments.Server.Api.Services
             }
         }
 
-        public async Task DeleteTaskItemAsync( int userTaskId, int currentUserId, CancellationToken cancellationToken)
+        public async Task DeleteTaskItemAsync( int taskItemId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -155,25 +156,25 @@ namespace RebacExperiments.Server.Api.Services
             {
                 var userTask = await context.UserTasks
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == userTaskId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
 
                 if (userTask == null)
                 {
                     throw new EntityNotFoundException()
                     {
                         EntityName = nameof(TaskItem),
-                        EntityId = userTaskId,
+                        EntityId = taskItemId,
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, userTaskId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, taskItemId, Relations.Owner, cancellationToken);
 
                 if (!isAuthorized)
                 {
                     throw new EntityUnauthorizedAccessException()
                     {
                         EntityName = nameof(TaskItem),
-                        EntityId = userTaskId,
+                        EntityId = taskItemId,
                         UserId = currentUserId,
                     };
                 }
@@ -183,16 +184,12 @@ namespace RebacExperiments.Server.Api.Services
                     .Where(t => t.Id == userTask.Id)
                     .ExecuteDeleteAsync(cancellationToken);
 
-                // No Idea if this could happen, because we are in a Transaction and there
-                // is a row, which should be locked. So this shouldn't happen at all...
-                if (rowsAffected == 0)
-                {
-                    throw new EntityConcurrencyException()
-                    {
-                        EntityName = nameof(TaskItem),
-                        EntityId = userTaskId,
-                    };
-                }
+                // Delete all stored relations towards the TaskItem
+                var tuplesToDelete = await _aclService
+                    .ReadAllRelationshipsByObjectAsync<TaskItem>(taskItemId)
+                    .ConfigureAwait(false);
+
+                await _aclService.DeleteRelationshipsAsync(tuplesToDelete, cancellationToken);
             }
         }
     }
