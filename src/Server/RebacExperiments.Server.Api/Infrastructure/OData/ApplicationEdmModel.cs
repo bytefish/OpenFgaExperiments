@@ -2,6 +2,7 @@
 
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using RebacExperiments.Server.Api.Infrastructure.Authorization;
 using RebacExperiments.Server.Api.Models;
 
 namespace RebacExperiments.Server.Api.Infrastructure.OData
@@ -14,6 +15,8 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             modelBuilder.Namespace = "TaskManagementService";
 
+            modelBuilder.ComplexType<RelationTuple>();
+
             modelBuilder.EntitySet<Team>("Teams");
             modelBuilder.EntitySet<Organization>("Organizations");
             modelBuilder.EntitySet<TaskItem>("TaskItems");
@@ -23,6 +26,9 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             // Authentication
             RegisterSignInUserAction(modelBuilder);
             RegisterSignOutUserAction(modelBuilder);
+
+            // Authorization
+            RegisterCreateRelationTupleAction(modelBuilder);
 
             // Send as Lower Camel Case Properties, so the JSON looks better:
             modelBuilder.EnableLowerCamelCase();
@@ -46,6 +52,34 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             var signOutUserAction = modelBuilder.Action("SignOutUser");
 
             signOutUserAction.HasDescription().HasDescription("SignOutUser");
+        }
+
+        private static void RegisterCreateRelationTupleAction(ODataConventionModelBuilder modelBuilder)
+        {
+            var signInUserAction = modelBuilder.Action("CreateRelationTuple");
+
+            signInUserAction.HasDescription().HasDescription("CreateRelationTuple");
+
+            signInUserAction.Parameter<string>("objectType").Required();
+            signInUserAction.Parameter<int>("objectId").Required();
+            signInUserAction.Parameter<string>("relation").Required();
+            signInUserAction.Parameter<string>("subjectType").Required();
+            signInUserAction.Parameter<int>("subjectId").Required();
+            signInUserAction.Parameter<string>("subjectRelation").Optional();
+        }
+
+        private static void RegisterDeleteRelationTupleAction(ODataConventionModelBuilder modelBuilder)
+        {
+            var signInUserAction = modelBuilder.Action("DeleteRelationTuple");
+
+            signInUserAction.HasDescription().HasDescription("DeleteRelationTuple");
+
+            signInUserAction.Parameter<string>("objectType").Required();
+            signInUserAction.Parameter<int>("objectId").Required();
+            signInUserAction.Parameter<string>("relation").Required();
+            signInUserAction.Parameter<string>("subjectType").Required();
+            signInUserAction.Parameter<int>("subjectId").Required();
+            signInUserAction.Parameter<string>("subjectRelation").Optional();
         }
     }
 }

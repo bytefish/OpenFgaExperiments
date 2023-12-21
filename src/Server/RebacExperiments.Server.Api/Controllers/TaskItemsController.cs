@@ -30,7 +30,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTaskItem([FromServices] ITaskItemService TaskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -78,7 +78,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPost]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PostTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostTaskItem([FromServices] ITaskItemService TaskItemService, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -103,7 +103,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPatch]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PatchTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromODataUri] int key, [FromBody] Delta<TaskItem> delta, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchTaskItem([FromServices] ITaskItemService TaskItemService, [FromODataUri] int key, [FromBody] Delta<TaskItem> delta, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -135,7 +135,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> DeleteTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteTaskItem([FromServices] ITaskItemService TaskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
