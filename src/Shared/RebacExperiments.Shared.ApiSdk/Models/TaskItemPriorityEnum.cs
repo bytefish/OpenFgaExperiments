@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using System;
 namespace RebacExperiments.Shared.ApiSdk.Models {
-    public enum UserTaskPriorityEnum {
+    public enum TaskItemPriorityEnum {
         [EnumMember(Value = "Low")]
         Low,
         [EnumMember(Value = "Normal")]

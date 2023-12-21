@@ -1,1 +1,1 @@
-﻿CREATE UNIQUE INDEX [UX_Application_UserTaskStatus_Name] ON [Application].[UserTaskStatus] ([Name])
+﻿CREATE UNIQUE INDEX [UX_Application_TaskItemStatus_Name] ON [Application].[TaskItemStatus] ([Name])

@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using System;
 namespace RebacExperiments.Shared.ApiSdk.Models {
-    public enum UserTaskStatusEnum {
+    public enum TaskItemStatusEnum {
         [EnumMember(Value = "NotStarted")]
         NotStarted,
         [EnumMember(Value = "InProgress")]

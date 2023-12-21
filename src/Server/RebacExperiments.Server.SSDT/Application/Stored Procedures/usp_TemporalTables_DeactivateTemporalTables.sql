@@ -1,27 +1,27 @@
 ﻿CREATE PROCEDURE [Application].[usp_TemporalTables_DeactivateTemporalTables]
 AS BEGIN
-	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTask]'), 'TableTemporalType') = 2
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TaskItem]'), 'TableTemporalType') = 2
 	BEGIN
-		PRINT 'Deactivate Temporal Table for [Application].[UserTask]'
+		PRINT 'Deactivate Temporal Table for [Application].[TaskItem]'
 
-		ALTER TABLE [Application].[UserTask] SET (SYSTEM_VERSIONING = OFF);
-		ALTER TABLE [Application].[UserTask] DROP PERIOD FOR SYSTEM_TIME;
+		ALTER TABLE [Application].[TaskItem] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[TaskItem] DROP PERIOD FOR SYSTEM_TIME;
 	END
 
-	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTaskPriority]'), 'TableTemporalType') = 2
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TaskItemPriority]'), 'TableTemporalType') = 2
 	BEGIN
-		PRINT 'Deactivate Temporal Table for [Application].[UserTaskPriority]'
+		PRINT 'Deactivate Temporal Table for [Application].[TaskItemPriority]'
 
-		ALTER TABLE [Application].[UserTaskPriority] SET (SYSTEM_VERSIONING = OFF);
-		ALTER TABLE [Application].[UserTaskPriority] DROP PERIOD FOR SYSTEM_TIME;
+		ALTER TABLE [Application].[TaskItemPriority] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[TaskItemPriority] DROP PERIOD FOR SYSTEM_TIME;
 	END
 
-	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTaskStatus]'), 'TableTemporalType') = 2
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TaskItemStatus]'), 'TableTemporalType') = 2
 	BEGIN
-		PRINT 'Deactivate Temporal Table for [Application].[UserTaskStatus]'
+		PRINT 'Deactivate Temporal Table for [Application].[TaskItemStatus]'
 
-		ALTER TABLE [Application].[UserTaskStatus] SET (SYSTEM_VERSIONING = OFF);
-		ALTER TABLE [Application].[UserTaskStatus] DROP PERIOD FOR SYSTEM_TIME;
+		ALTER TABLE [Application].[TaskItemStatus] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[TaskItemStatus] DROP PERIOD FOR SYSTEM_TIME;
 	END
     
 	IF OBJECTPROPERTY(OBJECT_ID('[Application].[Organization]'), 'TableTemporalType') = 2

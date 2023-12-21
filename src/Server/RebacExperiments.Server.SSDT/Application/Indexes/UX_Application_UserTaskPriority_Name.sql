@@ -1,1 +1,1 @@
-﻿CREATE UNIQUE INDEX [UX_Application_UserTaskPriority_Name] ON [Application].[UserTaskPriority] ([Name])
+﻿CREATE UNIQUE INDEX [UX_Application_TaskItemPriority_Name] ON [Application].[TaskItemPriority] ([Name])

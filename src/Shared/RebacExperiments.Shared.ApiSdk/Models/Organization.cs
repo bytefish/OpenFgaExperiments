@@ -5,30 +5,28 @@ using System.IO;
 using System.Linq;
 using System;
 namespace RebacExperiments.Shared.ApiSdk.Models {
-    public class RelationTuple : IAdditionalDataHolder, IParsable {
+    public class Organization : IAdditionalDataHolder, IParsable {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The description property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Description { get; set; }
+#nullable restore
+#else
+        public string Description { get; set; }
+#endif
         /// <summary>The id property</summary>
         public int? Id { get; set; }
         /// <summary>The lastEditedBy property</summary>
         public int? LastEditedBy { get; set; }
-        /// <summary>The objectKey property</summary>
-        public int? ObjectKey { get; set; }
-        /// <summary>The objectNamespace property</summary>
+        /// <summary>The name property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? ObjectNamespace { get; set; }
+        public string? Name { get; set; }
 #nullable restore
 #else
-        public string ObjectNamespace { get; set; }
-#endif
-        /// <summary>The objectRelation property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ObjectRelation { get; set; }
-#nullable restore
-#else
-        public string ObjectRelation { get; set; }
+        public string Name { get; set; }
 #endif
         /// <summary>The rowVersion property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -38,56 +36,34 @@ namespace RebacExperiments.Shared.ApiSdk.Models {
 #else
         public byte[] RowVersion { get; set; }
 #endif
-        /// <summary>The subjectKey property</summary>
-        public int? SubjectKey { get; set; }
-        /// <summary>The subjectNamespace property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SubjectNamespace { get; set; }
-#nullable restore
-#else
-        public string SubjectNamespace { get; set; }
-#endif
-        /// <summary>The subjectRelation property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SubjectRelation { get; set; }
-#nullable restore
-#else
-        public string SubjectRelation { get; set; }
-#endif
         /// <summary>The validFrom property</summary>
         public DateTimeOffset? ValidFrom { get; set; }
         /// <summary>The validTo property</summary>
         public DateTimeOffset? ValidTo { get; set; }
         /// <summary>
-        /// Instantiates a new RelationTuple and sets the default values.
+        /// Instantiates a new Organization and sets the default values.
         /// </summary>
-        public RelationTuple() {
+        public Organization() {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static RelationTuple CreateFromDiscriminatorValue(IParseNode parseNode) {
+        public static Organization CreateFromDiscriminatorValue(IParseNode parseNode) {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            return new RelationTuple();
+            return new Organization();
         }
         /// <summary>
         /// The deserialization information for the current model
         /// </summary>
         public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers() {
             return new Dictionary<string, Action<IParseNode>> {
+                {"description", n => { Description = n.GetStringValue(); } },
                 {"id", n => { Id = n.GetIntValue(); } },
                 {"lastEditedBy", n => { LastEditedBy = n.GetIntValue(); } },
-                {"objectKey", n => { ObjectKey = n.GetIntValue(); } },
-                {"objectNamespace", n => { ObjectNamespace = n.GetStringValue(); } },
-                {"objectRelation", n => { ObjectRelation = n.GetStringValue(); } },
+                {"name", n => { Name = n.GetStringValue(); } },
                 {"rowVersion", n => { RowVersion = n.GetByteArrayValue(); } },
-                {"subjectKey", n => { SubjectKey = n.GetIntValue(); } },
-                {"subjectNamespace", n => { SubjectNamespace = n.GetStringValue(); } },
-                {"subjectRelation", n => { SubjectRelation = n.GetStringValue(); } },
                 {"validFrom", n => { ValidFrom = n.GetDateTimeOffsetValue(); } },
                 {"validTo", n => { ValidTo = n.GetDateTimeOffsetValue(); } },
             };
@@ -98,15 +74,11 @@ namespace RebacExperiments.Shared.ApiSdk.Models {
         /// <param name="writer">Serialization writer to use to serialize this model</param>
         public virtual void Serialize(ISerializationWriter writer) {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
+            writer.WriteStringValue("description", Description);
             writer.WriteIntValue("id", Id);
             writer.WriteIntValue("lastEditedBy", LastEditedBy);
-            writer.WriteIntValue("objectKey", ObjectKey);
-            writer.WriteStringValue("objectNamespace", ObjectNamespace);
-            writer.WriteStringValue("objectRelation", ObjectRelation);
+            writer.WriteStringValue("name", Name);
             writer.WriteByteArrayValue("rowVersion", RowVersion);
-            writer.WriteIntValue("subjectKey", SubjectKey);
-            writer.WriteStringValue("subjectNamespace", SubjectNamespace);
-            writer.WriteStringValue("subjectRelation", SubjectRelation);
             writer.WriteDateTimeOffsetValue("validFrom", ValidFrom);
             writer.WriteDateTimeOffsetValue("validTo", ValidTo);
             writer.WriteAdditionalData(AdditionalData);

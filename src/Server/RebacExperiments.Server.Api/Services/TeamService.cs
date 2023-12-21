@@ -151,7 +151,7 @@ namespace RebacExperiments.Server.Api.Services
                         .ExecuteDeleteAsync(cancellationToken)
                         .ConfigureAwait(false);
 
-                    // After removing all possible references, delete the UserTask itself
+                    // After removing all possible references, delete the TaskItem itself
                     await context.Teams
                         .Where(t => t.Id == teamId)
                         .ExecuteDeleteAsync(cancellationToken)

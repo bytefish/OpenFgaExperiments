@@ -1,4 +1,4 @@
-﻿PRINT 'Inserting [Application].[UserTaskStatus] ...'
+﻿PRINT 'Inserting [Application].[TaskItemStatus] ...'
 
 -----------------------------------------------
 -- Global Parameters
@@ -7,19 +7,19 @@ DECLARE @ValidFrom datetime2(7) = '20130101'
 DECLARE @ValidTo datetime2(7) =  '99991231 23:59:59.9999999'
 
 -----------------------------------------------
--- [Application].[UserTaskStatus]
+-- [Application].[TaskItemStatus]
 -----------------------------------------------
-MERGE INTO [Application].[UserTaskStatus] AS [Target]
+MERGE INTO [Application].[TaskItemStatus] AS [Target]
 USING (VALUES 
 			  (1, 'Not Started', 1, @ValidFrom, @ValidTo)
 			, (2, 'In Progress', 1, @ValidFrom, @ValidTo)
 			, (3, 'Completed', 1, @ValidFrom, @ValidTo)
 			, (4, 'Waiting On Others', 1, @ValidFrom, @ValidTo)
 			, (5, 'Deferred', 1, @ValidFrom, @ValidTo)
-		) AS [Source]([UserTaskStatusID], [Name], [LastEditedBy], [ValidFrom], [ValidTo])
-ON ([Target].[UserTaskStatusID] = [Source].[UserTaskStatusID])
+		) AS [Source]([TaskItemStatusID], [Name], [LastEditedBy], [ValidFrom], [ValidTo])
+ON ([Target].[TaskItemStatusID] = [Source].[TaskItemStatusID])
 WHEN NOT MATCHED BY TARGET THEN
 	INSERT 
-		([UserTaskStatusID], [Name], [LastEditedBy], [ValidFrom], [ValidTo])
+		([TaskItemStatusID], [Name], [LastEditedBy], [ValidFrom], [ValidTo])
 	VALUES 
-		([Source].[UserTaskStatusID], [Source].[Name], [Source].[LastEditedBy], [Source].[ValidFrom], [Source].[ValidTo]);
+		([Source].[TaskItemStatusID], [Source].[Name], [Source].[LastEditedBy], [Source].[ValidFrom], [Source].[ValidTo]);

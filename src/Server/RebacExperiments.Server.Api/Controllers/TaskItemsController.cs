@@ -17,12 +17,12 @@ using RebacExperiments.Server.Api.Models;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
-    public class UserTasksController : ODataController
+    public class TaskItemsController : ODataController
     {
-        private readonly ILogger<UserTasksController> _logger;
+        private readonly ILogger<TaskItemsController> _logger;
         private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public UserTasksController(ILogger<UserTasksController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public TaskItemsController(ILogger<TaskItemsController> logger, ApplicationErrorHandler applicationErrorHandler)
         {
             _logger = logger;
             _applicationErrorHandler = applicationErrorHandler;
@@ -30,7 +30,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetUserTask([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService userTaskService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -41,9 +41,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var userTask = await userTaskService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+                var TaskItem = await TaskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(userTask);
+                return Ok(TaskItem);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpGet]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetUserTasks([FromServices] ITaskItemService userTaskService, ODataQueryOptions<TaskItem> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTaskItems([FromServices] ITaskItemService TaskItemService, ODataQueryOptions<TaskItem> queryOptions, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -65,9 +65,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var userTasks = await userTaskService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
+                var TaskItems = await TaskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(userTasks.AsQueryable()));
+                return Ok(queryOptions.ApplyTo(TaskItems.AsQueryable()));
             }
             catch (Exception ex)
             {
@@ -78,7 +78,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPost]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PostUserTask([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService userTaskService, [FromBody] TaskItem userTask, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -89,9 +89,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await userTaskService.CreateUserTaskAsync(userTask, User.GetUserId(), cancellationToken);
+                await TaskItemService.CreateTaskItemAsync(TaskItem, User.GetUserId(), cancellationToken);
 
-                return Created(userTask);
+                return Created(TaskItem);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPatch]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PatchUserTask([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService userTaskService, [FromODataUri] int key, [FromBody] Delta<TaskItem> delta, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromODataUri] int key, [FromBody] Delta<TaskItem> delta, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -114,16 +114,16 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                // Get the UserTask with the current values:
-                var userTask = await userTaskService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+                // Get the TaskItem with the current values:
+                var TaskItem = await TaskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
 
                 // Patch the Values to it:
-                delta.Patch(userTask);
+                delta.Patch(TaskItem);
 
                 // Update the Values:
-                await userTaskService.UpdateTaskItemAsync(userTask, User.GetUserId(), cancellationToken);
+                await TaskItemService.UpdateTaskItemAsync(TaskItem, User.GetUserId(), cancellationToken);
 
-                return Updated(userTask);
+                return Updated(TaskItem);
             }
             catch (Exception ex)
             {
@@ -135,7 +135,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> DeleteUserTask([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService userTaskService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteTaskItem([FromServices] ApplicationDbContext context, [FromServices] ITaskItemService TaskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -146,7 +146,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await userTaskService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
+                await TaskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
 
                 return StatusCode(StatusCodes.Status204NoContent);
             }

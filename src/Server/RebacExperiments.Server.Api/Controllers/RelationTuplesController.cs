@@ -15,10 +15,10 @@ namespace RebacExperiments.Server.Api.Controllers
 {
     public class RelationTuplesController : ODataController
     {
-        private readonly ILogger<UserTasksController> _logger;
+        private readonly ILogger<TaskItemsController> _logger;
         private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public RelationTuplesController(ILogger<UserTasksController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public RelationTuplesController(ILogger<TaskItemsController> logger, ApplicationErrorHandler applicationErrorHandler)
         {
             _logger = logger;
             _applicationErrorHandler = applicationErrorHandler;

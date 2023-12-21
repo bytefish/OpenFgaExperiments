@@ -11,13 +11,13 @@ Content-Type: application/json
   "rememberMe": true
 }
 
-### Get all UserTasks for "philipp@bytefish.de"
+### Get all TaskItems for "philipp@bytefish.de"
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 
 ### Get the first task and return the total count of Entities visible to "philipp@bytefish.de"
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks?$top=1&$orderby=id&$count=true
+GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems?$top=1&$orderby=id&$count=true
 
 
 ### Sign Out "philipp@bytefish.de"
@@ -26,7 +26,7 @@ POST {{RebacExperiments.Server.Api_HostAddress}}/SignOutUser
 
 ### Check for 401 Unauthorized when not Authenticated
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 
 ### Sign In as "max@mustermann.local"
 
@@ -39,13 +39,13 @@ Content-Type: application/json
   "rememberMe": true
 }
 
-### Get all UserTasks for "max@mustermann.local"
+### Get all TaskItems for "max@mustermann.local"
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 
-### Create a new UserTask "API HTTP File Example" as "max@mustermann.local"
+### Create a new TaskItem "API HTTP File Example" as "max@mustermann.local"
 
-POST {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+POST {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 Content-Type: application/json
 
 {
@@ -55,13 +55,13 @@ Content-Type: application/json
     "reminderDateTime": null,
     "completedDateTime": null,
     "assignedTo": null,
-    "userTaskPriority": "Normal",
-    "userTaskStatus": "NotStarted"
+    "TaskItemPriority": "Normal",
+    "TaskItemStatus": "NotStarted"
 }
 
-### Get all UserTasks for "max@mustermann.local"
+### Get all TaskItems for "max@mustermann.local"
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 
 
 ### Sign In "philipp@bytefish.de"
@@ -75,7 +75,7 @@ Content-Type: application/json
   "rememberMe": true
 }
 
-### Get all UserTasks for "philipp@bytefish.de"
+### Get all TaskItems for "philipp@bytefish.de"
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 

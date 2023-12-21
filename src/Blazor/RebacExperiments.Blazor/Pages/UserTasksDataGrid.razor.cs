@@ -10,17 +10,17 @@ using Microsoft.FluentUI.AspNetCore.Components;
 
 namespace RebacExperiments.Blazor.Pages
 {
-    public partial class UserTasksDataGrid
+    public partial class TaskItemsDataGrid
     {
         /// <summary>
         /// Provides the Data Items.
         /// </summary>
-        private GridItemsProvider<UserTask> UserTasksProvider = default!;
+        private GridItemsProvider<TaskItem> TaskItemsProvider = default!;
 
         /// <summary>
         /// DataGrid.
         /// </summary>
-        private FluentDataGrid<UserTask> DataGrid = default!;
+        private FluentDataGrid<TaskItem> DataGrid = default!;
 
         /// <summary>
         /// The current Pagination State.
@@ -37,27 +37,27 @@ namespace RebacExperiments.Blazor.Pages
         /// </summary>
         private readonly EventCallbackSubscriber<FilterState> CurrentFiltersChanged;
 
-        public UserTasksDataGrid()
+        public TaskItemsDataGrid()
         {
             CurrentFiltersChanged = new(EventCallback.Factory.Create<FilterState>(this, RefreshData));
         }
 
         protected override Task OnInitializedAsync()
         {
-            UserTasksProvider = async request =>
+            TaskItemsProvider = async request =>
             {
-                var response = await GetUserTasks(request);
+                var response = await GetTaskItems(request);
 
                 if(response == null)
                 {
-                    return GridItemsProviderResult.From(items: new List<UserTask>(), totalItemCount: 0);
+                    return GridItemsProviderResult.From(items: new List<TaskItem>(), totalItemCount: 0);
                 }
 
                 var entities = response.Value;
 
                 if (entities == null)
                 {
-                    return GridItemsProviderResult.From(items: new List<UserTask>(), totalItemCount: 0);
+                    return GridItemsProviderResult.From(items: new List<TaskItem>(), totalItemCount: 0);
                 }
 
                 int count = response.GetODataCount();
@@ -83,7 +83,7 @@ namespace RebacExperiments.Blazor.Pages
             return DataGrid.RefreshDataAsync();
         }
 
-        private async Task<UserTaskCollectionResponse?> GetUserTasks(GridItemsProviderRequest<UserTask> request)
+        private async Task<TaskItemCollectionResponse?> GetTaskItems(GridItemsProviderRequest<TaskItem> request)
         {
             // Extract all Sort Columns from the Blazor FluentUI DataGrid
             var sortColumns = DataGridUtils.GetSortColumns(request);
@@ -99,7 +99,7 @@ namespace RebacExperiments.Blazor.Pages
                 .Build();
 
             // Get the Data using the ApiClient from the SDK
-            return await ApiClient.Odata.UserTasks.GetAsync(request =>
+            return await ApiClient.Odata.TaskItems.GetAsync(request =>
             {
                 request.QueryParameters.Count = true;
                 request.QueryParameters.Top = parameters.Top;

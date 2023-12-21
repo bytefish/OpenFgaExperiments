@@ -1,4 +1,4 @@
-﻿@page "/UserTasks"
+﻿@page "/TaskItems"
 @using RebacExperiments.Blazor.Components
 @using RebacExperiments.Blazor.Shared.Models;
 @using RebacExperiments.Shared.ApiSdk;
@@ -10,7 +10,7 @@
 
 <h1>User Tasks</h1>
 
-<FluentDataGrid @ref="DataGrid" ItemsProvider="@UserTasksProvider" Pagination="@Pagination" TGridItem=UserTask>
+<FluentDataGrid @ref="DataGrid" ItemsProvider="@TaskItemsProvider" Pagination="@Pagination" TGridItem=TaskItem>
     <PropertyColumn Title="Customer ID" Property="@(c => c!.Id)" Sortable="true" Align=Align.Start>
         <ColumnOptions>
             <NumericFilter TItem="int" PropertyName="Id" FilterState="FilterState"></NumericFilter>

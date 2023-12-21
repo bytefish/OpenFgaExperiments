@@ -36,17 +36,17 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
         public DbSet<Role> Roles { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the UserTasks.
+        /// Gets or sets the TaskItems.
         /// </summary>
-        public DbSet<TaskItem> UserTasks { get; set; } = null!;
+        public DbSet<TaskItem> TaskItems { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the UserTasks.
+        /// Gets or sets the TaskItems.
         /// </summary>
         public DbSet<Team> Teams { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the UserTasks.
+        /// Gets or sets the TaskItems.
         /// </summary>
         public DbSet<Organization> Organizations { get; set; } = null!;
 
@@ -68,20 +68,20 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Now create the Tables
-            modelBuilder.HasSequence<int>("sq_UserTask", schema: "Application")
+            modelBuilder.HasSequence<int>("sq_TaskItem", schema: "Application")
                 .StartsAt(38187)
                 .IncrementsBy(1);
 
             modelBuilder.Entity<TaskItem>(entity =>
             {
-                entity.ToTable("UserTask", "Application");
+                entity.ToTable("TaskItem", "Application");
 
                 entity.HasKey(e => e.Id);
 
                 entity.Property(x => x.Id)
                     .HasColumnType("INT")
-                    .HasColumnName("UserTaskID")
-                    .UseHiLo("sq_UserTask", "Application")
+                    .HasColumnName("TaskItemID")
+                    .UseHiLo("sq_TaskItem", "Application")
                     .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Title)
@@ -113,13 +113,13 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
 
                 entity.Property(e => e.TaskItemStatus)
                     .HasColumnType("INT")
-                    .HasColumnName("UserTaskStatusID")
+                    .HasColumnName("TaskItemStatusID")
                     .HasConversion(v => (int)v, v => (TaskItemStatusEnum)v)
                     .IsRequired(true);
 
                 entity.Property(e => e.TaskItemPriority)
                     .HasColumnType("INT")
-                    .HasColumnName("UserTaskPriorityID")
+                    .HasColumnName("TaskItemPriorityID")
                     .HasConversion(v => (int)v, v => (TaskItemPriorityEnum)v)
                     .IsRequired(true);
 

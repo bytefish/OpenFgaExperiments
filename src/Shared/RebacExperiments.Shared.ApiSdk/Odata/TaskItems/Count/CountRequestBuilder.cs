@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks.Count {
+namespace RebacExperiments.Shared.ApiSdk.Odata.TaskItems.Count {
     /// <summary>
     /// Provides operations to count the resources in the collection.
     /// </summary>
@@ -18,14 +18,14 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks.Count {
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public CountRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/UserTasks/$count{?%24search,%24filter}", pathParameters) {
+        public CountRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/TaskItems/$count{?%24search,%24filter}", pathParameters) {
         }
         /// <summary>
         /// Instantiates a new CountRequestBuilder and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public CountRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/UserTasks/$count{?%24search,%24filter}", rawUrl) {
+        public CountRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/TaskItems/$count{?%24search,%24filter}", rawUrl) {
         }
         /// <summary>
         /// Get the number of the resource

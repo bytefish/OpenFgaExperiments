@@ -3,83 +3,83 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions;
 using RebacExperiments.Shared.ApiSdk.Models.ODataErrors;
 using RebacExperiments.Shared.ApiSdk.Models;
-using RebacExperiments.Shared.ApiSdk.Odata.UserTasks.Count;
-using RebacExperiments.Shared.ApiSdk.Odata.UserTasks.Item;
+using RebacExperiments.Shared.ApiSdk.Odata.Teams.Count;
+using RebacExperiments.Shared.ApiSdk.Odata.Teams.Item;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
+namespace RebacExperiments.Shared.ApiSdk.Odata.Teams {
     /// <summary>
-    /// Provides operations to manage the collection of UserTask entities.
+    /// Provides operations to manage the collection of Team entities.
     /// </summary>
-    public class UserTasksRequestBuilder : BaseRequestBuilder {
+    public class TeamsRequestBuilder : BaseRequestBuilder {
         /// <summary>Provides operations to count the resources in the collection.</summary>
         public CountRequestBuilder Count { get =>
             new CountRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>Provides operations to manage the collection of UserTask entities.</summary>
-        /// <param name="position">The unique identifier of UserTask</param>
-        public UserTasksItemRequestBuilder this[int position] { get {
+        /// <summary>Provides operations to manage the collection of Team entities.</summary>
+        /// <param name="position">The unique identifier of Team</param>
+        public TeamsItemRequestBuilder this[int position] { get {
             var urlTplParams = new Dictionary<string, object>(PathParameters);
             urlTplParams.Add("id", position);
-            return new UserTasksItemRequestBuilder(urlTplParams, RequestAdapter);
+            return new TeamsItemRequestBuilder(urlTplParams, RequestAdapter);
         } }
-        /// <summary>Provides operations to manage the collection of UserTask entities.</summary>
-        /// <param name="position">The unique identifier of UserTask</param>
+        /// <summary>Provides operations to manage the collection of Team entities.</summary>
+        /// <param name="position">The unique identifier of Team</param>
         [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
-        public UserTasksItemRequestBuilder this[string position] { get {
+        public TeamsItemRequestBuilder this[string position] { get {
             var urlTplParams = new Dictionary<string, object>(PathParameters);
             if (!string.IsNullOrWhiteSpace(position)) urlTplParams.Add("id", position);
-            return new UserTasksItemRequestBuilder(urlTplParams, RequestAdapter);
+            return new TeamsItemRequestBuilder(urlTplParams, RequestAdapter);
         } }
         /// <summary>
-        /// Instantiates a new UserTasksRequestBuilder and sets the default values.
+        /// Instantiates a new TeamsRequestBuilder and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public UserTasksRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/UserTasks{?%24top,%24skip,%24search,%24filter,%24count,%24orderby,%24select,%24expand}", pathParameters) {
+        public TeamsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/Teams{?%24top,%24skip,%24search,%24filter,%24count,%24orderby,%24select,%24expand}", pathParameters) {
         }
         /// <summary>
-        /// Instantiates a new UserTasksRequestBuilder and sets the default values.
+        /// Instantiates a new TeamsRequestBuilder and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public UserTasksRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/UserTasks{?%24top,%24skip,%24search,%24filter,%24count,%24orderby,%24select,%24expand}", rawUrl) {
+        public TeamsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/odata/Teams{?%24top,%24skip,%24search,%24filter,%24count,%24orderby,%24select,%24expand}", rawUrl) {
         }
         /// <summary>
-        /// Get entities from UserTasks
+        /// Get entities from Teams
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<UserTaskCollectionResponse?> GetAsync(Action<UserTasksRequestBuilderGetRequestConfiguration>? requestConfiguration = default, CancellationToken cancellationToken = default) {
+        public async Task<TeamCollectionResponse?> GetAsync(Action<TeamsRequestBuilderGetRequestConfiguration>? requestConfiguration = default, CancellationToken cancellationToken = default) {
 #nullable restore
 #else
-        public async Task<UserTaskCollectionResponse> GetAsync(Action<UserTasksRequestBuilderGetRequestConfiguration> requestConfiguration = default, CancellationToken cancellationToken = default) {
+        public async Task<TeamCollectionResponse> GetAsync(Action<TeamsRequestBuilderGetRequestConfiguration> requestConfiguration = default, CancellationToken cancellationToken = default) {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>> {
                 {"4XX", ODataError.CreateFromDiscriminatorValue},
                 {"5XX", ODataError.CreateFromDiscriminatorValue},
             };
-            return await RequestAdapter.SendAsync<UserTaskCollectionResponse>(requestInfo, UserTaskCollectionResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<TeamCollectionResponse>(requestInfo, TeamCollectionResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Add new entity to UserTasks
+        /// Add new entity to Teams
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<UserTask?> PostAsync(UserTask body, Action<UserTasksRequestBuilderPostRequestConfiguration>? requestConfiguration = default, CancellationToken cancellationToken = default) {
+        public async Task<Team?> PostAsync(Team body, Action<TeamsRequestBuilderPostRequestConfiguration>? requestConfiguration = default, CancellationToken cancellationToken = default) {
 #nullable restore
 #else
-        public async Task<UserTask> PostAsync(UserTask body, Action<UserTasksRequestBuilderPostRequestConfiguration> requestConfiguration = default, CancellationToken cancellationToken = default) {
+        public async Task<Team> PostAsync(Team body, Action<TeamsRequestBuilderPostRequestConfiguration> requestConfiguration = default, CancellationToken cancellationToken = default) {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
@@ -87,18 +87,18 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
                 {"4XX", ODataError.CreateFromDiscriminatorValue},
                 {"5XX", ODataError.CreateFromDiscriminatorValue},
             };
-            return await RequestAdapter.SendAsync<UserTask>(requestInfo, UserTask.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<Team>(requestInfo, Team.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Get entities from UserTasks
+        /// Get entities from Teams
         /// </summary>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<UserTasksRequestBuilderGetRequestConfiguration>? requestConfiguration = default) {
+        public RequestInformation ToGetRequestInformation(Action<TeamsRequestBuilderGetRequestConfiguration>? requestConfiguration = default) {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<UserTasksRequestBuilderGetRequestConfiguration> requestConfiguration = default) {
+        public RequestInformation ToGetRequestInformation(Action<TeamsRequestBuilderGetRequestConfiguration> requestConfiguration = default) {
 #endif
             var requestInfo = new RequestInformation {
                 HttpMethod = Method.GET,
@@ -106,7 +106,7 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
                 PathParameters = PathParameters,
             };
             if (requestConfiguration != null) {
-                var requestConfig = new UserTasksRequestBuilderGetRequestConfiguration();
+                var requestConfig = new TeamsRequestBuilderGetRequestConfiguration();
                 requestConfiguration.Invoke(requestConfig);
                 requestInfo.AddQueryParameters(requestConfig.QueryParameters);
                 requestInfo.AddRequestOptions(requestConfig.Options);
@@ -116,16 +116,16 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
             return requestInfo;
         }
         /// <summary>
-        /// Add new entity to UserTasks
+        /// Add new entity to Teams
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(UserTask body, Action<UserTasksRequestBuilderPostRequestConfiguration>? requestConfiguration = default) {
+        public RequestInformation ToPostRequestInformation(Team body, Action<TeamsRequestBuilderPostRequestConfiguration>? requestConfiguration = default) {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(UserTask body, Action<UserTasksRequestBuilderPostRequestConfiguration> requestConfiguration = default) {
+        public RequestInformation ToPostRequestInformation(Team body, Action<TeamsRequestBuilderPostRequestConfiguration> requestConfiguration = default) {
 #endif
             _ = body ?? throw new ArgumentNullException(nameof(body));
             var requestInfo = new RequestInformation {
@@ -134,7 +134,7 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
                 PathParameters = PathParameters,
             };
             if (requestConfiguration != null) {
-                var requestConfig = new UserTasksRequestBuilderPostRequestConfiguration();
+                var requestConfig = new TeamsRequestBuilderPostRequestConfiguration();
                 requestConfiguration.Invoke(requestConfig);
                 requestInfo.AddRequestOptions(requestConfig.Options);
                 requestInfo.AddHeaders(requestConfig.Headers);
@@ -147,13 +147,13 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public UserTasksRequestBuilder WithUrl(string rawUrl) {
-            return new UserTasksRequestBuilder(rawUrl, RequestAdapter);
+        public TeamsRequestBuilder WithUrl(string rawUrl) {
+            return new TeamsRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Get entities from UserTasks
+        /// Get entities from Teams
         /// </summary>
-        public class UserTasksRequestBuilderGetQueryParameters {
+        public class TeamsRequestBuilderGetQueryParameters {
             /// <summary>Include count of items</summary>
             [QueryParameter("%24count")]
             public bool? Count { get; set; }
@@ -217,17 +217,17 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.
         /// </summary>
-        public class UserTasksRequestBuilderGetRequestConfiguration {
+        public class TeamsRequestBuilderGetRequestConfiguration {
             /// <summary>Request headers</summary>
             public RequestHeaders Headers { get; set; }
             /// <summary>Request options</summary>
             public IList<IRequestOption> Options { get; set; }
             /// <summary>Request query parameters</summary>
-            public UserTasksRequestBuilderGetQueryParameters QueryParameters { get; set; } = new UserTasksRequestBuilderGetQueryParameters();
+            public TeamsRequestBuilderGetQueryParameters QueryParameters { get; set; } = new TeamsRequestBuilderGetQueryParameters();
             /// <summary>
-            /// Instantiates a new UserTasksRequestBuilderGetRequestConfiguration and sets the default values.
+            /// Instantiates a new TeamsRequestBuilderGetRequestConfiguration and sets the default values.
             /// </summary>
-            public UserTasksRequestBuilderGetRequestConfiguration() {
+            public TeamsRequestBuilderGetRequestConfiguration() {
                 Options = new List<IRequestOption>();
                 Headers = new RequestHeaders();
             }
@@ -235,15 +235,15 @@ namespace RebacExperiments.Shared.ApiSdk.Odata.UserTasks {
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.
         /// </summary>
-        public class UserTasksRequestBuilderPostRequestConfiguration {
+        public class TeamsRequestBuilderPostRequestConfiguration {
             /// <summary>Request headers</summary>
             public RequestHeaders Headers { get; set; }
             /// <summary>Request options</summary>
             public IList<IRequestOption> Options { get; set; }
             /// <summary>
-            /// Instantiates a new UserTasksRequestBuilderPostRequestConfiguration and sets the default values.
+            /// Instantiates a new TeamsRequestBuilderPostRequestConfiguration and sets the default values.
             /// </summary>
-            public UserTasksRequestBuilderPostRequestConfiguration() {
+            public TeamsRequestBuilderPostRequestConfiguration() {
                 Options = new List<IRequestOption>();
                 Headers = new RequestHeaders();
             }

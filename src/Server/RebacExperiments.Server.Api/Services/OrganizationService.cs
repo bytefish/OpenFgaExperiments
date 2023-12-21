@@ -7,7 +7,7 @@ using RebacExperiments.Server.Api.Models;
 
 namespace RebacExperiments.Server.Api.Services
 {
-    public class OrganizationService
+    public class OrganizationService : IOrganizationService
     {
         private readonly ILogger<OrganizationService> _logger;
 
@@ -21,7 +21,7 @@ namespace RebacExperiments.Server.Api.Services
             _aclService = aclService;
         }
         
-        public async Task<Organization> CreateUserTaskAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
+        public async Task<Organization> CreateTaskItemAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 

@@ -4,7 +4,7 @@ namespace RebacExperiments.Server.Api.Services
 {
     public interface IOrganizationService
     {
-        Task<Organization> CreateUserTaskAsync(Organization organization, int currentUserId, CancellationToken cancellationToken);
+        Task<Organization> CreateTaskItemAsync(Organization organization, int currentUserId, CancellationToken cancellationToken);
 
         Task<List<Organization>> GetOrganizationsByUserIdAsync(int userId, CancellationToken cancellationToken);
 

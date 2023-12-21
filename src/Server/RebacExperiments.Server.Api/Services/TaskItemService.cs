@@ -23,7 +23,7 @@ namespace RebacExperiments.Server.Api.Services
             _aclService = aclService;
         }
 
-        public async Task<TaskItem> CreateUserTaskAsync(TaskItem taskItem, int currentUserId, CancellationToken cancellationToken)
+        public async Task<TaskItem> CreateTaskItemAsync(TaskItem taskItem, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -38,14 +38,14 @@ namespace RebacExperiments.Server.Api.Services
                     .ConfigureAwait(false);
 
                 // The Current User should automatically be the Owner:
-                var userTaskItem = new UserTaskItem {
+                var TaskItemItem = new TaskItemItem {
                     UserId = currentUserId,
                     TaskItemId = taskItem.Id,
                     Role = Relations.Owner,
                 };
 
                 await context
-                    .AddAsync(userTaskItem, cancellationToken)
+                    .AddAsync(TaskItemItem, cancellationToken)
                     .ConfigureAwait(false);
 
                 await context.SaveChangesAsync(cancellationToken);
@@ -60,7 +60,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                var taskItem = await context.UserTasks
+                var taskItem = await context.TaskItems
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
 
@@ -96,43 +96,43 @@ namespace RebacExperiments.Server.Api.Services
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
                 // Probably inefficient ...?
-                var userTasks = await _aclService
+                var TaskItems = await _aclService
                     .ListUserObjectsAsync<TaskItem>(userId, Relations.Viewer, cancellationToken)
                     .ConfigureAwait(false);
 
-                return userTasks;
+                return TaskItems;
             }
         }
 
-        public async Task<TaskItem> UpdateTaskItemAsync(TaskItem userTask, int currentUserId, CancellationToken cancellationToken)
+        public async Task<TaskItem> UpdateTaskItemAsync(TaskItem TaskItem, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, userTask, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, TaskItem, Relations.Owner, cancellationToken);
 
                 if (!isAuthorized)
                 {
                     throw new EntityUnauthorizedAccessException()
                     {
                         EntityName = nameof(TaskItem),
-                        EntityId = userTask.Id,
+                        EntityId = TaskItem.Id,
                         UserId = currentUserId,
                     };
                 }
 
-                int rowsAffected = await context.UserTasks
-                    .Where(t => t.Id == userTask.Id && t.RowVersion == userTask.RowVersion)
+                int rowsAffected = await context.TaskItems
+                    .Where(t => t.Id == TaskItem.Id && t.RowVersion == TaskItem.RowVersion)
                     .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(x => x.Title, userTask.Title)
-                        .SetProperty(x => x.Description, userTask.Description)
-                        .SetProperty(x => x.DueDateTime, userTask.DueDateTime)
-                        .SetProperty(x => x.CompletedDateTime, userTask.CompletedDateTime)
-                        .SetProperty(x => x.ReminderDateTime, userTask.ReminderDateTime)
-                        .SetProperty(x => x.AssignedTo, userTask.AssignedTo)
-                        .SetProperty(x => x.TaskItemPriority, userTask.TaskItemPriority)
-                        .SetProperty(x => x.TaskItemStatus, userTask.TaskItemStatus)
+                        .SetProperty(x => x.Title, TaskItem.Title)
+                        .SetProperty(x => x.Description, TaskItem.Description)
+                        .SetProperty(x => x.DueDateTime, TaskItem.DueDateTime)
+                        .SetProperty(x => x.CompletedDateTime, TaskItem.CompletedDateTime)
+                        .SetProperty(x => x.ReminderDateTime, TaskItem.ReminderDateTime)
+                        .SetProperty(x => x.AssignedTo, TaskItem.AssignedTo)
+                        .SetProperty(x => x.TaskItemPriority, TaskItem.TaskItemPriority)
+                        .SetProperty(x => x.TaskItemStatus, TaskItem.TaskItemStatus)
                         .SetProperty(x => x.LastEditedBy, currentUserId), cancellationToken);
 
                 if (rowsAffected == 0)
@@ -140,11 +140,11 @@ namespace RebacExperiments.Server.Api.Services
                     throw new EntityConcurrencyException()
                     {
                         EntityName = nameof(TaskItem),
-                        EntityId = userTask.Id,
+                        EntityId = TaskItem.Id,
                     };
                 }
 
-                return userTask;
+                return TaskItem;
             }
         }
 
@@ -154,11 +154,11 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                var userTask = await context.UserTasks
+                var TaskItem = await context.TaskItems
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
 
-                if (userTask == null)
+                if (TaskItem == null)
                 {
                     throw new EntityNotFoundException()
                     {
@@ -179,9 +179,9 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                // After removing all possible references, delete the UserTask itself
-                int rowsAffected = await context.UserTasks
-                    .Where(t => t.Id == userTask.Id)
+                // After removing all possible references, delete the TaskItem itself
+                int rowsAffected = await context.TaskItems
+                    .Where(t => t.Id == TaskItem.Id)
                     .ExecuteDeleteAsync(cancellationToken);
 
                 // Delete all stored relations towards the TaskItem

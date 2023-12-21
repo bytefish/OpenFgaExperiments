@@ -49,13 +49,17 @@ try
     // Add services to the container
     builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
     builder.Services.AddSingleton<IUserService, UserService>();
+
     builder.Services.AddSingleton<ITaskItemService, TaskItemService>();
-    
+    builder.Services.AddSingleton<ITeamService, TeamService>();
+    builder.Services.AddSingleton<IOrganizationService, OrganizationService>();
+    builder.Services.AddSingleton<IAclService, AclService>();
+
     // Logging
     builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
     // Database
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     {
         var connectionString = builder.Configuration.GetConnectionString("ApplicationDatabase");
 

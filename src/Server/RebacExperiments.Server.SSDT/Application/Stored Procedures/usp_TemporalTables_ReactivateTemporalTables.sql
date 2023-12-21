@@ -1,28 +1,28 @@
 ﻿CREATE PROCEDURE [Application].[usp_TemporalTables_ReactivateTemporalTables]
 AS BEGIN
 
-	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTask]'), 'TableTemporalType') = 0
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TaskItem]'), 'TableTemporalType') = 0
 	BEGIN
-		PRINT 'Reactivate Temporal Table for [Application].[UserTask]'
+		PRINT 'Reactivate Temporal Table for [Application].[TaskItem]'
 
-		ALTER TABLE [Application].[UserTask] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
-		ALTER TABLE [Application].[UserTask] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[UserTaskHistory], DATA_CONSISTENCY_CHECK = ON));
+		ALTER TABLE [Application].[TaskItem] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Application].[TaskItem] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[TaskItemHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
 
-	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTaskPriority]'), 'TableTemporalType') = 0
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TaskItemPriority]'), 'TableTemporalType') = 0
 	BEGIN
-		PRINT 'Reactivate Temporal Table for [Application].[UserTaskPriority]'
+		PRINT 'Reactivate Temporal Table for [Application].[TaskItemPriority]'
 
-		ALTER TABLE [Application].[UserTaskPriority] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
-		ALTER TABLE [Application].[UserTaskPriority] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[UserTaskPriorityHistory], DATA_CONSISTENCY_CHECK = ON));
+		ALTER TABLE [Application].[TaskItemPriority] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Application].[TaskItemPriority] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[TaskItemPriorityHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
 
-	IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTaskStatus]'), 'TableTemporalType') = 0
+	IF OBJECTPROPERTY(OBJECT_ID('[Application].[TaskItemStatus]'), 'TableTemporalType') = 0
 	BEGIN
-		PRINT 'Reactivate Temporal Table for [Application].[UserTaskStatus]'
+		PRINT 'Reactivate Temporal Table for [Application].[TaskItemStatus]'
 
-		ALTER TABLE [Application].[UserTaskStatus] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
-		ALTER TABLE [Application].[UserTaskStatus] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[UserTaskStatusHistory], DATA_CONSISTENCY_CHECK = ON));
+		ALTER TABLE [Application].[TaskItemStatus] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Application].[TaskItemStatus] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[TaskItemStatusHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
     
 	IF OBJECTPROPERTY(OBJECT_ID('[Application].[Organization]'), 'TableTemporalType') = 0

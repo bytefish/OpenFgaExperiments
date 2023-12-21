@@ -14,9 +14,9 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             modelBuilder.Namespace = "TaskManagementService";
 
-            modelBuilder.EntitySet<TaskItem>("UserTasks");
-            modelBuilder.EntitySet<RelationTuple>("RelationTuples");
-
+            modelBuilder.EntitySet<Team>("Teams");
+            modelBuilder.EntitySet<Organization>("Organizations");
+            modelBuilder.EntitySet<TaskItem>("TaskItems");
             modelBuilder.EnumType<TaskItemStatusEnum>().RemoveMember(TaskItemStatusEnum.None);
             modelBuilder.EnumType<TaskItemPriorityEnum>().RemoveMember(TaskItemPriorityEnum.None);
 
