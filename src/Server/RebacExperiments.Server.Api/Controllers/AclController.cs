@@ -33,7 +33,7 @@ namespace RebacExperiments.Server.Api.Controllers
         }
 
         [HttpPost("odata/CreateRelationTuple")]
-        public async Task<IActionResult> CreateRelationTuple([FromServices] IAclService aclService, [FromBody] RelationTuple relationTuple, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateRelationTuple([FromServices] IAclService aclService, ODataActionParameters parameters, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -44,9 +44,10 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
+                var tuple = (RelationTuple) parameters["tuple"];
 
                 await aclService
-                    .AddRelationshipsAsync(new[] { relationTuple }, cancellationToken)
+                    .AddRelationshipsAsync(new[] { tuple }, cancellationToken)
                     .ConfigureAwait(false);
 
                 return Ok();
@@ -58,7 +59,7 @@ namespace RebacExperiments.Server.Api.Controllers
         }
 
         [HttpPost("odata/DeleteRelationTuple")]
-        public async Task<IActionResult> DeleteRelationTuple([FromServices] IAclService aclService, [FromBody] RelationTuple relationTuple, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteRelationTuple([FromServices] IAclService aclService, ODataActionParameters parameters, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -69,9 +70,10 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
+                var tuple = (RelationTuple)parameters["tuple"];
 
                 await aclService
-                    .DeleteRelationshipsAsync(new[] { relationTuple }, cancellationToken)
+                    .DeleteRelationshipsAsync(new[] { tuple }, cancellationToken)
                     .ConfigureAwait(false);
 
                 return Ok();

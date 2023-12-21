@@ -61,12 +61,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             signInUserAction.HasDescription().HasDescription("CreateRelationTuple");
 
-            signInUserAction.Parameter<string>("objectType").Required();
-            signInUserAction.Parameter<int>("objectId").Required();
-            signInUserAction.Parameter<string>("relation").Required();
-            signInUserAction.Parameter<string>("subjectType").Required();
-            signInUserAction.Parameter<int>("subjectId").Required();
-            signInUserAction.Parameter<string>("subjectRelation").Optional();
+            signInUserAction.Parameter<RelationTuple>("tuple").Required();
         }
 
         private static void RegisterDeleteRelationTupleAction(ODataConventionModelBuilder modelBuilder)
@@ -75,12 +70,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             signInUserAction.HasDescription().HasDescription("DeleteRelationTuple");
 
-            signInUserAction.Parameter<string>("objectType").Required();
-            signInUserAction.Parameter<int>("objectId").Required();
-            signInUserAction.Parameter<string>("relation").Required();
-            signInUserAction.Parameter<string>("subjectType").Required();
-            signInUserAction.Parameter<int>("subjectId").Required();
-            signInUserAction.Parameter<string>("subjectRelation").Optional();
+            signInUserAction.Parameter<RelationTuple>("value").Required();
         }
     }
 }

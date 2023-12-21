@@ -131,7 +131,6 @@ namespace RebacExperiments.Server.Api.Controllers
             }
         }
 
-        
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
