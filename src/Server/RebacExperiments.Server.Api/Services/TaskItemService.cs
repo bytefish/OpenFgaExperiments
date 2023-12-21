@@ -66,8 +66,8 @@ namespace RebacExperiments.Server.Api.Services
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
                 var taskItem = await context.TaskItems
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
 
                 if (taskItem == null)
                 {
@@ -155,15 +155,15 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                var TaskItem = await context.TaskItems
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
+                var taskItem = await context.TaskItems
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
 
-                if (TaskItem == null)
+                if (taskItem == null)
                 {
                     throw new EntityNotFoundException()
                     {
-                        EntityName = nameof(TaskItem),
+                        EntityName = nameof(taskItem),
                         EntityId = taskItemId,
                     };
                 }
@@ -174,7 +174,7 @@ namespace RebacExperiments.Server.Api.Services
                 {
                     throw new EntityUnauthorizedAccessException()
                     {
-                        EntityName = nameof(TaskItem),
+                        EntityName = nameof(taskItem),
                         EntityId = taskItemId,
                         UserId = currentUserId,
                     };
@@ -182,7 +182,7 @@ namespace RebacExperiments.Server.Api.Services
 
                 
                 await context.TaskItems
-                    .Where(t => t.Id == TaskItem.Id)
+                    .Where(t => t.Id == taskItem.Id)
                     .ExecuteDeleteAsync(cancellationToken);
 
                 // Delete all stored relations towards the TaskItem
