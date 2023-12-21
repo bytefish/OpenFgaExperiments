@@ -55,7 +55,7 @@ AS BEGIN
 		PRINT 'Reactivate Temporal Table for [Application].[OrganizationRole]'
 
 		ALTER TABLE [Application].[OrganizationRole] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
-		ALTER TABLE [Application].[OrganizationRole] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[OrganizationHistory], DATA_CONSISTENCY_CHECK = ON));
+		ALTER TABLE [Application].[OrganizationRole] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[OrganizationRoleHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
     
     IF OBJECTPROPERTY(OBJECT_ID('[Application].[UserTaskItem]'), 'TableTemporalType') = 0
