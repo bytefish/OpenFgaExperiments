@@ -16,13 +16,4 @@ AS BEGIN
 		ALTER TABLE [Identity].[Role] DROP PERIOD FOR SYSTEM_TIME;
 	END
 
-
-	IF OBJECTPROPERTY(OBJECT_ID('[Identity].[RelationTuple]'), 'TableTemporalType') = 2
-	BEGIN
-		PRINT 'Deactivate Temporal Table for [Identity].[RelationTuple]'
-
-		ALTER TABLE [Identity].[RelationTuple] SET (SYSTEM_VERSIONING = OFF);
-		ALTER TABLE [Identity].[RelationTuple] DROP PERIOD FOR SYSTEM_TIME;
-	END
-
 END

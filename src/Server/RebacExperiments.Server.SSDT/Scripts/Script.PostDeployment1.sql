@@ -29,9 +29,6 @@ GO
 :r .\Identity\pds-110-ins-identity-roles.sql
 GO
 
-:r .\Identity\pds-120-ins-identity-relation-tuples.sql
-GO
-
 /* 
     Set the initial data for the [Application] schema
 */
@@ -41,7 +38,7 @@ GO
 :r .\Application\pds-110-ins-application-task-status.sql
 GO
 
-:r .\Application\pds-120-ins-application-user-task.sql
+:r .\Application\pds-120-ins-application-task-item.sql
 GO
 
 :r .\Application\pds-130-ins-application-organization.sql
