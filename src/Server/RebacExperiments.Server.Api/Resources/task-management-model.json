@@ -1,1 +1,166 @@
-﻿
+{
+  "schema_version": "1.1",
+  "type_definitions": [
+    {
+      "type": "User"
+    },
+    {
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "User"
+              }
+            ]
+          }
+        }
+      },
+      "relations": {
+        "member": {
+          "this": {}
+        }
+      },
+      "type": "Role"
+    },
+    {
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "User"
+              }
+            ]
+          },
+          "owner": {
+            "directly_related_user_types": [
+              {
+                "type": "User"
+              }
+            ]
+          }
+        }
+      },
+      "relations": {
+        "member": {
+          "union": {
+            "child": [
+              {
+                "this": {}
+              },
+              {
+                "computedUserset": {
+                  "relation": "owner"
+                }
+              }
+            ]
+          }
+        },
+        "owner": {
+          "this": {}
+        }
+      },
+      "type": "Organization"
+    },
+    {
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "User"
+              }
+            ]
+          }
+        }
+      },
+      "relations": {
+        "member": {
+          "this": {}
+        }
+      },
+      "type": "Team"
+    },
+    {
+      "metadata": {
+        "relations": {
+          "can_change_owner": {},
+          "can_read": {},
+          "can_share": {},
+          "can_write": {},
+          "owner": {
+            "directly_related_user_types": [
+              {
+                "type": "User"
+              },
+              {
+                "relation": "member",
+                "type": "Team"
+              }
+            ]
+          },
+          "viewer": {
+            "directly_related_user_types": [
+              {
+                "type": "User"
+              },
+              {
+                "type": "User",
+                "wildcard": {}
+              },
+              {
+                "relation": "member",
+                "type": "Organization"
+              },
+              {
+                "relation": "member",
+                "type": "Team"
+              }
+            ]
+          }
+        }
+      },
+      "relations": {
+        "can_change_owner": {
+          "computedUserset": {
+            "relation": "owner"
+          }
+        },
+        "can_read": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "viewer"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "owner"
+                }
+              }
+            ]
+          }
+        },
+        "can_share": {
+          "computedUserset": {
+            "relation": "owner"
+          }
+        },
+        "can_write": {
+          "computedUserset": {
+            "relation": "owner"
+          }
+        },
+        "owner": {
+          "this": {}
+        },
+        "viewer": {
+          "this": {}
+        }
+      },
+      "type": "TaskItem"
+    }
+  ]
+}

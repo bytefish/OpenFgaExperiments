@@ -16,11 +16,11 @@ type Team
   relations
     define member: [User]
 
-type UserTask
+type TaskItem
     relations
         define can_change_owner: owner
         define can_read: viewer or owner
         define can_share: owner
         define can_write: owner
-        define owner: [User]
+        define owner: [User, Team#member]
         define viewer: [User, User:*, Organization#member, Team#member]
