@@ -7,7 +7,7 @@ using RebacExperiments.Server.Api.Models;
 
 namespace RebacExperiments.Server.Api.Services
 {
-    public class TeamService: ITeamService
+    public class TeamService : ITeamService
     {
         private readonly ILogger<TeamService> _logger;
 
@@ -20,7 +20,7 @@ namespace RebacExperiments.Server.Api.Services
             _dbContextFactory = dbContextFactory;
             _aclService = aclService;
         }
-        
+
         public async Task<Team> CreateTeamAsync(Team team, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
@@ -60,17 +60,53 @@ namespace RebacExperiments.Server.Api.Services
             }
         }
 
-        public async Task<List<Organization>> GetOrganizationsByUserIdAsync(int userId, CancellationToken cancellationToken)
+        public async Task<Team> GetTeamByIdAsync(int teamId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                var organizations = await _aclService
-                    .ListUserObjectsAsync<Organization>(userId, Relations.Viewer, cancellationToken)
+                var team = await context.Teams
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == teamId, cancellationToken);
+
+                if (team == null)
+                {
+                    throw new EntityNotFoundException()
+                    {
+                        EntityName = nameof(Team),
+                        EntityId = teamId,
+                    };
+                }
+
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, team, Relations.Viewer, cancellationToken);
+
+                if (!isAuthorized)
+                {
+                    throw new EntityUnauthorizedAccessException()
+                    {
+                        EntityName = nameof(Team),
+                        EntityId = teamId,
+                        UserId = currentUserId,
+                    };
+                }
+
+                return team;
+            }
+        }
+
+
+        public async Task<List<Team>> GetTeamsByUserIdAsync(int userId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            {
+                var teams = await _aclService
+                    .ListUserObjectsAsync<Team>(userId, Relations.Viewer, cancellationToken)
                     .ConfigureAwait(false);
 
-                return organizations;
+                return teams;
             }
         }
 
@@ -200,7 +236,7 @@ namespace RebacExperiments.Server.Api.Services
                 await context
                     .AddAsync(teamRole)
                     .ConfigureAwait(false);
-             
+
                 await context
                     .SaveChangesAsync(cancellationToken)
                     .ConfigureAwait(false);

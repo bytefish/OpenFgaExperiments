@@ -17,12 +17,12 @@ using RebacExperiments.Server.Api.Models;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
-    public class TaskItemsController : ODataController
+    public class TeamsController : ODataController
     {
-        private readonly ILogger<TaskItemsController> _logger;
+        private readonly ILogger<TeamsController> _logger;
         private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public TaskItemsController(ILogger<TaskItemsController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public TeamsController(ILogger<TeamsController> logger, ApplicationErrorHandler applicationErrorHandler)
         {
             _logger = logger;
             _applicationErrorHandler = applicationErrorHandler;
@@ -30,7 +30,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetTaskItem([FromServices] ITaskItemService taskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTeam([FromServices] ITeamService teamService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -41,9 +41,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+                var team = await teamService.GetTeamByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(taskItem);
+                return Ok(team);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpGet]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetTaskItems([FromServices] ITaskItemService taskItemService, ODataQueryOptions<TaskItem> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTeams([FromServices] ITeamService teamService, ODataQueryOptions<TaskItem> queryOptions, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -65,9 +65,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var taskItems = await taskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
+                var teams = await teamService.GetTeamsByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(taskItems.AsQueryable()));
+                return Ok(queryOptions.ApplyTo(teams.AsQueryable()));
             }
             catch (Exception ex)
             {
@@ -78,7 +78,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPost]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PostTaskItem([FromServices] ITaskItemService taskItemService, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostTeam([FromServices] ITeamService teamService, [FromBody] Team team, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -89,9 +89,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await taskItemService.CreateTaskItemAsync(TaskItem, User.GetUserId(), cancellationToken);
+                await teamService.CreateTeamAsync(team, User.GetUserId(), cancellationToken);
 
-                return Created(TaskItem);
+                return Created(team);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPatch]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PatchTaskItem([FromServices] ITaskItemService taskItemService, [FromODataUri] int key, [FromBody] Delta<TaskItem> delta, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchTeam([FromServices] ITeamService teamService, [FromODataUri] int key, [FromBody] Delta<Team> delta, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -115,15 +115,15 @@ namespace RebacExperiments.Server.Api.Controllers
             try
             {
                 // Get the TaskItem with the current values:
-                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+                var team = await teamService.GetTeamByIdAsync(key, User.GetUserId(), cancellationToken);
 
                 // Patch the Values to it:
-                delta.Patch(taskItem);
+                delta.Patch(team);
 
                 // Update the Values:
-                await taskItemService.UpdateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
+                await teamService.UpdateTeamAsync(team, User.GetUserId(), cancellationToken);
 
-                return Updated(taskItem);
+                return Updated(team);
             }
             catch (Exception ex)
             {
@@ -135,7 +135,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> DeleteTaskItem([FromServices] ITaskItemService taskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteTeam([FromServices] ITeamService teamService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -146,7 +146,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await taskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
+                await teamService.DeleteTeamAsync(key, User.GetUserId(), cancellationToken);
 
                 return StatusCode(StatusCodes.Status204NoContent);
             }

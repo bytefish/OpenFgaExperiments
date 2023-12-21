@@ -4,14 +4,12 @@ namespace RebacExperiments.Server.Api.Services
 {
     public interface IOrganizationService
     {
-        Task<Organization> CreateTaskItemAsync(Organization organization, int currentUserId, CancellationToken cancellationToken);
-
-        Task<List<Organization>> GetOrganizationsByUserIdAsync(int userId, CancellationToken cancellationToken);
-
-        Task<Organization> UpdateTaskItemAsync(Organization organization, int currentUserId, CancellationToken cancellationToken);
-
-        Task DeleteOrganizationAsync(int organizationId, int currentUserId, CancellationToken cancellationToken);
-
         Task<OrganizationRole> AddUserToOrganizationAsync(int organizationId, int userId, int currentUserId, CancellationToken cancellationToken);
+        Task<Organization> CreateOrganizationAsync(Organization organization, int currentUserId, CancellationToken cancellationToken);
+        Task DeleteOrganizationAsync(int organizationId, int currentUserId, CancellationToken cancellationToken);
+        Task<Organization> GetOrganizationByIdAsync(int organizationId, int currentUserId, CancellationToken cancellationToken);
+        Task<List<Organization>> GetOrganizationsByUserIdAsync(int userId, CancellationToken cancellationToken);
+        Task<OrganizationRole> RemoveUserFromOrganizationAsync(int organizationId, int userId, int currentUserId, CancellationToken cancellationToken);
+        Task<Organization> UpdateOrganizationAsync(Organization organization, int currentUserId, CancellationToken cancellationToken);
     }
 }

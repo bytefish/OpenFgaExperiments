@@ -17,12 +17,12 @@ using RebacExperiments.Server.Api.Models;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
-    public class TaskItemsController : ODataController
+    public class OrganizationsController : ODataController
     {
-        private readonly ILogger<TaskItemsController> _logger;
+        private readonly ILogger<OrganizationsController> _logger;
         private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public TaskItemsController(ILogger<TaskItemsController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public OrganizationsController(ILogger<OrganizationsController> logger, ApplicationErrorHandler applicationErrorHandler)
         {
             _logger = logger;
             _applicationErrorHandler = applicationErrorHandler;
@@ -30,7 +30,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetTaskItem([FromServices] ITaskItemService taskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetOrganization([FromServices] IOrganizationService organizationService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -41,9 +41,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+                var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(taskItem);
+                return Ok(organization);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpGet]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> GetTaskItems([FromServices] ITaskItemService taskItemService, ODataQueryOptions<TaskItem> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetOrganizations([FromServices] IOrganizationService organizationService, ODataQueryOptions<TaskItem> queryOptions, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -65,9 +65,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var taskItems = await taskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
+                var organizations = await organizationService.GetOrganizationsByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(taskItems.AsQueryable()));
+                return Ok(queryOptions.ApplyTo(organizations.AsQueryable()));
             }
             catch (Exception ex)
             {
@@ -78,7 +78,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPost]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PostTaskItem([FromServices] ITaskItemService taskItemService, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostOrganization([FromServices] IOrganizationService organizationService, [FromBody] Organization Organization, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -89,9 +89,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await taskItemService.CreateTaskItemAsync(TaskItem, User.GetUserId(), cancellationToken);
+                await organizationService.CreateOrganizationAsync(Organization, User.GetUserId(), cancellationToken);
 
-                return Created(TaskItem);
+                return Created(Organization);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPatch]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PatchTaskItem([FromServices] ITaskItemService taskItemService, [FromODataUri] int key, [FromBody] Delta<TaskItem> delta, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchOrganization([FromServices] IOrganizationService organizationService, [FromODataUri] int key, [FromBody] Delta<Organization> delta, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -115,15 +115,15 @@ namespace RebacExperiments.Server.Api.Controllers
             try
             {
                 // Get the TaskItem with the current values:
-                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+                var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
 
                 // Patch the Values to it:
-                delta.Patch(taskItem);
+                delta.Patch(organization);
 
                 // Update the Values:
-                await taskItemService.UpdateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
+                await organizationService.UpdateOrganizationAsync(organization, User.GetUserId(), cancellationToken);
 
-                return Updated(taskItem);
+                return Updated(organization);
             }
             catch (Exception ex)
             {
@@ -135,7 +135,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> DeleteTaskItem([FromServices] ITaskItemService taskItemService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteOrganization([FromServices] IOrganizationService organizationService, [FromODataUri(Name = "key")] int key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -146,7 +146,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await taskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
+                await organizationService.DeleteOrganizationAsync(key, User.GetUserId(), cancellationToken);
 
                 return StatusCode(StatusCodes.Status204NoContent);
             }

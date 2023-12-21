@@ -20,8 +20,8 @@ namespace RebacExperiments.Server.Api.Services
             _dbContextFactory = dbContextFactory;
             _aclService = aclService;
         }
-        
-        public async Task<Organization> CreateTaskItemAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
+
+        public async Task<Organization> CreateOrganizationAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -60,6 +60,41 @@ namespace RebacExperiments.Server.Api.Services
             }
         }
 
+        public async Task<Organization> GetOrganizationByIdAsync(int organizationId, int currentUserId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            {
+                var organization = await context.Organizations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
+
+                if (organization == null)
+                {
+                    throw new EntityNotFoundException()
+                    {
+                        EntityName = nameof(Organization),
+                        EntityId = organizationId,
+                    };
+                }
+
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Relations.Viewer, cancellationToken);
+
+                if (!isAuthorized)
+                {
+                    throw new EntityUnauthorizedAccessException()
+                    {
+                        EntityName = nameof(Organization),
+                        EntityId = organizationId,
+                        UserId = currentUserId,
+                    };
+                }
+
+                return organization;
+            }
+        }
+
         public async Task<List<Organization>> GetOrganizationsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
@@ -74,7 +109,7 @@ namespace RebacExperiments.Server.Api.Services
             }
         }
 
-        public async Task<Organization> UpdateTaskItemAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
+        public async Task<Organization> UpdateOrganizationAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -143,7 +178,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                using(var transaction = await context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+                using (var transaction = await context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
                 {
                     await context.OrganizationRoles
                         .Where(t => t.Id == organization.Id)
@@ -157,9 +192,9 @@ namespace RebacExperiments.Server.Api.Services
 
                     await transaction
                         .CommitAsync(cancellationToken)
-                        .ConfigureAwait(false); 
+                        .ConfigureAwait(false);
                 }
-                
+
                 // Delete all Relations towards the Organization
                 var tuplesToDelete = await _aclService
                     .ReadAllRelationshipsByObjectAsync<Organization>(organizationId)
@@ -187,7 +222,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                var organizationRole = new OrganizationRole 
+                var organizationRole = new OrganizationRole
                 {
                     OrganizationId = organizationId,
                     UserId = userId,
@@ -198,7 +233,7 @@ namespace RebacExperiments.Server.Api.Services
                 await context
                     .AddAsync(organizationRole)
                     .ConfigureAwait(false);
-             
+
                 await context
                     .SaveChangesAsync(cancellationToken)
                     .ConfigureAwait(false);

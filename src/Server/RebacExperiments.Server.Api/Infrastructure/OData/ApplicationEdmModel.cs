@@ -29,6 +29,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             // Authorization
             RegisterCreateRelationTupleAction(modelBuilder);
+            RegisterDeleteRelationTupleAction(modelBuilder);
 
             // Send as Lower Camel Case Properties, so the JSON looks better:
             modelBuilder.EnableLowerCamelCase();
