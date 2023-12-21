@@ -29,6 +29,9 @@ GO
 :r .\Identity\pds-110-ins-identity-roles.sql
 GO
 
+:r .\Identity\pds-120-ins-identity-user-roles.sql
+GO
+
 /* 
     Set the initial data for the [Application] schema
 */
