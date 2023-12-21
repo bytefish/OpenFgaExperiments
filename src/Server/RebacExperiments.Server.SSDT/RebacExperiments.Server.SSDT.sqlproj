@@ -112,5 +112,8 @@
     <None Include="Scripts\Application\pds-150-ins-application-organization-role.sql" />
     <None Include="Scripts\Application\pds-160-ins-application-team-role.sql" />
     <None Include="Scripts\Application\pds-170-ins-application-user-task-item.sql" />
+    <Build Include="Identity\Tables\UserRole.sql" />
+    <Build Include="Identity\Sequences\sq_UserRole.sql" />
+    <None Include="Scripts\Identity\pds-120-ins-identity-user-roles.sql" />
   </ItemGroup>
 </Project>

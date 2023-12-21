@@ -554,6 +554,58 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
                     .HasColumnName("LastEditedBy")
                     .IsRequired(true);
             });
+            
+
+            modelBuilder.HasSequence<int>("sq_UserRole", schema: "Identity")
+                .StartsAt(38187)
+                .IncrementsBy(1);
+
+            modelBuilder.Entity<UserRole>(entity =>
+            {
+                entity.ToTable("UserRole", "Identity");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(x => x.Id)
+                    .HasColumnType("INT")
+                    .HasColumnName("UserRoleID")
+                    .UseHiLo("sq_UserRole", "Identity")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UserId)
+                    .HasColumnType("INT")
+                    .HasColumnName("UserID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.RoleId)
+                    .HasColumnType("INT")
+                    .HasColumnName("RoleID")
+                    .IsRequired(true);
+
+                entity.Property(e => e.RowVersion)
+                    .HasColumnType("ROWVERSION")
+                    .HasColumnName("RowVersion")
+                    .IsConcurrencyToken()
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidFrom)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidFrom")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidTo)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidTo")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.LastEditedBy)
+                    .HasColumnType("INT")
+                    .HasColumnName("LastEditedBy")
+                    .IsRequired(true);
+            });
 
 
 

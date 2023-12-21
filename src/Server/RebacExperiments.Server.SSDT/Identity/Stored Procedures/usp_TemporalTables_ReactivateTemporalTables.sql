@@ -16,5 +16,13 @@ AS BEGIN
 		ALTER TABLE [Identity].[Role] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
 		ALTER TABLE [Identity].[Role] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Identity].[RoleHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
+
+	IF OBJECTPROPERTY(OBJECT_ID('[Identity].[UserRole]'), 'TableTemporalType') = 0
+	BEGIN
+		PRINT 'Reactivate Temporal Table for [Identity].[UserRole]'
+
+		ALTER TABLE [Identity].[UserRole] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Identity].[UserRole] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Identity].[UserRoleHistory], DATA_CONSISTENCY_CHECK = ON));
+	END
     
 END
