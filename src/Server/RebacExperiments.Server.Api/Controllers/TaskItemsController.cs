@@ -9,11 +9,10 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
@@ -78,7 +77,7 @@ namespace RebacExperiments.Server.Api.Controllers
         [HttpPost]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
-        public async Task<IActionResult> PostTaskItem([FromServices] ITaskItemService taskItemService, [FromBody] TaskItem TaskItem, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostTaskItem([FromServices] ITaskItemService taskItemService, [FromBody] TaskItem taskItem, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -89,9 +88,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                await taskItemService.CreateTaskItemAsync(TaskItem, User.GetUserId(), cancellationToken);
+                await taskItemService.CreateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
 
-                return Created(TaskItem);
+                return Created(taskItem);
             }
             catch (Exception ex)
             {

@@ -1,12 +1,13 @@
 ﻿using OpenFga.Sdk.Client.Model;
 using OpenFga.Sdk.Client;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using System.Globalization;
-using RebacExperiments.Server.Api.Models;
 using OpenFga.Sdk.Model;
 using RebacExperiments.Server.Api.Infrastructure.Authorization;
+using RebacExperiments.Server.Database.Models;
+using RebacExperiments.Server.Database;
+using RebacExperiments.Server.OpenFga;
 
 namespace RebacExperiments.Server.Api.Services
 {
@@ -15,13 +16,15 @@ namespace RebacExperiments.Server.Api.Services
         private readonly ILogger<AclService> _logger;
 
         private readonly OpenFgaClient _openFgaClient;
-        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+        private readonly IDbContextFactory<ApplicationDbContext> _applicationDbContextFactory;
+        private readonly IDbContextFactory<OpenFgaDbContext> _openFgaDbContextFactory;
 
-        public AclService(ILogger<AclService> logger, OpenFgaClient openFgaClient, IDbContextFactory<ApplicationDbContext> dbContextFactory)
+        public AclService(ILogger<AclService> logger, OpenFgaClient openFgaClient, IDbContextFactory<ApplicationDbContext> applicationDbContextFactory, IDbContextFactory<OpenFgaDbContext> openFgaDbContextFactory)
         {
             _logger = logger;
             _openFgaClient = openFgaClient;
-            _dbContextFactory = dbContextFactory;
+            _applicationDbContextFactory = applicationDbContextFactory;
+            _openFgaDbContextFactory = openFgaDbContextFactory;
         }
 
         public async Task<bool> CheckObjectAsync<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, CancellationToken cancellationToken)
@@ -87,12 +90,12 @@ namespace RebacExperiments.Server.Api.Services
                 .ListObjects(body, null, cancellationToken)
                 .ConfigureAwait(false);
 
-            if(response == null)
+            if (response == null)
             {
                 throw new InvalidOperationException("No Response received");
             }
 
-            if(response.Objects == null)
+            if (response.Objects == null)
             {
                 return [];
             }
@@ -102,7 +105,7 @@ namespace RebacExperiments.Server.Api.Services
                 .Select(x => x.Id)
                 .ToArray();
 
-            using(var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            using (var context = await _applicationDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
                 var entities = await context.Set<TObjectType>()
                     .AsNoTracking()
@@ -150,9 +153,9 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            var tuples = new List<ClientTupleKey>()
+            var tuples = new List<ClientTupleKeyWithoutCondition>()
             {
-                new ClientTupleKey
+                new ClientTupleKeyWithoutCondition
                 {
                     Object = ToZanzibarNotation<TObjectType>(objectId),
                     Relation = relation,
@@ -168,53 +171,26 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            var body = new ClientReadRequest
+            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                Object = ToZanzibarNotation<TObjectType>(objectId),
-            };
+                var objectType = typeof(TObjectType).Name;
+                var objectIdStr = objectId.ToString();
 
-            var readResult = new List<RelationTuple>();
-
-            string? continuationToken = null;
-
-            do
-            {
-                var options = new ClientReadOptions
-                {
-                    PageSize = 100,
-                    ContinuationToken = continuationToken
-                };
-
-                var response = await _openFgaClient
-                    .Read(body, options, cancellationToken)
+                var tuples = await context.Tuples
+                    .AsNoTracking()
+                    .Where(x => x.ObjectType == objectType && x.ObjectId == objectIdStr)
+                    .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
-                if (response == null)
-                {
-                    throw new InvalidOperationException("No Response received");
-                }
-
-                if (response.Tuples != null)
-                {
-                    foreach (var tuple in response.Tuples)
+                return tuples
+                    .Select(x => new RelationTuple
                     {
-                        var relationTuple = new RelationTuple
-                        {
-                            Object = tuple.Key?.Object ?? string.Empty,
-                            Relation = tuple.Key?.Relation ?? string.Empty,
-                            Subject = tuple.Key?.User ?? string.Empty,
-                        };
-
-                        readResult.Add(relationTuple);
-                    }
-                }
-
-                // Set the new Continuation Token to get more data ...
-                continuationToken = response.ContinuationToken;
-
-            } while (continuationToken != null);
-
-            return readResult;
+                        Object = $"{x.ObjectType}:{x.ObjectId}",
+                        Relation = x.Relation,
+                        Subject = $"{x.UserType}:{x.User}"
+                    })
+                    .ToList();
+            }
         }
 
 
@@ -223,53 +199,32 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            var body = new ClientReadRequest
+            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                User = ToZanzibarNotation<TSubjectType>(subjectId, subjectRelation),
-            };
+                var subjectType = typeof(TSubjectType).Name;
+                
+                var subjectIdStr = subjectId.ToString();
 
-            var readResult = new List<RelationTuple>();
-
-            string? continuationToken = null;
-
-            do
-            {
-                var options = new ClientReadOptions
+                if(!string.IsNullOrWhiteSpace(subjectRelation))
                 {
-                    PageSize = 100,
-                    ContinuationToken = continuationToken
-                };
+                    subjectIdStr = $"{subjectType}:{subjectId}#{subjectRelation}";
+                }
 
-                var response = await _openFgaClient
-                    .Read(body, options, cancellationToken)
+                var tuples = await context.Tuples
+                    .AsNoTracking()
+                    .Where(x => x.UserType == subjectType && x.User == subjectIdStr)
+                    .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
-                if (response == null)
-                {
-                    throw new InvalidOperationException("No Response received");
-                }
-
-                if (response.Tuples != null)
-                {
-                    foreach (var tuple in response.Tuples)
+                return tuples
+                    .Select(x => new RelationTuple
                     {
-                        var relationTuple = new RelationTuple
-                        {
-                            Object = tuple.Key?.Object ?? string.Empty,
-                            Relation = tuple.Key?.Relation ?? string.Empty,
-                            Subject = tuple.Key?.User ?? string.Empty,
-                        };
-
-                        readResult.Add(relationTuple);
-                    }
-                }
-
-                // Set the new Continuation Token to get more data ...
-                continuationToken = response.ContinuationToken;
-
-            } while (continuationToken != null);
-
-            return readResult;
+                        Object = $"{x.ObjectType}:{x.ObjectId}",
+                        Relation = x.Relation,
+                        Subject = $"{x.UserType}:{x.User}"
+                    })
+                    .ToList();
+            }
         }
 
         public async Task<List<RelationTuple>> ReadAllRelationships(string? @object, string? relation, string? subject, CancellationToken cancellationToken = default)
@@ -408,7 +363,7 @@ namespace RebacExperiments.Server.Api.Services
                     User = x.Subject
                 })
                 .ToList();
-    
+
             await _openFgaClient
                 .WriteTuples(clientTupleKeys, null, cancellationToken)
                 .ConfigureAwait(false);
@@ -417,7 +372,7 @@ namespace RebacExperiments.Server.Api.Services
         public async Task DeleteRelationshipsAsync(ICollection<RelationTuple> relationTuples, CancellationToken cancellationToken)
         {
             var clientTupleKeys = relationTuples
-                .Select(x => new ClientTupleKey
+                .Select(x => new ClientTupleKeyWithoutCondition
                 {
                     Object = x.Object,
                     Relation = x.Relation,
@@ -450,12 +405,12 @@ namespace RebacExperiments.Server.Api.Services
 
         private static (string Type, int Id, string? relation) FromZanzibarNotation(string s)
         {
-            if(s.Contains('#'))
+            if (s.Contains('#'))
             {
                 return FromZanzibarNotationWithRelation(s);
             }
 
-            return FromZanzibarNotationWithoutRelation(s);  
+            return FromZanzibarNotationWithoutRelation(s);
         }
 
         private static (string Type, int Id, string? relation) FromZanzibarNotationWithoutRelation(string s)

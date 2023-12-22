@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
+using RebacExperiments.Server.Database;
 using System.Security.Claims;
 
 namespace RebacExperiments.Server.Api.Controllers

@@ -1,4 +1,4 @@
-﻿using RebacExperiments.Server.Api.Models;
+﻿using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Services
 {

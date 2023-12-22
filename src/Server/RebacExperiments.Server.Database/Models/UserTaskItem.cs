@@ -1,13 +1,13 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace RebacExperiments.Server.Api.Models
+namespace RebacExperiments.Server.Database.Models
 {
-    public class OrganizationTaskItem : Entity
+    public class UserTaskItem : Entity
     {
         /// <summary>
-        /// Gets or sets the OrganizationId.
+        /// Gets or sets the UserId.
         /// </summary>
-        public required int OrganizationId { get; set; }
+        public required int UserId { get; set; }
 
         /// <summary>
         /// Gets or sets the TaskItemId.

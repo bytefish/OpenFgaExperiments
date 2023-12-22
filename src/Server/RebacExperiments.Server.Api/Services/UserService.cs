@@ -5,10 +5,10 @@ using OpenFga.Sdk.Client;
 using OpenFga.Sdk.Model;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database;
+using RebacExperiments.Server.Database.Models;
 using System.Security.Claims;
 
 namespace RebacExperiments.Server.Api.Services

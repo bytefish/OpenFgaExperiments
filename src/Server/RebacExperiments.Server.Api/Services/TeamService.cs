@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database;
+using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Services
 {
@@ -41,6 +41,7 @@ namespace RebacExperiments.Server.Api.Services
                     UserId = currentUserId,
                     TeamId = team.Id,
                     Role = Relations.Owner,
+                    LastEditedBy = currentUserId,
                 };
 
                 await context

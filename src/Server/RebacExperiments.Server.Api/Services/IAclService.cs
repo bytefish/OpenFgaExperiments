@@ -2,8 +2,7 @@
 
 
 using RebacExperiments.Server.Api.Infrastructure.Authorization;
-using RebacExperiments.Server.Api.Infrastructure.Database;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Services
 {

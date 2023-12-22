@@ -13,11 +13,12 @@ using OpenFga.Sdk.Client;
 using OpenFga.Sdk.Model;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.OData;
 using RebacExperiments.Server.Api.Services;
+using RebacExperiments.Server.Database;
+using RebacExperiments.Server.OpenFga;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Security.Claims;
@@ -69,7 +70,22 @@ try
         }
 
         options
-            .EnableSensitiveDataLogging().UseSqlServer(connectionString);
+            .EnableSensitiveDataLogging()
+            .UseSqlServer(connectionString);
+    });
+
+    builder.Services.AddDbContextFactory<OpenFgaDbContext>(options =>
+    {
+        var connectionString = builder.Configuration.GetConnectionString("OpenFgaDatabase");
+
+        if (connectionString == null)
+        {
+            throw new InvalidOperationException("No ConnectionString named 'OpenFgaDatabase' was found");
+        }
+
+        options
+            .EnableSensitiveDataLogging()
+            .UseNpgsql(connectionString);
     });
 
     // OpenFGA
@@ -77,8 +93,7 @@ try
     {
         var configuration = new ClientConfiguration
         {
-            ApiScheme = builder.Configuration.GetValue<string>("OpenFGA:ApiScheme")!,
-            ApiHost = builder.Configuration.GetValue<string>("OpenFGA:ApiHost")!,
+            ApiUrl = builder.Configuration.GetValue<string>("OpenFGA:ApiUrl")!,
             StoreId = builder.Configuration.GetValue<string>("OpenFGA:StoreId")!,
             AuthorizationModelId = builder.Configuration.GetValue<string>("OpenFGA:AuthorizationModelId")!,
         };

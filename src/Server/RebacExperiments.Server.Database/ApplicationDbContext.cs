@@ -1,9 +1,9 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.EntityFrameworkCore;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database.Models;
 
-namespace RebacExperiments.Server.Api.Infrastructure.Database
+namespace RebacExperiments.Server.Database
 {
     /// <summary>
     /// A <see cref="DbContext"/> to query the database.
@@ -11,18 +11,12 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
     public class ApplicationDbContext : DbContext
     {
         /// <summary>
-        /// Logger.
-        /// </summary>
-        internal ILogger<ApplicationDbContext> Logger { get; }
-
-        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="options">Options to configure the base <see cref="DbContext"/></param>
-        public ApplicationDbContext(ILogger<ApplicationDbContext> logger, DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        {
-            Logger = logger;
+        {            
         }
 
         /// <summary>
@@ -526,7 +520,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
 
                 entity.Property(e => e.Role)
                     .HasColumnType("NVARCHAR(255)")
-                    .HasColumnName("Name")
+                    .HasColumnName("Role")
                     .IsRequired(true)
                     .HasMaxLength(255);
 
@@ -554,7 +548,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Database
                     .HasColumnName("LastEditedBy")
                     .IsRequired(true);
             });
-            
+
 
             modelBuilder.HasSequence<int>("sq_UserRole", schema: "Identity")
                 .StartsAt(38187)

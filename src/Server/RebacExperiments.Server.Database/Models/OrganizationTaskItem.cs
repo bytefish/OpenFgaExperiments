@@ -1,21 +1,18 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace RebacExperiments.Server.Api.Models
+namespace RebacExperiments.Server.Database.Models
 {
-    /// <summary>
-    /// Role of the User within a Team.
-    /// </summary>
-    public class TeamRole : Entity
+    public class OrganizationTaskItem : Entity
     {
         /// <summary>
-        /// Gets or sets the TeamId.
+        /// Gets or sets the OrganizationId.
         /// </summary>
-        public required int TeamId { get; set; }
+        public required int OrganizationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the UserId.
+        /// Gets or sets the TaskItemId.
         /// </summary>
-        public required int UserId { get; set; }
+        public required int TaskItemId { get; set; }
 
         /// <summary>
         /// Gets or sets the Role.

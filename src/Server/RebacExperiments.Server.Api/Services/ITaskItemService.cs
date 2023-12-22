@@ -1,6 +1,6 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Services
 {

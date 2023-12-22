@@ -3,7 +3,7 @@
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using RebacExperiments.Server.Api.Infrastructure.Authorization;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Infrastructure.OData
 {
@@ -73,7 +73,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             signInUserAction.Parameter<RelationTuple>("tuple").Required();
         }
-
 
         private static void RegisterGetRelationTuplesAction(ODataConventionModelBuilder modelBuilder)
         {

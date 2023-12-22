@@ -32,10 +32,16 @@ Content-Type: application/json
 
 {
   "tuple": {
-      "object": "TaskItem:",    
-      "subject": "User:2"
+      "object": "TaskItem:152",  
+      "relation": "owner",
+      "subject": "User:"
   }
 }
+
+
+### Delete TaskITEM
+
+DELETE {{RebacExperiments.Server.Api_HostAddress}}/TaskItems(152)
 
 
 ### Get all TaskItems for "philipp@bytefish.de"

@@ -2,7 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace RebacExperiments.Server.Api.Models
+namespace RebacExperiments.Server.Database.Models
 {
     public class User : Entity
     {

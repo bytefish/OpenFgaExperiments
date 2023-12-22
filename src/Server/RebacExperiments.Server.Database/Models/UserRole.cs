@@ -1,6 +1,6 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace RebacExperiments.Server.Api.Models
+namespace RebacExperiments.Server.Database.Models
 {
     public class UserRole : Entity
     {

@@ -9,11 +9,10 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
-using RebacExperiments.Server.Api.Infrastructure.Database;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
-using RebacExperiments.Server.Api.Models;
+using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
