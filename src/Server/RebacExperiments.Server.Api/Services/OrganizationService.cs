@@ -80,7 +80,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Relations.Viewer, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Actions.CanRead, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -103,7 +103,7 @@ namespace RebacExperiments.Server.Api.Services
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
                 var organizations = await _aclService
-                    .ListUserObjectsAsync<Organization>(userId, Relations.Viewer, cancellationToken)
+                    .ListUserObjectsAsync<Organization>(userId, Actions.CanRead, cancellationToken)
                     .ConfigureAwait(false);
 
                 return organizations;
@@ -116,7 +116,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -167,7 +167,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, organizationId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -211,7 +211,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -253,7 +253,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {

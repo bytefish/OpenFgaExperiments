@@ -187,7 +187,7 @@ namespace RebacExperiments.Server.Api.Services
                     {
                         Object = $"{x.ObjectType}:{x.ObjectId}",
                         Relation = x.Relation,
-                        Subject = $"{x.UserType}:{x.User}"
+                        Subject = $"{x.User}"
                     })
                     .ToList();
             }
@@ -221,7 +221,7 @@ namespace RebacExperiments.Server.Api.Services
                     {
                         Object = $"{x.ObjectType}:{x.ObjectId}",
                         Relation = x.Relation,
-                        Subject = $"{x.UserType}:{x.User}"
+                        Subject = $"{x.User}"
                     })
                     .ToList();
             }

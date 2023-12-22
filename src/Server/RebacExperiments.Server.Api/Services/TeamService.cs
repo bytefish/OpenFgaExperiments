@@ -80,7 +80,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, team, Relations.Viewer, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, team, Actions.CanRead, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -117,7 +117,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, team, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, team, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -168,7 +168,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, teamId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, teamId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -214,7 +214,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<Team>(currentUserId, teamId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<Team>(currentUserId, teamId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -256,7 +256,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<Team>(currentUserId, teamId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<Team>(currentUserId, teamId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {

@@ -39,7 +39,7 @@ namespace RebacExperiments.Server.OpenFga.Models
         /// <summary>
         /// Gets or sets the Operation.
         /// </summary>
-        public required string Operation { get; set; }
+        public required int Operation { get; set; }
 
         /// <summary>
         /// Gets or sets the Ulid.

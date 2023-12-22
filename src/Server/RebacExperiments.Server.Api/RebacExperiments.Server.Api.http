@@ -18,8 +18,7 @@ Content-Type: application/json
 
 {
   "tuple": {
-      "object": "TaskItem:152",
-      "relation": "viewer",
+      "object": "TaskItem",
       "subject": "User:2"
   }
 }
@@ -39,9 +38,9 @@ Content-Type: application/json
 }
 
 
-### Delete TaskITEM
+### Delete TaskItem
 
-DELETE {{RebacExperiments.Server.Api_HostAddress}}/TaskItems(152)
+DELETE {{RebacExperiments.Server.Api_HostAddress}}/TaskItems(38197)
 
 
 ### Get all TaskItems for "philipp@bytefish.de"

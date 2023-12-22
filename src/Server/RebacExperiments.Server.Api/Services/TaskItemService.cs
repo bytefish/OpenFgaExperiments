@@ -79,7 +79,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, taskItem, Relations.Viewer, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, taskItem, Actions.CanRead, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -100,7 +100,7 @@ namespace RebacExperiments.Server.Api.Services
             _logger.TraceMethodEntry();
 
             var taskItems = await _aclService
-                .ListUserObjectsAsync<TaskItem>(userId, Relations.Viewer, cancellationToken)
+                .ListUserObjectsAsync<TaskItem>(userId, Actions.CanRead, cancellationToken)
                 .ConfigureAwait(false);
 
             return taskItems;
@@ -112,7 +112,7 @@ namespace RebacExperiments.Server.Api.Services
 
             using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, TaskItem, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, TaskItem, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
@@ -169,7 +169,7 @@ namespace RebacExperiments.Server.Api.Services
                     };
                 }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, taskItemId, Relations.Owner, cancellationToken);
+                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, taskItemId, Actions.CanWrite, cancellationToken);
 
                 if (!isAuthorized)
                 {
