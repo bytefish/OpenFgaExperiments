@@ -19,12 +19,16 @@ $fgaStoreJson = $fgaCreateStoreResponse | ConvertFrom-Json
 
 # ... extract the StoreID
 $fgaStoreId = $fgaStoreJson.store.id
+$fgaAuthorizationModelId = $fgaStoreJson.model.authorization_model_id
 
 # ... write it to the "FGA_STORE_ID" environment variable
-$env:FGA_STORE_ID=$fgaStoreId
+$env:OpenFGA__StoreId=$fgaStoreId
+$env:OpenFGA__AuthorizationModelId=$fgaAuthorizationModelId
 
 # ... and output the StoreID for Copy and Pasting
-Write-Output "Store ID= ${fgaStoreId}"
+Write-Output "OpenFGA StoreId:                  ${fgaStoreId}"
+Write-Output "OpenFGA AuthorizationModelId:     ${fgaAuthorizationModelId}"
 
 # ... and output the raw JSON Reponse for Copy and Pasting
-Write-Output "JSON Response = ${fgaCreateStoreResponse}"
+Write-Output "JSON Response:"
+Write-Output "$($fgaStoreJson | ConvertTo-Json)"

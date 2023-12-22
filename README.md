@@ -1,371 +1,89 @@
-# Experimenting with Relationship-based Access Control and ASP.NET Core OData #
+# Working with OpenFGA in ASP.NET Core #
 
-[written an article about the Google Zanzibar Data Model]: https://www.bytefish.de/blog/relationship_based_acl_with_google_zanzibar.html
+This repository is an experiment for working with OpenFGA in .NET. I basically want to develop an end-to-end example for using OpenFGA in .NET and applying it to ASP.NET Core OData Queries, so we can apply fine grained authorizations down to a datasets entity. 
 
-The Google Drive app starts and a moment later *your files* appear. It's magic. But have you 
-ever wondered what's *your files* actually? How do these services actually know, which files 
-*you are allowed* to see?
+We are building a Task Management application, that allows a `User`, `Team` and `Organization` to manage `TaskItems`. A `User` has a `Role`, such as `Administrator` or `User`, so we can also allow for Role-based Access Control. By using OpenFGA we add a Relationship-based Access Control, which makes it easy to model relations between objects.
 
-Are you part of an *Organization* and you are allowed to *view* all their files? Have you been 
-assigned to a *Team*, that's allowed to *view* or *edit* files? Has someone shared *their files* 
-with *you* as a *User*?
+As of now the application has a `User`, `Role`, `Organization`, `Team` and `TaskItem`. 
 
-So in 2019 Google has lifted the curtain and has published a paper on *Google Zanzibar*, which 
-is Google's central solution for providing authorization among its many services:
-
-* [https://research.google/pubs/pub48190/](https://research.google/pubs/pub48190/)
-
-The keyword here is *Relationship-based Access Control*, which is ...
-
-> [...] an authorization paradigm where a subject's permission to access a resource is defined by the 
-> presence of relationships between those subjects and resources.
-
-I have previously [written an article about the Google Zanzibar Data Model], and also wrote some 
-pretty nice SQL statements to make sense of the it. This repository implements Relationship-based 
-Access Control using ASP.NET Core, EntityFramework Core and Microsoft SQL Server.
-
-## About this Repository ##
-
-This repository is an OData-enabled implementation of the RESTful API implementing ReBAC in ASP.NET Core:
-
-* [https://www.bytefish.de/blog/aspnetcore_rebac.html](https://www.bytefish.de/blog/aspnetcore_rebac.html)
-
-The blog article for this repository can be found at:
-
-* [https://www.bytefish.de/blog/aspnetcore_rebac_odata.html](https://www.bytefish.de/blog/aspnetcore_rebac_odata.html)
-
-## OData API Example using a .http File ##
-
-We got everything in place. We can now start the application and use Swagger to query it. But Visual Studio 2022 
-now comes with the "Endpoints Explorer" to execute HTTP Requests against HTTP endpoints. Though it's not fully-fledged 
-yet, I think it'll improve with time and it already covers a lot of use cases.
-
-You can find the Endpoints Explorer at:
-
-* `View -> Other Windows -> Endpoints Explorer`
-
-By clicking on `RebacExperiments.Server.Api.http` the HTTP script with the sample requests comes up.
-
-### The Example Setup ###
-
-We have got 2 Tasks:
-
-* `task_152`: "Sign Document"
-* `task 323`: "Call Back Philipp Wagner"
-
-And we have got two users: 
-
-* `user_philipp`: "Philipp Wagner"
-* `user_max`: "Max Mustermann"
-
-Both users are permitted to login, so they are allowed to query for data, given a permitted role and permissions.
-
-There are two Organizations:
-
-* Organization 1: "Organization #1"
-* Organization 2: "Organization #2"
-
-And 2 Roles:
-
-* `role_user`: "User" (Allowed to Query for UserTasks)
-* `role_admin`: "Administrator" (Allowed to Delete a UserTask)
-
-The Relationships between the entities are the following:
+The Model in the FGA Syntax is given as: 
 
 ```
-The Relationship-Table is given below.
+model
+  schema 1.1
 
-ObjectKey           |  ObjectNamespace  |   ObjectRelation  |   SubjectKey          |   SubjectNamespace    |   SubjectRelation
---------------------|-------------------|-------------------|-----------------------|-----------------------|-------------------
-:task_323  :        |   UserTask        |       viewer      |   :organization_1:    |       Organization    |   member
-:task_152  :        |   UserTask        |       viewer      |   :organization_1:    |       Organization    |   member
-:task_152  :        |   UserTask        |       viewer      |   :organization_2:    |       Organization    |   member
-:organization_1:    |   Organization    |       member      |   :user_philipp:      |       User            |   NULL
-:organization_2:    |   Organization    |       member      |   :user_max:          |       User            |   NULL
-:role_user:         |   Role            |       member      |   :user_philipp:      |       User            |   NULL
-:role_admin:        |   Role            |       member      |   :user_philipp:      |       User            |   NULL
-:role_user:         |   Role            |       member      |   :user_max:          |       User            |   NULL
-:task_323:          |   UserTask        |       owner       |   :user_2:            |       User            |   member
+type User
+
+type Role
+    relations
+        define member: [User]
+
+type Organization
+    relations
+        define member: [User] or owner
+        define owner: [User]
+
+type Team
+  relations
+    define member: [User]
+
+type TaskItem
+    relations
+        define can_change_owner: owner
+        define can_read: viewer or owner
+        define can_share: owner
+        define can_write: owner
+        define owner: [User, Team#member]
+        define viewer: [User, User:*, Organization#member, Team#member]
 ```
 
-We can draw the following conclusions here: A `member` of `organization_1` is `viewer` of `task_152` and `task_323`. A `member` 
-of `organization_2` is a `viewer` of `task_152` only. `user_philipp` is member of `organization_1`, so the user is able to see 
-both tasks as `viewer`. `user_max` is member of `organization_2`, so he is a `viewer` of `task_152` only. `user_philipp` has the 
-`User` and `Administrator` roles assigned, so he can create, query and delete a `UserTask`. `user_max` only has the `User` role 
-assigned, so he is not authorized to delete a `UserTask`. Finally `user_philipp` is also the `owner` of `task_323` so he is 
-permitted to update the data of the `UserTask`.
+## Getting Started ##
 
-### HTTP Endpoints Explorer Script ###
-
-We start by defining the Host Address:
+Switch into the `/docker` folder and run:
 
 ```
-@RebacExperiments.Server.Api_HostAddress = https://localhost:5000/odata
+./docker compose up
 ```
 
-Then we signin `philipp@bytefish.de` using the `SignInUser` Action:
+This will start OpenFGA and a Postgres instance, which is going to hold the OpenFGA data.
+
+### Creating the OpenFGA Store ###
+
+To get started, we need to create a Store. This is done using the FGA CLI, which has been added to the repository at `tools/fga_0.2.1_windows_amd64.tar.gz`. 
+
+You can create the Store by running the Powershellscript, which will output the Store ID, Authorization Model ID and the full JSON response:
 
 ```
-### Sign In "philipp@bytefish.de"
-
-POST {{RebacExperiments.Server.Api_HostAddress}}/SignInUser
-Content-Type: application/json
-
+PS > .\createFgaStore.ps1
+OpenFGA StoreId:                  01HJ8S5C3R7TKXPSP9N5HTDPTP
+OpenFGA AuthorizationModelId:     01HJ8S5C46YMQRCC7Z1MHHJMFR
+JSON Response:
 {
-  "username": "philipp@bytefish.de",
-  "password": "5!F25GbKwU3P",
-  "rememberMe": true
+  "store": {
+    "created_at": "2023-12-22T12:49:18.968564Z",
+    "id": "01HJ8S5C3R7TKXPSP9N5HTDPTP",
+    "name": "Task Management Application",
+    "updated_at": "2023-12-22T12:49:18.968564Z"
+  },
+  "model": {
+    "authorization_model_id": "01HJ8S5C46YMQRCC7Z1MHHJMFR"
+  }
 }
 ```
 
-And then we get all `UserTask` entities for the current user:
+We can see the StoreID being written to the Environment variable:
 
 ```
-### Get all UserTasks for "philipp@bytefish.de"
-
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
+PS C:\Users\philipp\source\repos\bytefish\OpenFgaExperiments> $env:OpenFGA__StoreId
+01HJ8S5C3R7TKXPSP9N5HTDPTP
+PS C:\Users\philipp\source\repos\bytefish\OpenFgaExperiments> $env:OpenFGA__AuthorizationModelId
+01HJ8S5C46YMQRCC7Z1MHHJMFR
 ```
 
-The response is going to contain two entities:
-
-```json
-{
-  "@odata.context": "https://localhost:5000/odata/$metadata#UserTasks",
-  "value": [
-    {
-      "title": "Call Back",
-      "description": "Call Back Philipp Wagner",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Low",
-      "userTaskStatus": "NotStarted",
-      "id": 152,
-      "rowVersion": "AAAAAAAAB\u002Bw=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    },
-    {
-      "title": "Sign Document",
-      "description": "You need to Sign a Document",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Normal",
-      "userTaskStatus": "InProgress",
-      "id": 323,
-      "rowVersion": "AAAAAAAAB\u002B0=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    }
-  ]
-}
-```
-
-We can then introduce some OData Goodies and say we want only `1` entity, the results should be 
-ordered by the `id` property and the response should contain the total number of entities the user 
-is authorized to acces.
+If you want to create the Store without Powershell run:
 
 ```
-### Get the first task and return the total count of Entities visible to "philipp@bytefish.de"
-
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks?$top=1&$orderby=id&$count=true
+./fga store create --name "Task Management Application" --model "src\Server\RebacExperiments.Server.Api\Resources\task-management-model.fga"
 ```
 
-The result is going to contain the `@odata.count` property and have `1` task only.
-
-```
-{
-  "@odata.context": "https://localhost:5000/odata/$metadata#UserTasks",
-  "@odata.count": 2,
-  "value": [
-    {
-      "title": "Call Back",
-      "description": "Call Back Philipp Wagner",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Low",
-      "userTaskStatus": "NotStarted",
-      "id": 152,
-      "rowVersion": "AAAAAAAAB\u002Bw=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    }
-  ]
-}
-```
-
-We can then sign in as `max@mustermann.local`.
-
-```
-### Sign In as "max@mustermann.local"
-
-POST {{RebacExperiments.Server.Api_HostAddress}}/SignInUser
-Content-Type: application/json
-
-{
-  "username": "max@mustermann.local",
-  "password": "5!F25GbKwU3P",
-  "rememberMe": true
-}
-```
-
-If you try to get all `UserTask` entities of `max@mustermann.local`:
-
-```
-### Get all UserTasks for "max@mustermann.local"
-
-GET {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
-```
-
-There will be `1` task only.
-
-```json
-{
-  "@odata.context": "https://localhost:5000/odata/$metadata#UserTasks",
-  "value": [
-    {
-      "title": "Call Back",
-      "description": "Call Back Philipp Wagner",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Low",
-      "userTaskStatus": "NotStarted",
-      "id": 152,
-      "rowVersion": "AAAAAAAAB\u002Bw=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    }
-  ]
-}
-```
-
-Now we'll create a new `UserTask` "API HTTP File Example":
-
-```
-### Create a new UserTask "API HTTP File Example" as "max@mustermann.local"
-
-POST {{RebacExperiments.Server.Api_HostAddress}}/UserTasks
-Content-Type: application/json
-
-{
-    "title": "API HTTP File Example",
-    "description": "API HTTP File Example",
-    "dueDateTime": null,
-    "reminderDateTime": null,
-    "completedDateTime": null,
-    "assignedTo": null,
-    "userTaskPriority": "Normal",
-    "userTaskStatus": "NotStarted"
-}
-```
-
-And we can see, that `max@mustermann.local` now sees both `UserTask` entities:
-
-```json
-{
-  "@odata.context": "https://localhost:5000/odata/$metadata#UserTasks",
-  "value": [
-    {
-      "title": "Call Back",
-      "description": "Call Back Philipp Wagner",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Low",
-      "userTaskStatus": "NotStarted",
-      "id": 152,
-      "rowVersion": "AAAAAAAAB\u002Bw=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    },
-    {
-      "title": "API HTTP File Example",
-      "description": "API HTTP File Example",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Normal",
-      "userTaskStatus": "NotStarted",
-      "id": 38191,
-      "rowVersion": "AAAAAAAACAY=",
-      "lastEditedBy": 7,
-      "validFrom": "2023-10-25T19:58:44.8007138\u002B02:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    }
-  ]
-}
-```
-
-If we sign in as `philipp@bytefish.de` again:
-
-```
-### Sign In "philipp@bytefish.de"
-
-POST {{RebacExperiments.Server.Api_HostAddress}}/SignInUser
-Content-Type: application/json
-
-{
-  "username": "philipp@bytefish.de",
-  "password": "5!F25GbKwU3P",
-  "rememberMe": true
-}
-```
-
-We can see with a call to `/UserTasks`, that he doesn't see the new `UserTask` at all.
-
-```json
-{
-  "@odata.context": "https://localhost:5000/odata/$metadata#UserTasks",
-  "value": [
-    {
-      "title": "Call Back",
-      "description": "Call Back Philipp Wagner",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Low",
-      "userTaskStatus": "NotStarted",
-      "id": 152,
-      "rowVersion": "AAAAAAAAB\u002Bw=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    },
-    {
-      "title": "Sign Document",
-      "description": "You need to Sign a Document",
-      "dueDateTime": null,
-      "reminderDateTime": null,
-      "completedDateTime": null,
-      "assignedTo": null,
-      "userTaskPriority": "Normal",
-      "userTaskStatus": "InProgress",
-      "id": 323,
-      "rowVersion": "AAAAAAAAB\u002B0=",
-      "lastEditedBy": 1,
-      "validFrom": "2013-01-01T00:00:00\u002B01:00",
-      "validTo": "9999-12-31T23:59:59.9999999\u002B01:00"
-    }
-  ]
-}
-```
-
-
-## Further Reading ##
-
-* [Exploring Relationship-based Access Control (ReBAC) with Google Zanzibar](https://www.bytefish.de/blog/relationship_based_acl_with_google_zanzibar.html)
+Set the `OpenFGA:StoreId` and `OpenFga:AuthorizationModelId` in the `appsettings.json`, or set the Environment Variables `OpenFGA__StoreId` and `OpenFGA__AuthorizationModelId`.

@@ -11,18 +11,12 @@ namespace RebacExperiments.Server.OpenFga
     public class OpenFgaDbContext : DbContext
     {
         /// <summary>
-        /// Logger.
-        /// </summary>
-        internal ILogger<OpenFgaDbContext> Logger { get; }
-
-        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="options">Options to configure the base <see cref="DbContext"/></param>
-        public OpenFgaDbContext(ILogger<OpenFgaDbContext> logger, DbContextOptions<OpenFgaDbContext> options)
+        public OpenFgaDbContext(DbContextOptions<OpenFgaDbContext> options)
             : base(options)
         {
-            Logger = logger;
         }
 
         /// <summary>

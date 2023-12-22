@@ -47,6 +47,10 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    builder.Configuration
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddEnvironmentVariables();
+
     // Add services to the container
     builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
     builder.Services.AddSingleton<IUserService, UserService>();
