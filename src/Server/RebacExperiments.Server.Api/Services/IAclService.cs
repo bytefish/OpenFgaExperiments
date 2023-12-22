@@ -141,6 +141,6 @@ namespace RebacExperiments.Server.Api.Services
         Task<List<RelationTuple>> ReadAllRelationshipsBySubjectAsync<TSubjectType>(int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
             where TSubjectType : Entity;
 
-
+        Task<List<RelationTuple>> ReadAllRelationships(string? @object, string? relation, string? subject, CancellationToken cancellationToken = default);
     }
 }

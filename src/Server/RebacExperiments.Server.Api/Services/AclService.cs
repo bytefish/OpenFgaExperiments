@@ -272,6 +272,61 @@ namespace RebacExperiments.Server.Api.Services
             return readResult;
         }
 
+        public async Task<List<RelationTuple>> ReadAllRelationships(string? @object, string? relation, string? subject, CancellationToken cancellationToken = default)
+        {
+            _logger.TraceMethodEntry();
+
+            var body = new ClientReadRequest
+            {
+                Object = @object,
+                Relation = relation,
+                User = subject,
+            };
+
+            var readResult = new List<RelationTuple>();
+
+            string? continuationToken = null;
+
+            do
+            {
+                var options = new ClientReadOptions
+                {
+                    PageSize = 100,
+                    ContinuationToken = continuationToken
+                };
+
+                var response = await _openFgaClient
+                    .Read(body, options, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (response == null)
+                {
+                    throw new InvalidOperationException("No Response received");
+                }
+
+                if (response.Tuples != null)
+                {
+                    foreach (var tuple in response.Tuples)
+                    {
+                        var relationTuple = new RelationTuple
+                        {
+                            Object = tuple.Key?.Object ?? string.Empty,
+                            Relation = tuple.Key?.Relation ?? string.Empty,
+                            Subject = tuple.Key?.User ?? string.Empty,
+                        };
+
+                        readResult.Add(relationTuple);
+                    }
+                }
+
+                // Set the new Continuation Token to get more data ...
+                continuationToken = response.ContinuationToken;
+
+            } while (!string.IsNullOrWhiteSpace(continuationToken));
+
+            return readResult;
+        }
+
         public async Task<List<RelationTuple>> ReadAllRelationships<TObjectType, TSubjectType>(int? objectId, string? relation, int? subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
             where TObjectType : Entity
             where TSubjectType : Entity
@@ -378,14 +433,19 @@ namespace RebacExperiments.Server.Api.Services
         private static string ToZanzibarNotation<TEntity>(int? id, string? relation = null)
             where TEntity : Entity
         {
-            var strId = id == null ? "*" : id.ToString();
+            return ToZanzibarNotation(typeof(TEntity).Name, id, relation);
+        }
+
+        private static string ToZanzibarNotation(string type, int? id, string? relation = null)
+        {
+            var strId = id == null ? "" : id.ToString();
 
             if (string.IsNullOrWhiteSpace(relation))
             {
-                return $"{typeof(TEntity).Name}:{strId}";
+                return $"{type}:{strId}";
             }
 
-            return $"{typeof(TEntity).Name}:{strId}#{relation}";
+            return $"{type}:{strId}#{relation}";
         }
 
         private static (string Type, int Id, string? relation) FromZanzibarNotation(string s)

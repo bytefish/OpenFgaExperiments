@@ -30,6 +30,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             // Authorization
             RegisterCreateRelationTupleAction(modelBuilder);
             RegisterDeleteRelationTupleAction(modelBuilder);
+            RegisterGetRelationTuplesAction(modelBuilder);
 
             // Send as Lower Camel Case Properties, so the JSON looks better:
             modelBuilder.EnableLowerCamelCase();
@@ -70,7 +71,17 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             signInUserAction.HasDescription().HasDescription("DeleteRelationTuple");
 
-            signInUserAction.Parameter<RelationTuple>("value").Required();
+            signInUserAction.Parameter<RelationTuple>("tuple").Required();
+        }
+
+
+        private static void RegisterGetRelationTuplesAction(ODataConventionModelBuilder modelBuilder)
+        {
+            var signInUserAction = modelBuilder.Action("GetRelationTuples");
+
+            signInUserAction.HasDescription().HasDescription("GetRelationTuples");
+
+            signInUserAction.Parameter<RelationTuple>("tuple").Required();
         }
     }
 }

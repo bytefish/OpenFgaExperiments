@@ -11,6 +11,33 @@ Content-Type: application/json
   "rememberMe": true
 }
 
+### Create a new Relation 
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/CreateRelationTuple
+Content-Type: application/json
+
+{
+  "tuple": {
+      "object": "TaskItem:152",
+      "relation": "viewer",
+      "subject": "User:2"
+  }
+}
+
+
+### Get RelationTuples
+
+POST {{RebacExperiments.Server.Api_HostAddress}}/GetRelationTuples
+Content-Type: application/json
+
+{
+  "tuple": {
+      "object": "TaskItem:",    
+      "subject": "User:2"
+  }
+}
+
+
 ### Get all TaskItems for "philipp@bytefish.de"
 
 GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
@@ -18,7 +45,6 @@ GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 ### Get the first task and return the total count of Entities visible to "philipp@bytefish.de"
 
 GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems?$top=1&$orderby=id&$count=true
-
 
 ### Sign Out "philipp@bytefish.de"
 
