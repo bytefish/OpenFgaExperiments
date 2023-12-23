@@ -91,6 +91,24 @@ namespace RebacExperiments.Server.Api.Services
             where TSubjectType : Entity;
 
         /// <summary>
+        /// Gets all Relationships (until I find a better way of filtering with OData).
+        /// </summary>
+        /// <param name="filter">Filter to apply</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>All matching stored relationships</returns>
+        Task<List<StoredRelationTuple>> GetAllRelationshipsAsync(Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken);
+
+
+        /// <summary>
+        /// Gets all Relationships for a given Store.
+        /// </summary>
+        /// <param name="storeId">Store</param>
+        /// <param name="filter">Filter to apply</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>All matching stored relationships</returns>
+        Task<List<StoredRelationTuple>> GetAllRelationshipsByStoreAsync(string storeId, Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Creates a List of Relations.
         /// </summary>
         /// <param name="tuples">Tuples to write to the Store</param>

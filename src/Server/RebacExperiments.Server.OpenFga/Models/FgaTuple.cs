@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RebacExperiments.Server.OpenFga.Models
+﻿namespace RebacExperiments.Server.OpenFga.Models
 {
     public class FgaTuple
     {
@@ -57,7 +51,5 @@ namespace RebacExperiments.Server.OpenFga.Models
         /// Gets or sets the ConditionContext.
         /// </summary>
         public byte[]? ConditionContext { get; set; }
-
-        //CONSTRAINT changelog_pkey PRIMARY KEY (store, ulid, object_type)
     }
 }

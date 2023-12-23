@@ -15,22 +15,27 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             modelBuilder.Namespace = "TaskManagementService";
 
-            modelBuilder.ComplexType<RelationTuple>();
-
+            modelBuilder.EntitySet<User>("Users");
             modelBuilder.EntitySet<Team>("Teams");
             modelBuilder.EntitySet<Organization>("Organizations");
             modelBuilder.EntitySet<TaskItem>("TaskItems");
             modelBuilder.EnumType<TaskItemStatusEnum>().RemoveMember(TaskItemStatusEnum.None);
             modelBuilder.EnumType<TaskItemPriorityEnum>().RemoveMember(TaskItemPriorityEnum.None);
 
+            // Raw Access to the OpenFGA Tuples
+            modelBuilder.EntitySet<StoredRelationTuple>("RelationTuples");
+
+            modelBuilder
+                .Function("GetCurrentStoreId")
+                .Returns<string>();
+
+            modelBuilder.EntityType<StoredRelationTuple>().Collection
+                .Function("GetCurrentRelationTuples")
+                .ReturnsFromEntitySet<StoredRelationTuple>("RelationTuples");
+
             // Authentication
             RegisterSignInUserAction(modelBuilder);
             RegisterSignOutUserAction(modelBuilder);
-
-            // Authorization
-            RegisterCreateRelationTupleAction(modelBuilder);
-            RegisterDeleteRelationTupleAction(modelBuilder);
-            RegisterGetRelationTuplesAction(modelBuilder);
 
             // Send as Lower Camel Case Properties, so the JSON looks better:
             modelBuilder.EnableLowerCamelCase();
@@ -56,31 +61,11 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             signOutUserAction.HasDescription().HasDescription("SignOutUser");
         }
 
-        private static void RegisterCreateRelationTupleAction(ODataConventionModelBuilder modelBuilder)
+        private static void RegisterGetCurrentStoreIdFunction(ODataConventionModelBuilder modelBuilder)
         {
-            var signInUserAction = modelBuilder.Action("CreateRelationTuple");
+            
 
-            signInUserAction.HasDescription().HasDescription("CreateRelationTuple");
-
-            signInUserAction.Parameter<RelationTuple>("tuple").Required();
-        }
-
-        private static void RegisterDeleteRelationTupleAction(ODataConventionModelBuilder modelBuilder)
-        {
-            var signInUserAction = modelBuilder.Action("DeleteRelationTuple");
-
-            signInUserAction.HasDescription().HasDescription("DeleteRelationTuple");
-
-            signInUserAction.Parameter<RelationTuple>("tuple").Required();
-        }
-
-        private static void RegisterGetRelationTuplesAction(ODataConventionModelBuilder modelBuilder)
-        {
-            var signInUserAction = modelBuilder.Action("GetRelationTuples");
-
-            signInUserAction.HasDescription().HasDescription("GetRelationTuples");
-
-            signInUserAction.Parameter<RelationTuple>("tuple").Required();
+            
         }
     }
 }

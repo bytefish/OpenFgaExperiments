@@ -11,16 +11,21 @@ Content-Type: application/json
   "rememberMe": true
 }
 
+### Read all Relationships
+
+GET {{RebacExperiments.Server.Api_HostAddress}}/RelationTuples?$filter=contains(subject,'1')
+
 ### Create a new Relation 
 
-POST {{RebacExperiments.Server.Api_HostAddress}}/CreateRelationTuple
+POST {{RebacExperiments.Server.Api_HostAddress}}/RelationTuples
 Content-Type: application/json
 
 {
-  "tuple": {
-      "object": "TaskItem",
-      "subject": "User:2"
-  }
+    "id": "131312",
+    "store": "34242342",
+    "object": "TaskItem",
+    "relation": "",
+    "subject": "User:2",
 }
 
 
@@ -54,10 +59,6 @@ GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems?$top=1&$orderby=id&$co
 ### Sign Out "philipp@bytefish.de"
 
 POST {{RebacExperiments.Server.Api_HostAddress}}/SignOutUser
-
-### Check for 401 Unauthorized when not Authenticated
-
-GET {{RebacExperiments.Server.Api_HostAddress}}/TaskItems
 
 ### Sign In as "max@mustermann.local"
 

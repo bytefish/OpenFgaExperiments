@@ -353,6 +353,54 @@ namespace RebacExperiments.Server.Api.Services
             };
         }
 
+        public async Task<List<StoredRelationTuple>> GetAllRelationshipsAsync(Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            {
+                // Wow, super ugly way to "abstract" stored tuples...
+                var queryable = context.Database.SqlQuery<StoredRelationTuple>(
+                        @$"SELECT ulid                                  AS ""Id""
+                            , store                                     AS ""Store""
+                            , (object_type || ':' || object_id)         AS ""Object""
+                            , relation                                  AS ""Relation"" 
+                            , _user                                     AS ""Subject""
+                            , inserted_at                               AS ""InsertedAt""
+                           FROM public.tuple");
+
+                var result = await filter(queryable)
+                    .ToListAsync(cancellationToken);
+
+                return result;
+            }
+        }
+
+
+        public async Task<List<StoredRelationTuple>> GetAllRelationshipsByStoreAsync(string storeId, Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            {
+                // Wow, super ugly way to "abstract" stored tuples...
+                var queryable = context.Database.SqlQuery<StoredRelationTuple>(
+                        @$"SELECT ulid                                  AS ""Id""
+                            , store                                     AS ""Store""
+                            , (object_type || ':' || object_id)         AS ""Object""
+                            , relation                                  AS ""Relation"" 
+                            , _user                                     AS ""Subject""
+                            , inserted_at                               AS ""InsertedAt""
+                           FROM public.tuple")
+                    .Where(x => x.Store == storeId);
+
+                var result = await filter(queryable)
+                    .ToListAsync(cancellationToken);
+
+                return result;
+            }
+        }
+
         public async Task AddRelationshipsAsync(ICollection<RelationTuple> relationTuples, CancellationToken cancellationToken)
         {
             var clientTupleKeys = relationTuples

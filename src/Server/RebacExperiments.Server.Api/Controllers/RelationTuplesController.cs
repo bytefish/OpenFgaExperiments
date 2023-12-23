@@ -7,22 +7,25 @@ using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Api.Infrastructure.Authorization;
+using Microsoft.AspNetCore.OData.Query;
+using System.Threading;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
-    public class AclController : ODataController
+    public class RelationTuplesController : ODataController
     {
-        private readonly ILogger<AclController> _logger;
+        private readonly ILogger<RelationTuplesController> _logger;
         private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public AclController(ILogger<AclController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public RelationTuplesController(ILogger<RelationTuplesController> logger, ApplicationErrorHandler applicationErrorHandler)
         {
             _logger = logger;
             _applicationErrorHandler = applicationErrorHandler;
         }
 
-        [HttpPost("odata/CreateRelationTuple")]
-        public async Task<IActionResult> CreateRelationTuple([FromServices] IAclService aclService, ODataActionParameters parameters, CancellationToken cancellationToken)
+        [HttpGet]
+        public async Task<IActionResult> GetRelationTuples([FromServices] IAclService aclService, ODataQueryOptions<StoredRelationTuple> query, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -33,10 +36,39 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var tuple = (RelationTuple) parameters["tuple"];
+                var result = await aclService
+                    .GetAllRelationshipsAsync(tuples => (IQueryable<StoredRelationTuple>) query.ApplyTo(tuples), cancellationToken)
+                    .ConfigureAwait(false);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return _applicationErrorHandler.HandleException(HttpContext, ex);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostRelationTuple([FromServices] IAclService aclService, [FromBody] StoredRelationTuple relationTuple, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            if (!ModelState.IsValid)
+            {
+                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+            }
+
+            try
+            {
+                var tupleToInsert = new RelationTuple
+                {
+                    Object = relationTuple.Object,
+                    Relation = relationTuple.Relation,
+                    Subject = relationTuple.Subject
+                };
 
                 await aclService
-                    .AddRelationshipsAsync(new[] { tuple }, cancellationToken)
+                    .AddRelationshipsAsync(new[] { tupleToInsert }, cancellationToken)
                     .ConfigureAwait(false);
 
                 return Ok();
@@ -47,8 +79,8 @@ namespace RebacExperiments.Server.Api.Controllers
             }
         }
 
-        [HttpPost("odata/GetRelationTuples")]
-        public async Task<IActionResult> GetRelationTuples([FromServices] IAclService aclService, ODataActionParameters parameters, CancellationToken cancellationToken)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteRelationTuple([FromServices] IAclService aclService, [FromODataUri(Name = "key")] string key, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -59,10 +91,72 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var tuple = (RelationTuple)parameters["tuple"];
+                var tuplesToDelete = await aclService
+                    .GetAllRelationshipsAsync(q => q.Where(x => x.Id == key), cancellationToken)
+                    .ConfigureAwait(false);
 
+                if(tuplesToDelete.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var tupleToDelete = new RelationTuple
+                {
+                    Object = tuplesToDelete[0].Object,
+                    Relation = tuplesToDelete[0].Relation,
+                    Subject = tuplesToDelete[0].Subject
+                };
+
+                await aclService
+                    .DeleteRelationshipsAsync(new[] { tupleToDelete }, cancellationToken)
+                    .ConfigureAwait(false);
+
+                return StatusCode(StatusCodes.Status204NoContent);
+            }
+            catch (Exception ex)
+            {
+                return _applicationErrorHandler.HandleException(HttpContext, ex);
+            }
+        }
+
+        [HttpGet("/odata/GetCurrentStoreId()")]
+        public IActionResult GetCurrentStoreId([FromServices] IConfiguration configuration)
+        {
+            _logger.TraceMethodEntry();
+
+            if (!ModelState.IsValid)
+            {
+                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+            }
+
+            try
+            {
+                var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId");
+
+                return Ok(currentStoreId);
+            }
+            catch (Exception ex)
+            {
+                return _applicationErrorHandler.HandleException(HttpContext, ex);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentRelationTuples([FromServices] IConfiguration configuration, [FromServices] IAclService aclService, ODataQueryOptions<StoredRelationTuple> query, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            if (!ModelState.IsValid)
+            {
+                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+            }
+
+            try
+            {
+                var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId")!;
+                
                 var tuples = await aclService
-                    .ReadAllRelationships(tuple.Object, tuple.Relation, tuple.Subject, cancellationToken)
+                    .GetAllRelationshipsByStoreAsync(currentStoreId, tuples => (IQueryable<StoredRelationTuple>)query.ApplyTo(tuples), cancellationToken)
                     .ConfigureAwait(false);
 
                 return Ok(tuples);
@@ -71,32 +165,8 @@ namespace RebacExperiments.Server.Api.Controllers
             {
                 return _applicationErrorHandler.HandleException(HttpContext, ex);
             }
-        }
 
-        [HttpPost("odata/DeleteRelationTuple")]
-        public async Task<IActionResult> DeleteRelationTuple([FromServices] IAclService aclService, ODataActionParameters parameters, CancellationToken cancellationToken)
-        {
-            _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
-            {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
-            }
-
-            try
-            {
-                var tuple = (RelationTuple)parameters["tuple"];
-
-                await aclService
-                    .DeleteRelationshipsAsync(new[] { tuple }, cancellationToken)
-                    .ConfigureAwait(false);
-
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
         }
     }
 }
