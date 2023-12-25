@@ -10,6 +10,8 @@ using RebacExperiments.Server.Api.Infrastructure.Authorization;
 using Microsoft.AspNetCore.OData.Query;
 using System.Threading;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
@@ -25,7 +27,7 @@ namespace RebacExperiments.Server.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRelationTuples([FromServices] IAclService aclService, ODataQueryOptions<StoredRelationTuple> query, CancellationToken cancellationToken)
+        public IActionResult GetRelationTuples([FromServices] IAclService aclService, ODataQueryOptions<StoredRelationTuple> options, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -36,11 +38,9 @@ namespace RebacExperiments.Server.Api.Controllers
 
             try
             {
-                var result = await aclService
-                    .GetAllRelationshipsAsync(tuples => (IQueryable<StoredRelationTuple>) query.ApplyTo(tuples), cancellationToken)
-                    .ConfigureAwait(false);
+                var queryable = aclService.GetAllRelationshipsQueryable();
 
-                return Ok(result);
+                return Ok(options.ApplyTo(queryable));
             }
             catch (Exception ex)
             {
@@ -92,7 +92,9 @@ namespace RebacExperiments.Server.Api.Controllers
             try
             {
                 var tuplesToDelete = await aclService
-                    .GetAllRelationshipsAsync(q => q.Where(x => x.Id == key), cancellationToken)
+                    .GetAllRelationshipsQueryable()
+                    .Where(x => x.Id == key)
+                    .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
                 if(tuplesToDelete.Count == 0)
@@ -142,7 +144,7 @@ namespace RebacExperiments.Server.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCurrentRelationTuples([FromServices] IConfiguration configuration, [FromServices] IAclService aclService, ODataQueryOptions<StoredRelationTuple> query, CancellationToken cancellationToken)
+        public IActionResult GetCurrentRelationTuples([FromServices] IConfiguration configuration, [FromServices] IAclService aclService, ODataQueryOptions<StoredRelationTuple> options, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -155,11 +157,11 @@ namespace RebacExperiments.Server.Api.Controllers
             {
                 var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId")!;
                 
-                var tuples = await aclService
-                    .GetAllRelationshipsByStoreAsync(currentStoreId, tuples => (IQueryable<StoredRelationTuple>)query.ApplyTo(tuples), cancellationToken)
-                    .ConfigureAwait(false);
+                var queryable = aclService
+                    .GetAllRelationshipsByStoreQueryable(currentStoreId);
 
-                return Ok(tuples);
+                return Ok(options.ApplyTo(queryable));
+
             }
             catch (Exception ex)
             {

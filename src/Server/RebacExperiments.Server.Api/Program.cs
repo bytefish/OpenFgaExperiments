@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData;
 using OpenFga.Sdk.Client;
@@ -53,12 +54,12 @@ try
 
     // Add services to the container
     builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
-    builder.Services.AddSingleton<IUserService, UserService>();
 
-    builder.Services.AddSingleton<ITaskItemService, TaskItemService>();
-    builder.Services.AddSingleton<ITeamService, TeamService>();
-    builder.Services.AddSingleton<IOrganizationService, OrganizationService>();
-    builder.Services.AddSingleton<IAclService, AclService>();
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<ITaskItemService, TaskItemService>();
+    builder.Services.AddScoped<ITeamService, TeamService>();
+    builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+    builder.Services.AddScoped<IAclService, AclService>();
 
     // Logging
     builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));

@@ -17,18 +17,21 @@ namespace RebacExperiments.Server.Api.Services
     {
         private readonly ILogger<UserService> _logger;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly ApplicationDbContext _applicationDbContext;
 
-        public UserService(ILogger<UserService> logger, IPasswordHasher passwordHasher)
+        public UserService(ILogger<UserService> logger, ApplicationDbContext applicationDbContext, IPasswordHasher passwordHasher)
         {
             _logger = logger;
+            _applicationDbContext = applicationDbContext;
             _passwordHasher = passwordHasher;
+
         }
 
-        public async Task<List<Claim>> GetClaimsAsync(ApplicationDbContext context, string username, string password, CancellationToken cancellationToken)
+        public async Task<List<Claim>> GetClaimsAsync(string username, string password, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            var user = await context.Users
+            var user = await _applicationDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.LogonName == username, cancellationToken);
 
@@ -50,8 +53,8 @@ namespace RebacExperiments.Server.Api.Services
                 throw new AuthenticationFailedException();
             }
 
-            var query = from userRole in context.UserRoles
-                            join role in context.Roles on userRole.RoleId equals role.Id
+            var query = from userRole in _applicationDbContext.UserRoles
+                            join role in _applicationDbContext.Roles on userRole.RoleId equals role.Id
                         where userRole.UserId.Equals(user.Id)
                         select role;
 

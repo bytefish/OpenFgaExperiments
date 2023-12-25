@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.EntityFrameworkCore;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
@@ -11,13 +13,13 @@ namespace RebacExperiments.Server.Api.Services
     {
         private readonly ILogger<OrganizationService> _logger;
 
-        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+        private readonly ApplicationDbContext _applicationDbContext;
         private readonly IAclService _aclService;
 
-        public OrganizationService(ILogger<OrganizationService> logger, IDbContextFactory<ApplicationDbContext> dbContextFactory, IAclService aclService)
+        public OrganizationService(ILogger<OrganizationService> logger, ApplicationDbContext applicationDbContext, IAclService aclService)
         {
             _logger = logger;
-            _dbContextFactory = dbContextFactory;
+            _applicationDbContext = applicationDbContext;
             _aclService = aclService;
         }
 
@@ -25,270 +27,247 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            // Make sure the Current User is the last editor:
+            organization.LastEditedBy = currentUserId;
+
+            // Add the new Task, the HiLo Pattern automatically assigns a new Id using the HiLo Pattern
+            await _applicationDbContext
+                .AddAsync(organization, cancellationToken)
+                .ConfigureAwait(false);
+
+            // The User creating the Organization should automatically be the Owner:
+            var organizationRole = new OrganizationRole
             {
-                // Make sure the Current User is the last editor:
-                organization.LastEditedBy = currentUserId;
+                UserId = currentUserId,
+                OrganizationId = organization.Id,
+                Role = Relations.Owner,
+                LastEditedBy = currentUserId
+            };
 
-                // Add the new Task, the HiLo Pattern automatically assigns a new Id using the HiLo Pattern
-                await context
-                    .AddAsync(organization, cancellationToken)
-                    .ConfigureAwait(false);
+            await _applicationDbContext
+                .AddAsync(organizationRole, cancellationToken)
+                .ConfigureAwait(false);
 
-                // The User creating the Organization should automatically be the Owner:
-                var organizationRole = new OrganizationRole
-                {
-                    UserId = currentUserId,
-                    OrganizationId = organization.Id,
-                    Role = Relations.Owner,
-                    LastEditedBy = currentUserId
-                };
+            await _applicationDbContext
+                .SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-                await context
-                    .AddAsync(organizationRole, cancellationToken)
-                    .ConfigureAwait(false);
+            // Add to ACL Store
+            await _aclService
+                .AddRelationshipAsync<Organization, User>(organization.Id, Relations.Owner, currentUserId, null)
+                .ConfigureAwait(false);
 
-                await context
-                    .SaveChangesAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                // Add to ACL Store
-                await _aclService
-                    .AddRelationshipAsync<Organization, User>(organization.Id, Relations.Owner, currentUserId, null)
-                    .ConfigureAwait(false);
-
-                return organization;
-            }
+            return organization;
         }
 
         public async Task<Organization> GetOrganizationByIdAsync(int organizationId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            var organization = await _applicationDbContext.Organizations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
+
+            if (organization == null)
             {
-                var organization = await context.Organizations
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
-
-                if (organization == null)
+                throw new EntityNotFoundException()
                 {
-                    throw new EntityNotFoundException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organizationId,
-                    };
-                }
-
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Actions.CanRead, cancellationToken);
-
-                if (!isAuthorized)
-                {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organizationId,
-                        UserId = currentUserId,
-                    };
-                }
-
-                return organization;
+                    EntityName = nameof(Organization),
+                    EntityId = organizationId,
+                };
             }
+
+            bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Actions.CanRead, cancellationToken);
+
+            if (!isAuthorized)
+            {
+                throw new EntityUnauthorizedAccessException()
+                {
+                    EntityName = nameof(Organization),
+                    EntityId = organizationId,
+                    UserId = currentUserId,
+                };
+            }
+
+            return organization;
         }
 
         public async Task<List<Organization>> GetOrganizationsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var organizations = await _aclService
-                    .ListUserObjectsAsync<Organization>(userId, Actions.CanRead, cancellationToken)
-                    .ConfigureAwait(false);
+            var organizations = await _aclService
+                .ListUserObjectsAsync<Organization>(userId, Actions.CanRead, cancellationToken)
+                .ConfigureAwait(false);
 
-                return organizations;
-            }
+            return organizations;
         }
 
         public async Task<Organization> UpdateOrganizationAsync(Organization organization, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Actions.CanWrite, cancellationToken);
+
+            if (!isAuthorized)
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, organization, Actions.CanWrite, cancellationToken);
-
-                if (!isAuthorized)
+                throw new EntityUnauthorizedAccessException()
                 {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organization.Id,
-                        UserId = currentUserId,
-                    };
-                }
-
-                int rowsAffected = await context.Organizations
-                    .Where(t => t.Id == organization.Id && t.RowVersion == organization.RowVersion)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(x => x.Name, organization.Name)
-                        .SetProperty(x => x.Description, organization.Description)
-                        .SetProperty(x => x.LastEditedBy, currentUserId), cancellationToken);
-
-                if (rowsAffected == 0)
-                {
-                    throw new EntityConcurrencyException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organization.Id,
-                    };
-                }
-
-                return organization;
+                    EntityName = nameof(Organization),
+                    EntityId = organization.Id,
+                    UserId = currentUserId,
+                };
             }
+
+            int rowsAffected = await _applicationDbContext.Organizations
+                .Where(t => t.Id == organization.Id && t.RowVersion == organization.RowVersion)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.Name, organization.Name)
+                    .SetProperty(x => x.Description, organization.Description)
+                    .SetProperty(x => x.LastEditedBy, currentUserId), cancellationToken);
+
+            if (rowsAffected == 0)
+            {
+                throw new EntityConcurrencyException()
+                {
+                    EntityName = nameof(Organization),
+                    EntityId = organization.Id,
+                };
+            }
+
+            return organization;
         }
 
         public async Task DeleteOrganizationAsync(int organizationId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var organization = await context.Organizations
+            var organization = await _applicationDbContext.Organizations
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-                if (organization == null)
+            if (organization == null)
+            {
+                throw new EntityNotFoundException()
                 {
-                    throw new EntityNotFoundException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organizationId,
-                    };
-                }
+                    EntityName = nameof(Organization),
+                    EntityId = organizationId,
+                };
+            }
 
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
+            bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
 
-                if (!isAuthorized)
+            if (!isAuthorized)
+            {
+                throw new EntityUnauthorizedAccessException()
                 {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organizationId,
-                        UserId = currentUserId,
-                    };
-                }
+                    EntityName = nameof(Organization),
+                    EntityId = organizationId,
+                    UserId = currentUserId,
+                };
+            }
 
-                using (var transaction = await context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    await context.OrganizationRoles
-                        .Where(t => t.Id == organization.Id)
-                        .ExecuteDeleteAsync(cancellationToken)
-                        .ConfigureAwait(false);
-
-                    await context.Organizations
-                        .Where(t => t.Id == organization.Id)
-                        .ExecuteDeleteAsync(cancellationToken)
-                        .ConfigureAwait(false);
-
-                    await transaction
-                        .CommitAsync(cancellationToken)
-                        .ConfigureAwait(false);
-                }
-
-                // Delete all Relations towards the Organization
-                var tuplesToDelete = await _aclService
-                    .ReadAllRelationshipsByObjectAsync<Organization>(organizationId)
+            using (var transaction = await _applicationDbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await _applicationDbContext.OrganizationRoles
+                    .Where(t => t.Id == organization.Id)
+                    .ExecuteDeleteAsync(cancellationToken)
                     .ConfigureAwait(false);
 
-                await _aclService.DeleteRelationshipsAsync(tuplesToDelete, cancellationToken);
+                await _applicationDbContext.Organizations
+                    .Where(t => t.Id == organization.Id)
+                    .ExecuteDeleteAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                await transaction
+                    .CommitAsync(cancellationToken)
+                    .ConfigureAwait(false);
             }
+
+            // Delete all Relations towards the Organization
+            var tuplesToDelete = await _aclService
+                .ReadAllRelationshipsByObjectAsync<Organization>(organizationId)
+                .ConfigureAwait(false);
+
+            await _aclService.DeleteRelationshipsAsync(tuplesToDelete, cancellationToken);
         }
 
         public async Task<OrganizationRole> AddUserToOrganizationAsync(int organizationId, int userId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
+
+            if (!isAuthorized)
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
-
-                if (!isAuthorized)
+                throw new EntityUnauthorizedAccessException()
                 {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organizationId,
-                        UserId = currentUserId,
-                    };
-                }
-
-                var organizationRole = new OrganizationRole
-                {
-                    OrganizationId = organizationId,
-                    UserId = userId,
-                    Role = Relations.Member,
-                    LastEditedBy = currentUserId,
+                    EntityName = nameof(Organization),
+                    EntityId = organizationId,
+                    UserId = currentUserId,
                 };
-
-                await context
-                    .AddAsync(organizationRole)
-                    .ConfigureAwait(false);
-
-                await context
-                    .SaveChangesAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                await _aclService
-                    .AddRelationshipAsync<Organization, User>(organizationId, Relations.Member, userId, null)
-                    .ConfigureAwait(false);
-
-                return organizationRole;
             }
+
+            var organizationRole = new OrganizationRole
+            {
+                OrganizationId = organizationId,
+                UserId = userId,
+                Role = Relations.Member,
+                LastEditedBy = currentUserId,
+            };
+
+            await _applicationDbContext
+                .AddAsync(organizationRole)
+                .ConfigureAwait(false);
+
+            await _applicationDbContext
+                .SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            await _aclService
+                .AddRelationshipAsync<Organization, User>(organizationId, Relations.Member, userId, null)
+                .ConfigureAwait(false);
+
+            return organizationRole;
         }
 
         public async Task<OrganizationRole> RemoveUserFromOrganizationAsync(int organizationId, int userId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
+
+            if (!isAuthorized)
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<Organization>(currentUserId, organizationId, Actions.CanWrite, cancellationToken);
-
-                if (!isAuthorized)
+                throw new EntityUnauthorizedAccessException()
                 {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(Organization),
-                        EntityId = organizationId,
-                        UserId = currentUserId,
-                    };
-                }
-
-                var organizationRole = new OrganizationRole
-                {
-                    OrganizationId = organizationId,
-                    UserId = userId,
-                    Role = Relations.Member,
-                    LastEditedBy = currentUserId,
+                    EntityName = nameof(Organization),
+                    EntityId = organizationId,
+                    UserId = currentUserId,
                 };
-
-                await context
-                    .AddAsync(organizationRole)
-                    .ConfigureAwait(false);
-
-                await context
-                    .SaveChangesAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                await _aclService
-                    .DeleteRelationshipAsync<Organization, User>(organizationId, Relations.Member, userId, null, cancellationToken)
-                    .ConfigureAwait(false);
-
-                return organizationRole;
             }
+
+            var organizationRole = new OrganizationRole
+            {
+                OrganizationId = organizationId,
+                UserId = userId,
+                Role = Relations.Member,
+                LastEditedBy = currentUserId,
+            };
+
+            await _applicationDbContext
+                .AddAsync(organizationRole)
+                .ConfigureAwait(false);
+
+            await _applicationDbContext
+                .SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            await _aclService
+                .DeleteRelationshipAsync<Organization, User>(organizationId, Relations.Member, userId, null, cancellationToken)
+                .ConfigureAwait(false);
+
+            return organizationRole;
         }
-
-
     }
 }

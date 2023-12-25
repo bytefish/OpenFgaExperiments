@@ -13,13 +13,13 @@ namespace RebacExperiments.Server.Api.Services
     {
         private readonly ILogger<TaskItemService> _logger;
 
-        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+        private readonly ApplicationDbContext _applicationDbContext;
         private readonly IAclService _aclService;
 
-        public TaskItemService(ILogger<TaskItemService> logger, IDbContextFactory<ApplicationDbContext> dbContextFactory, IAclService aclService)
+        public TaskItemService(ILogger<TaskItemService> logger, ApplicationDbContext applicationDbContext, IAclService aclService)
         {
             _logger = logger;
-            _dbContextFactory = dbContextFactory;
+            _applicationDbContext = applicationDbContext;
             _aclService = aclService;
         }
 
@@ -27,72 +27,67 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            // Make sure the Current User is the last editor:
+            taskItem.LastEditedBy = currentUserId;
+
+            // Add the new Task, the HiLo Pattern automatically assigns a new Id using the HiLo Pattern
+            await _applicationDbContext
+                .AddAsync(taskItem, cancellationToken)
+                .ConfigureAwait(false);
+
+            // The Current User should automatically be the Owner:
+            var userTaskItem = new UserTaskItem
             {
-                // Make sure the Current User is the last editor:
-                taskItem.LastEditedBy = currentUserId;
+                UserId = currentUserId,
+                TaskItemId = taskItem.Id,
+                Role = Relations.Owner,
+                LastEditedBy = currentUserId,
+            };
 
-                // Add the new Task, the HiLo Pattern automatically assigns a new Id using the HiLo Pattern
-                await context
-                    .AddAsync(taskItem, cancellationToken)
-                    .ConfigureAwait(false);
+            await _applicationDbContext
+                .AddAsync(userTaskItem, cancellationToken)
+                .ConfigureAwait(false);
 
-                // The Current User should automatically be the Owner:
-                var userTaskItem = new UserTaskItem {
-                    UserId = currentUserId,
-                    TaskItemId = taskItem.Id,
-                    Role = Relations.Owner,
-                    LastEditedBy = currentUserId,
-                };
+            await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
-                await context
-                    .AddAsync(userTaskItem, cancellationToken)
-                    .ConfigureAwait(false);
+            // Acl
+            await _aclService
+                .AddRelationshipAsync<TaskItem, User>(taskItem.Id, Relations.Owner, currentUserId, null)
+                .ConfigureAwait(false);
 
-                await context.SaveChangesAsync(cancellationToken);
-
-                // Acl
-                await _aclService
-                    .AddRelationshipAsync<TaskItem, User>(taskItem.Id, Relations.Owner, currentUserId, null)
-                    .ConfigureAwait(false);
-
-                return taskItem;
-            }
+            return taskItem;
         }
 
         public async Task<TaskItem> GetTaskItemByIdAsync(int taskItemId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            var taskItem = await _applicationDbContext.TaskItems
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
+
+            if (taskItem == null)
             {
-                var taskItem = await context.TaskItems
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
-
-                if (taskItem == null)
+                throw new EntityNotFoundException()
                 {
-                    throw new EntityNotFoundException()
-                    {
-                        EntityName = nameof(TaskItem),
-                        EntityId = taskItemId,
-                    };
-                }
-
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, taskItem, Actions.CanRead, cancellationToken);
-
-                if (!isAuthorized)
-                {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(TaskItem),
-                        EntityId = taskItemId,
-                        UserId = currentUserId,
-                    };
-                }
-
-                return taskItem;
+                    EntityName = nameof(TaskItem),
+                    EntityId = taskItemId,
+                };
             }
+
+            bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, taskItem, Actions.CanRead, cancellationToken);
+
+            if (!isAuthorized)
+            {
+                throw new EntityUnauthorizedAccessException()
+                {
+                    EntityName = nameof(TaskItem),
+                    EntityId = taskItemId,
+                    UserId = currentUserId,
+                };
+            }
+
+            return taskItem;
         }
 
         public async Task<List<TaskItem>> GetTaskItemsByUserIdAsync(int userId, CancellationToken cancellationToken)
@@ -110,92 +105,86 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, TaskItem, Actions.CanWrite, cancellationToken);
+
+            if (!isAuthorized)
             {
-                bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, TaskItem, Actions.CanWrite, cancellationToken);
-
-                if (!isAuthorized)
+                throw new EntityUnauthorizedAccessException()
                 {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(TaskItem),
-                        EntityId = TaskItem.Id,
-                        UserId = currentUserId,
-                    };
-                }
-
-                int rowsAffected = await context.TaskItems
-                    .Where(t => t.Id == TaskItem.Id && t.RowVersion == TaskItem.RowVersion)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(x => x.Title, TaskItem.Title)
-                        .SetProperty(x => x.Description, TaskItem.Description)
-                        .SetProperty(x => x.DueDateTime, TaskItem.DueDateTime)
-                        .SetProperty(x => x.CompletedDateTime, TaskItem.CompletedDateTime)
-                        .SetProperty(x => x.ReminderDateTime, TaskItem.ReminderDateTime)
-                        .SetProperty(x => x.AssignedTo, TaskItem.AssignedTo)
-                        .SetProperty(x => x.TaskItemPriority, TaskItem.TaskItemPriority)
-                        .SetProperty(x => x.TaskItemStatus, TaskItem.TaskItemStatus)
-                        .SetProperty(x => x.LastEditedBy, currentUserId), cancellationToken);
-
-                if (rowsAffected == 0)
-                {
-                    throw new EntityConcurrencyException()
-                    {
-                        EntityName = nameof(TaskItem),
-                        EntityId = TaskItem.Id,
-                    };
-                }
-
-                return TaskItem;
+                    EntityName = nameof(TaskItem),
+                    EntityId = TaskItem.Id,
+                    UserId = currentUserId,
+                };
             }
+
+            int rowsAffected = await _applicationDbContext.TaskItems
+                .Where(t => t.Id == TaskItem.Id && t.RowVersion == TaskItem.RowVersion)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.Title, TaskItem.Title)
+                    .SetProperty(x => x.Description, TaskItem.Description)
+                    .SetProperty(x => x.DueDateTime, TaskItem.DueDateTime)
+                    .SetProperty(x => x.CompletedDateTime, TaskItem.CompletedDateTime)
+                    .SetProperty(x => x.ReminderDateTime, TaskItem.ReminderDateTime)
+                    .SetProperty(x => x.AssignedTo, TaskItem.AssignedTo)
+                    .SetProperty(x => x.TaskItemPriority, TaskItem.TaskItemPriority)
+                    .SetProperty(x => x.TaskItemStatus, TaskItem.TaskItemStatus)
+                    .SetProperty(x => x.LastEditedBy, currentUserId), cancellationToken);
+
+            if (rowsAffected == 0)
+            {
+                throw new EntityConcurrencyException()
+                {
+                    EntityName = nameof(TaskItem),
+                    EntityId = TaskItem.Id,
+                };
+            }
+
+            return TaskItem;
         }
 
         public async Task DeleteTaskItemAsync(int taskItemId, int currentUserId, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
+            var taskItem = await _applicationDbContext.TaskItems
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
+
+            if (taskItem == null)
             {
-                var taskItem = await context.TaskItems
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == taskItemId, cancellationToken);
-
-                if (taskItem == null)
+                throw new EntityNotFoundException()
                 {
-                    throw new EntityNotFoundException()
-                    {
-                        EntityName = nameof(taskItem),
-                        EntityId = taskItemId,
-                    };
-                }
-
-                bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, taskItemId, Actions.CanWrite, cancellationToken);
-
-                if (!isAuthorized)
-                {
-                    throw new EntityUnauthorizedAccessException()
-                    {
-                        EntityName = nameof(taskItem),
-                        EntityId = taskItemId,
-                        UserId = currentUserId,
-                    };
-                }
-
-                await context.UserTaskItems
-                    .Where(ut => ut.TaskItemId == taskItemId)
-                    .ExecuteDeleteAsync();
-
-                await context.TaskItems
-                    .Where(t => t.Id == taskItem.Id)
-                    .ExecuteDeleteAsync(cancellationToken);
-
-                // Delete all stored relations towards the TaskItem
-                var tuplesToDelete = await _aclService
-                    .ReadAllRelationshipsByObjectAsync<TaskItem>(taskItemId)
-                    .ConfigureAwait(false);
-
-                await _aclService.DeleteRelationshipsAsync(tuplesToDelete, cancellationToken);
+                    EntityName = nameof(taskItem),
+                    EntityId = taskItemId,
+                };
             }
+
+            bool isAuthorized = await _aclService.CheckUserObjectAsync<TaskItem>(currentUserId, taskItemId, Actions.CanWrite, cancellationToken);
+
+            if (!isAuthorized)
+            {
+                throw new EntityUnauthorizedAccessException()
+                {
+                    EntityName = nameof(taskItem),
+                    EntityId = taskItemId,
+                    UserId = currentUserId,
+                };
+            }
+
+            await _applicationDbContext.UserTaskItems
+                .Where(ut => ut.TaskItemId == taskItemId)
+                .ExecuteDeleteAsync();
+
+            await _applicationDbContext.TaskItems
+                .Where(t => t.Id == taskItem.Id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Delete all stored relations towards the TaskItem
+            var tuplesToDelete = await _aclService
+                .ReadAllRelationshipsByObjectAsync<TaskItem>(taskItemId)
+                .ConfigureAwait(false);
+
+            await _aclService.DeleteRelationshipsAsync(tuplesToDelete, cancellationToken);
         }
     }
 }

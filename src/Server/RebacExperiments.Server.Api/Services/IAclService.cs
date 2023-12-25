@@ -1,6 +1,5 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using RebacExperiments.Server.Api.Infrastructure.Authorization;
 using RebacExperiments.Server.Database.Models;
 
@@ -96,8 +95,7 @@ namespace RebacExperiments.Server.Api.Services
         /// <param name="filter">Filter to apply</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns>All matching stored relationships</returns>
-        Task<List<StoredRelationTuple>> GetAllRelationshipsAsync(Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken);
-
+        IQueryable<StoredRelationTuple> GetAllRelationshipsQueryable();
 
         /// <summary>
         /// Gets all Relationships for a given Store.
@@ -106,7 +104,7 @@ namespace RebacExperiments.Server.Api.Services
         /// <param name="filter">Filter to apply</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns>All matching stored relationships</returns>
-        Task<List<StoredRelationTuple>> GetAllRelationshipsByStoreAsync(string storeId, Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken);
+        IQueryable<StoredRelationTuple> GetAllRelationshipsByStoreQueryable(string storeId);
 
         /// <summary>
         /// Creates a List of Relations.
@@ -147,16 +145,6 @@ namespace RebacExperiments.Server.Api.Services
         /// <returns>All Relationships found in Store</returns>
         Task<List<RelationTuple>> ReadAllRelationshipsByObjectAsync<TObjectType>(int objectId, CancellationToken cancellationToken = default)
             where TObjectType : Entity;
-
-        /// <summary>
-        /// Reads all stored Relation Tuples off the Store.
-        /// </summary>
-        /// <typeparam name="TObjectType">Type of the Object</typeparam>
-        /// <param name="objectId">Object Entity</param>
-        /// <param name="cancellationToken">Cancellation Token</param>
-        /// <returns>All Relationships found in Store</returns>
-        Task<List<RelationTuple>> ReadAllRelationshipsBySubjectAsync<TSubjectType>(int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
-            where TSubjectType : Entity;
 
         Task<List<RelationTuple>> ReadAllRelationships(string? @object, string? relation, string? subject, CancellationToken cancellationToken = default);
     }

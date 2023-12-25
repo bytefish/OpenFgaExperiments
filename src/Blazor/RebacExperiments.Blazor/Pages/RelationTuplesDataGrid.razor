@@ -1,0 +1,46 @@
+﻿@page "/RelationTuples"
+@using RebacExperiments.Blazor.Components
+@using RebacExperiments.Blazor.Shared.Models;
+@using RebacExperiments.Shared.ApiSdk;
+@using RebacExperiments.Shared.ApiSdk.Models;
+
+@inject ApiClient ApiClient
+
+<PageTitle>User Tasks</PageTitle>
+
+<h1>User Tasks</h1>
+
+<FluentDataGrid @ref="DataGrid" ItemsProvider="@RelationTuplesProvider" Pagination="@Pagination" TGridItem=StoredRelationTuple>
+    <PropertyColumn Title="ID" Property="@(c => c!.Id)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Id" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Store" Property="@(c => c.Store)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Store" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Object" Property="@(c => c.Object)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Object" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Relation" Property="@(c => c.Relation)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Relation" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Subject" Property="@(c => c.Subject)" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <StringFilter PropertyName="Subject" FilterState="FilterState"></StringFilter>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Inserted At" Property="@(c => c!.InsertedAt)" Format="yyyy-MM-dd mm:ss" Sortable="true" Align=Align.Start>
+        <ColumnOptions>
+            <DateTimeFilter PropertyName="InsertedAt" FilterState="FilterState"></DateTimeFilter>
+        </ColumnOptions>
+   </PropertyColumn>
+</FluentDataGrid>
+
+<FluentPaginator State="@Pagination" />

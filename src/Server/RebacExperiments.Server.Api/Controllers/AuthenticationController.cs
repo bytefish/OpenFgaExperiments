@@ -43,7 +43,6 @@ namespace RebacExperiments.Server.Api.Controllers
             {
                 // Create ClaimsPrincipal from Database 
                 var userClaims = await userService.GetClaimsAsync(
-                    context: context,
                     username: username,
                     password: password,
                     cancellationToken: cancellationToken);

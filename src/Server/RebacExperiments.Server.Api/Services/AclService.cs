@@ -1,9 +1,9 @@
-﻿using OpenFga.Sdk.Client.Model;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using OpenFga.Sdk.Client.Model;
 using OpenFga.Sdk.Client;
 using Microsoft.EntityFrameworkCore;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
-using System.Globalization;
-using OpenFga.Sdk.Model;
 using RebacExperiments.Server.Api.Infrastructure.Authorization;
 using RebacExperiments.Server.Database.Models;
 using RebacExperiments.Server.Database;
@@ -16,15 +16,15 @@ namespace RebacExperiments.Server.Api.Services
         private readonly ILogger<AclService> _logger;
 
         private readonly OpenFgaClient _openFgaClient;
-        private readonly IDbContextFactory<ApplicationDbContext> _applicationDbContextFactory;
-        private readonly IDbContextFactory<OpenFgaDbContext> _openFgaDbContextFactory;
+        private readonly ApplicationDbContext _applicationDbContext;
+        private readonly OpenFgaDbContext _openFgaDbContext;
 
-        public AclService(ILogger<AclService> logger, OpenFgaClient openFgaClient, IDbContextFactory<ApplicationDbContext> applicationDbContextFactory, IDbContextFactory<OpenFgaDbContext> openFgaDbContextFactory)
+        public AclService(ILogger<AclService> logger, OpenFgaClient openFgaClient, ApplicationDbContext applicationDbContext, OpenFgaDbContext openFgaDbContext)
         {
             _logger = logger;
             _openFgaClient = openFgaClient;
-            _applicationDbContextFactory = applicationDbContextFactory;
-            _openFgaDbContextFactory = openFgaDbContextFactory;
+            _applicationDbContext = applicationDbContext;
+            _openFgaDbContext = openFgaDbContext;
         }
 
         public async Task<bool> CheckObjectAsync<TObjectType, TSubjectType>(int objectId, string relation, int subjectId, CancellationToken cancellationToken)
@@ -105,16 +105,13 @@ namespace RebacExperiments.Server.Api.Services
                 .Select(x => x.Id)
                 .ToArray();
 
-            using (var context = await _applicationDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var entities = await context.Set<TObjectType>()
-                    .AsNoTracking()
-                    .Where(x => objectIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
+            var entities = await _applicationDbContext.Set<TObjectType>()
+                .AsNoTracking()
+                .Where(x => objectIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-                return entities;
-            }
+            return entities;
         }
 
         public async Task<List<TEntityType>> ListUserObjectsAsync<TEntityType>(int userId, string relation, CancellationToken cancellationToken)
@@ -171,60 +168,23 @@ namespace RebacExperiments.Server.Api.Services
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var objectType = typeof(TObjectType).Name;
-                var objectIdStr = objectId.ToString();
+            var objectType = typeof(TObjectType).Name;
+            var objectIdStr = objectId.ToString();
 
-                var tuples = await context.Tuples
-                    .AsNoTracking()
-                    .Where(x => x.ObjectType == objectType && x.ObjectId == objectIdStr)
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
+            var tuples = await _openFgaDbContext.Tuples
+                .AsNoTracking()
+                .Where(x => x.ObjectType == objectType && x.ObjectId == objectIdStr)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-                return tuples
-                    .Select(x => new RelationTuple
-                    {
-                        Object = $"{x.ObjectType}:{x.ObjectId}",
-                        Relation = x.Relation,
-                        Subject = $"{x.User}"
-                    })
-                    .ToList();
-            }
-        }
-
-
-        public async Task<List<RelationTuple>> ReadAllRelationshipsBySubjectAsync<TSubjectType>(int subjectId, string? subjectRelation, CancellationToken cancellationToken = default)
-            where TSubjectType : Entity
-        {
-            _logger.TraceMethodEntry();
-
-            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var subjectType = typeof(TSubjectType).Name;
-                
-                var subjectIdStr = subjectId.ToString();
-
-                if(!string.IsNullOrWhiteSpace(subjectRelation))
+            return tuples
+                .Select(x => new RelationTuple
                 {
-                    subjectIdStr = $"{subjectType}:{subjectId}#{subjectRelation}";
-                }
-
-                var tuples = await context.Tuples
-                    .AsNoTracking()
-                    .Where(x => x.UserType == subjectType && x.User == subjectIdStr)
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                return tuples
-                    .Select(x => new RelationTuple
-                    {
-                        Object = $"{x.ObjectType}:{x.ObjectId}",
-                        Relation = x.Relation,
-                        Subject = $"{x.User}"
-                    })
-                    .ToList();
-            }
+                    Object = $"{x.ObjectType}:{x.ObjectId}",
+                    Relation = x.Relation,
+                    Subject = $"{x.User}"
+                })
+                .ToList();
         }
 
         public async Task<List<RelationTuple>> ReadAllRelationships(string? @object, string? relation, string? subject, CancellationToken cancellationToken = default)
@@ -353,52 +313,36 @@ namespace RebacExperiments.Server.Api.Services
             };
         }
 
-        public async Task<List<StoredRelationTuple>> GetAllRelationshipsAsync(Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken)
+        public IQueryable<StoredRelationTuple> GetAllRelationshipsQueryable()
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Wow, super ugly way to "abstract" stored tuples...
-                var queryable = context.Database.SqlQuery<StoredRelationTuple>(
-                        @$"SELECT ulid                                  AS ""Id""
+            // Wow, super ugly way to "abstract" stored tuples...
+            return _openFgaDbContext.Database.SqlQuery<StoredRelationTuple>(
+                    @$"SELECT ulid                                  AS ""Id""
                             , store                                     AS ""Store""
                             , (object_type || ':' || object_id)         AS ""Object""
                             , relation                                  AS ""Relation"" 
                             , _user                                     AS ""Subject""
                             , inserted_at                               AS ""InsertedAt""
                            FROM public.tuple");
-
-                var result = await filter(queryable)
-                    .ToListAsync(cancellationToken);
-
-                return result;
-            }
         }
 
 
-        public async Task<List<StoredRelationTuple>> GetAllRelationshipsByStoreAsync(string storeId, Func<IQueryable<StoredRelationTuple>, IQueryable<StoredRelationTuple>> filter, CancellationToken cancellationToken)
+        public IQueryable<StoredRelationTuple> GetAllRelationshipsByStoreQueryable(string storeId)
         {
             _logger.TraceMethodEntry();
 
-            using (var context = await _openFgaDbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Wow, super ugly way to "abstract" stored tuples...
-                var queryable = context.Database.SqlQuery<StoredRelationTuple>(
-                        @$"SELECT ulid                                  AS ""Id""
+            // Wow, super ugly way to "abstract" stored tuples...
+            return _openFgaDbContext.Database.SqlQuery<StoredRelationTuple>(
+                    @$"SELECT ulid                                  AS ""Id""
                             , store                                     AS ""Store""
                             , (object_type || ':' || object_id)         AS ""Object""
                             , relation                                  AS ""Relation"" 
                             , _user                                     AS ""Subject""
                             , inserted_at                               AS ""InsertedAt""
                            FROM public.tuple")
-                    .Where(x => x.Store == storeId);
-
-                var result = await filter(queryable)
-                    .ToListAsync(cancellationToken);
-
-                return result;
-            }
+                .Where(x => x.Store == storeId);
         }
 
         public async Task AddRelationshipsAsync(ICollection<RelationTuple> relationTuples, CancellationToken cancellationToken)
