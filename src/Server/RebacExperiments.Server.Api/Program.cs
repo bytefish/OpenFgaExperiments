@@ -65,7 +65,7 @@ try
     builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
     // Database
-    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
         var connectionString = builder.Configuration.GetConnectionString("ApplicationDatabase");
 
@@ -79,7 +79,7 @@ try
             .UseSqlServer(connectionString);
     });
 
-    builder.Services.AddDbContextFactory<OpenFgaDbContext>(options =>
+    builder.Services.AddDbContext<OpenFgaDbContext>(options =>
     {
         var connectionString = builder.Configuration.GetConnectionString("OpenFgaDatabase");
 

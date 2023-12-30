@@ -13,7 +13,7 @@ Content-Type: application/json
 
 ### Read all Relationships
 
-GET {{RebacExperiments.Server.Api_HostAddress}}/RelationTuples?$filter=contains(subject,'1')
+GET {{RebacExperiments.Server.Api_HostAddress}}/RelationTuples
 
 ### Create a new Relation 
 
