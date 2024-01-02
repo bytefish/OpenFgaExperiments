@@ -1,13 +1,31 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
-using System.Collections.Concurrent;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Metadata;
-using System.Reflection;
 
 namespace RebacExperiments.Blazor.Infrastructure
 {
+    /// <summary>
+    /// Validation Error for a Property
+    /// </summary>
+    public record ValidationError
+    {
+        /// <summary>
+        /// Gets or sets the PropertyName.
+        /// </summary>
+        public required string PropertyName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ErrorMessage.
+        /// </summary>
+        public required string ErrorMessage { get; set; }
+    }
+
+    /// <summary>
+    /// Provides a SimpleValidator, which takes a Validation function for the model to be validated.
+    /// </summary>
+    /// <typeparam name="TModel">Type of the Model in the <see cref="EditContext"/></typeparam>
     public class SimpleValidator<TModel> : ComponentBase, IDisposable
     {
         private IDisposable? _subscriptions;
@@ -15,10 +33,8 @@ namespace RebacExperiments.Blazor.Infrastructure
 
         [CascadingParameter] EditContext? CurrentEditContext { get; set; }
 
-        [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
-
         [Parameter]
-        public Func<TModel?, IServiceProvider, IEnumerable<ValidationError>> ValidationFunc { get; set; } = null!;
+        public Func<TModel?, IEnumerable<ValidationError>> ValidationFunc { get; set; } = null!;
 
         /// <inheritdoc />
         protected override void OnInitialized()
@@ -30,7 +46,7 @@ namespace RebacExperiments.Blazor.Infrastructure
                     $"inside an EditForm.");
             }
 
-            _subscriptions = CurrentEditContext.EnableSimpleValidation(ServiceProvider, ValidationFunc);
+            _subscriptions = CurrentEditContext.EnableSimpleValidation(ValidationFunc);
             _originalEditContext = CurrentEditContext;
         }
 
@@ -41,8 +57,7 @@ namespace RebacExperiments.Blazor.Infrastructure
             {
                 // While we could support this, there's no known use case presently. Since InputBase doesn't support it,
                 // it's more understandable to have the same restriction.
-                throw new InvalidOperationException($"{GetType()} does not support changing the " +
-                    $"{nameof(EditContext)} dynamically.");
+                throw new InvalidOperationException($"{GetType()} does not support changing the {nameof(EditContext)} dynamically.");
             }
         }
 
@@ -60,53 +75,40 @@ namespace RebacExperiments.Blazor.Infrastructure
         }
     }
 
-    public record ValidationError
-    {
-        public required string PropertyName { get; set; }
-
-        public required string ErrorMessage { get; set; }
-    }
-
-    public static class EditContextDataAnnotationsExtensions
+    public static class EditContextSimpleValidationExtensions
     {
         /// <summary>
-        /// Enables DataAnnotations validation support for the <see cref="EditContext"/>.
+        /// Enables validation support for the <see cref="EditContext"/>.
         /// </summary>
         /// <param name="editContext">The <see cref="EditContext"/>.</param>
-        /// <param name="serviceProvider">The <see cref="IServiceProvider"/> to be used in the <see cref="ValidationContext"/>.</param>
+        /// <param name="validationFunc">Validation function to apply</param>
         /// <returns>A disposable object whose disposal will remove DataAnnotations validation support from the <see cref="EditContext"/>.</returns>
-        public static IDisposable EnableSimpleValidation<TModel>(this EditContext editContext, IServiceProvider serviceProvider, Func<TModel?, IServiceProvider, IEnumerable<ValidationError>> validationFunc)
+        public static IDisposable EnableSimpleValidation<TModel>(this EditContext editContext, Func<TModel?, IEnumerable<ValidationError>> validationFunc)
         {
-            ArgumentNullException.ThrowIfNull(serviceProvider);
-
-            return new SimpleValidationEventSubscriptions<TModel>(editContext, serviceProvider, validationFunc);
+            return new SimpleValidationEventSubscriptions<TModel>(editContext, validationFunc);
         }
 
         private sealed class SimpleValidationEventSubscriptions<TModel> : IDisposable
         {
             private readonly EditContext _editContext;
-            private readonly IServiceProvider _serviceProvider;
-            private readonly Func<TModel?, IServiceProvider, IEnumerable<ValidationError>> _validationFunc;
+            private readonly Func<TModel?, IEnumerable<ValidationError>> _validationFunc;
             private readonly ValidationMessageStore _messages;
 
-            public SimpleValidationEventSubscriptions(EditContext editContext, IServiceProvider serviceProvider, Func<TModel?, IServiceProvider, IEnumerable<ValidationError>> validationFunc)
+            public SimpleValidationEventSubscriptions(EditContext editContext, Func<TModel?, IEnumerable<ValidationError>> validationFunc)
             {
                 _editContext = editContext ?? throw new ArgumentNullException(nameof(editContext));
-                _serviceProvider = serviceProvider;
                 _validationFunc = validationFunc;
                 _messages = new ValidationMessageStore(_editContext);
 
                 _editContext.OnFieldChanged += OnFieldChanged;
                 _editContext.OnValidationRequested += OnValidationRequested;
-
             }
 
-            [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Model types are expected to be defined in assemblies that do not get trimmed.")]
             private void OnFieldChanged(object? sender, FieldChangedEventArgs eventArgs)
             {
                 _messages.Clear();
 
-                var validationErrors = _validationFunc((TModel) _editContext.Model, _serviceProvider);
+                var validationErrors = _validationFunc((TModel) _editContext.Model);
 
                 foreach (var validationError in validationErrors)
                 {
@@ -116,12 +118,11 @@ namespace RebacExperiments.Blazor.Infrastructure
                 _editContext.NotifyValidationStateChanged();
             }
 
-            [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Model types are expected to be defined in assemblies that do not get trimmed.")]
             private void OnValidationRequested(object? sender, ValidationRequestedEventArgs eventArgs)
             {
                 _messages.Clear();
 
-                var validationErrors = _validationFunc((TModel) _editContext.Model, _serviceProvider);
+                var validationErrors = _validationFunc((TModel) _editContext.Model);
 
                 foreach (var validationError in validationErrors)
                 {
@@ -137,7 +138,6 @@ namespace RebacExperiments.Blazor.Infrastructure
                 _editContext.OnFieldChanged -= OnFieldChanged;
                 _editContext.OnValidationRequested -= OnValidationRequested;
                 _editContext.NotifyValidationStateChanged();
-
             }
         }
     }

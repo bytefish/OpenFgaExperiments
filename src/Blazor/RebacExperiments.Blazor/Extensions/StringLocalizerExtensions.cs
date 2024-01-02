@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Localization;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Extensions.Localization;
 
 namespace RebacExperiments.Blazor.Extensions
 {
