@@ -13,6 +13,12 @@ namespace RebacExperiments.Blazor.Pages
     public partial class TaskItemsDataGrid
     {
         /// <summary>
+        /// NavigationManager to navigate to Details and Edit pages.
+        /// </summary>
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = default!;
+
+        /// <summary>
         /// Provides the Data Items.
         /// </summary>
         private GridItemsProvider<TaskItem> TaskItemsProvider = default!;
@@ -115,6 +121,11 @@ namespace RebacExperiments.Blazor.Pages
                     request.QueryParameters.Orderby = parameters.OrderBy;
                 }
             });    
+        }
+
+        private void EditTaskItem(TaskItem taskItem)
+        {
+            NavigationManager.NavigateTo($"/TaskItem/Edit/{taskItem.Id}");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/TaskItem/Edit/{Id}"
+﻿@page "/TaskItem/Edit/{Id:int}"
 
 @namespace RebacExperiments.Blazor.Pages
 
@@ -8,3 +8,6 @@
 @using RebacExperiments.Shared.ApiSdk.Models;
 
 @inject ApiClient ApiClient
+
+<TaskItemEditForm TaskItem=@CurrentTaskItem>
+</TaskItemEditForm>

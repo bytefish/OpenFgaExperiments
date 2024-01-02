@@ -29,5 +29,10 @@ namespace RebacExperiments.Blazor.Pages
 
             return taskItem;
         }
+
+        private async Task PersistTaskItem(TaskItem taskItem)
+        {
+            
+        }
     }
 }

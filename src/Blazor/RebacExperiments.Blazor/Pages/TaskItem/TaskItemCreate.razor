@@ -9,7 +9,5 @@
 
 @inject ApiClient ApiClient
 
-<TaskItemEditForm 
-    TaskItem=@CurrentTaskItem 
-    PersistTaskItem="@(x => Console.Write(x))">
+<TaskItemEditForm TaskItem=@CurrentTaskItem PersistTaskItem="@PersistTaskItem">
 </TaskItemEditForm>

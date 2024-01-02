@@ -42,8 +42,7 @@
         </ColumnOptions>
     </PropertyColumn>
     <TemplateColumn Title="Actions" Align="@Align.End">
-        <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" /> <!-- OnClick="@(() => DemoLogger.WriteLine("Edit clicked"))" -->
-        <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())" /> <!--OnClick="@(() => DemoLogger.WriteLine("Delete clicked"))"-->
+        <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => EditTaskItem(context))" />
     </TemplateColumn>
 </FluentDataGrid>
 

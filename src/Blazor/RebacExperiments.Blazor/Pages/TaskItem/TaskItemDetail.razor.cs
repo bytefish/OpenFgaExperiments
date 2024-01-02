@@ -16,13 +16,13 @@ namespace RebacExperiments.Blazor.Pages
         /// <summary>
         /// The TaskItem Details to be displayed.
         /// </summary>
-        public TaskItem CurrentTaskItem { get; set; } = new TaskItem();
+        public TaskItem CurrentTaskItem { get; set; } = null!;
 
-        protected override async Task OnInitializedAsync()
+        protected override async Task OnParametersSetAsync()
         {
             CurrentTaskItem = await GetTaskItemAsync(Id);
 
-            await base.OnInitializedAsync();
+            await base.OnParametersSetAsync();
         }
 
         private async Task<TaskItem> GetTaskItemAsync(int id)
