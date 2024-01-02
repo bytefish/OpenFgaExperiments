@@ -10,5 +10,14 @@
 @inject ApiClient ApiClient
 
 
-<TaskItemEditForm TaskItem=@CurrentTaskItem>
-</TaskItemEditForm>
+<FluentStack Orientation="Orientation.Vertical">
+    <div>
+        <FluentTextField Name="title" @bind-Value="CurrentTaskItem.Title" Label="Title" ReadOnly />
+        </div>
+        <div>
+            <FluentTextArea Name="description" Rows=5 Cols=60 @bind-Value="CurrentTaskItem.Description" Label="Description" ReadOnly />
+        </div>
+        <div>
+            <TaskItemPrioritySelector name="priority" Label="Priority" Disabled />
+        </div>
+</FluentStack>

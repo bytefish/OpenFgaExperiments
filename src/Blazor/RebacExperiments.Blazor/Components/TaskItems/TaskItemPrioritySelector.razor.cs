@@ -22,6 +22,12 @@ namespace RebacExperiments.Blazor.Components
         public virtual string? Title { get; set; }
 
         /// <summary>
+        /// Text used on label attribute.
+        /// </summary>
+        [Parameter]
+        public virtual string? Label { get; set; }
+
+        /// <summary>
         /// If true, will disable the list of items.
         /// </summary>
         [Parameter]

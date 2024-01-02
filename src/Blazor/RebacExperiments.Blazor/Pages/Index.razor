@@ -11,6 +11,8 @@
     Welcome to your new app.
 </p>
 
-<button @onclick="SignInUser_Philipp">Sign In as "philipp@bytefish.de"</button>
-<button @onclick="SignInUser_Max">Sign In as "max@mustermann.local"</button>
-<button @onclick="SignOutUser">Sign Out</button>
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentButton Appearance="Appearance.Accent" OnClick="SignInUser_Philipp">Sign In as "philipp@bytefish.de"</FluentButton>
+    <FluentButton Appearance="Appearance.Accent" OnClick="SignInUser_Max">Sign In as "max@mustermann.local"</FluentButton>
+    <FluentButton Appearance="Appearance.Accent" OnClick="SignOutUser">Sign Out</FluentButton>
+</FluentStack>

@@ -3,11 +3,33 @@
 @namespace RebacExperiments.Blazor.Pages
 
 @using RebacExperiments.Blazor.Components
+@using RebacExperiments.Blazor.Infrastructure
 @using RebacExperiments.Blazor.Shared.Models;
 @using RebacExperiments.Shared.ApiSdk;
 @using RebacExperiments.Shared.ApiSdk.Models;
 
 @inject ApiClient ApiClient
 
-<TaskItemEditForm TaskItem=@CurrentTaskItem>
-</TaskItemEditForm>
+<EditForm Model="@CurrentTaskItem" OnValidSubmit="@(async () => await HandleValidSubmitAsync())" FormName="task_item_edit" novalidate>
+    <SimpleValidator TModel=TaskItem ValidationFunc="ValidateTaskItem" />
+    <FluentValidationSummary />
+    <FluentStack Orientation="Orientation.Vertical">
+        <div>
+            <FluentTextField Name="title" @bind-Value="CurrentTaskItem.Title" Label="Title" Required />
+             <FluentValidationMessage For="@(() => CurrentTaskItem.Title)" />
+         </div>
+         <div>
+             <FluentTextArea Name="description" Rows=5 Cols=60 @bind-Value="CurrentTaskItem.Description" Label="Description" Required />
+             <FluentValidationMessage For="@(() => CurrentTaskItem.Description)" />
+         </div>
+         <div>
+             <TaskItemPrioritySelector name="priority" Label="Priority" Required />
+             <FluentValidationMessage For="@(() => CurrentTaskItem.TaskItemPriority)" />
+         </div>
+     </FluentStack>
+     <FluentStack Orientation="Orientation.Horizontal">
+         <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Save Changes</FluentButton>
+         <FluentButton Appearance="Appearance.Accent">Discard Changes</FluentButton>
+     </FluentStack>
+     
+ </EditForm>

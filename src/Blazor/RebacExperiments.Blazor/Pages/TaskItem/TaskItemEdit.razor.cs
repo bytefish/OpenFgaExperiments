@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.AspNetCore.Components;
+using RebacExperiments.Blazor.Infrastructure;
 using RebacExperiments.Shared.ApiSdk.Models;
 
 namespace RebacExperiments.Blazor.Pages
@@ -35,6 +36,20 @@ namespace RebacExperiments.Blazor.Pages
             }
 
             return taskItem;
+        }
+
+        private async Task HandleValidSubmitAsync()
+        {
+            
+        }
+
+        private static IEnumerable<ValidationError> ValidateTaskItem(TaskItem taskItem, IServiceProvider serviceProvider)
+        {
+            yield return new ValidationError
+            {
+                PropertyName = nameof(TaskItem.Title),
+                ErrorMessage = "Test"
+            };
         }
     }
 }
