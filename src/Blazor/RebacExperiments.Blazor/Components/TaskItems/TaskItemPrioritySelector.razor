@@ -1,5 +1,5 @@
 ﻿@using RebacExperiments.Blazor.Extensions
-@using RebacExperiments.Blazor.Shared.Models
+@using RebacExperiments.Shared.ApiSdk.Models
 
 @namespace RebacExperiments.Blazor.Components
 
@@ -8,11 +8,12 @@
               Id="@Id"
               AriaLabel="@Title"
               Disabled="@Disabled"
-              Items="@FilterOperators"
+              Items="@TaskItemPriorities"
               OptionText="@(i => Loc.TranslateEnum(i))"
               OptionValue="@(i => i.ToString())"
-              TOption=FilterOperatorEnum
+              TOption=TaskItemPriorityEnum
               Value=@_value
-              SelectedOption=@_filterOperator
-              SelectedOptionChanged="OnSelectedValueChanged">
+              SelectedOption=@_taskItemPriority
+              SelectedOptionChanged="OnSelectedValueChanged"
+              Required="@Required">
 </FluentSelect>

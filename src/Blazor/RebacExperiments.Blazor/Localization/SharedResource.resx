@@ -183,4 +183,13 @@
   <data name="FilterOperatorEnum_Yes" xml:space="preserve">
     <value>Yes</value>
   </data>
+  <data name="TaskItemPriorityEnum_High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="TaskItemPriorityEnum_Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="TaskItemPriorityEnum_Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
 </root>

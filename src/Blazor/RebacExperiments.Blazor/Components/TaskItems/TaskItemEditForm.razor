@@ -1,0 +1,24 @@
+﻿@inject IDialogService DialogService
+
+@namespace RebacExperiments.Blazor.Components
+@using RebacExperiments.Shared.ApiSdk.Models
+
+
+<EditForm Model="@TaskItem" OnValidSubmit="@(async () => await HandleValidSubmitAsync())" FormName="task_item_edit" novalidate>
+    <DataAnnotationsValidator />
+    <FluentValidationSummary />
+    <FluentStack Orientation="Orientation.Vertical">
+        <div>
+            <FluentTextField Name="title" @bind-Value="TaskItem.Title" Label="Title" Required />
+             <FluentValidationMessage For="@(() => TaskItem.Title)" />
+         </div>
+         <div>
+             <FluentTextArea Name="description" Rows=5 Cols=60 @bind-Value="TaskItem.Description" Label="Description" Required />
+             <FluentValidationMessage For="@(() => TaskItem.Description)" />
+         </div>
+         <div>
+             <TaskItemPrioritySelector name="priority" Title="Test" Required />
+             <FluentValidationMessage For="@(() => TaskItem.TaskItemPriority)" />
+         </div>
+     </FluentStack>
+ </EditForm>
