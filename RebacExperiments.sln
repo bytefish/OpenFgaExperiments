@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebacExperiments.Shared.Api
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebacExperiments.Server.OpenFga", "src\Server\RebacExperiments.Server.OpenFga\RebacExperiments.Server.OpenFga.csproj", "{DBF2142A-7F69-405A-8F12-9513E501C622}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RebacExperiments.Server.Database", "src\Server\RebacExperiments.Server.Database\RebacExperiments.Server.Database.csproj", "{65D0E81C-B7C8-4639-8E4E-EC82E5C2B872}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebacExperiments.Server.Database", "src\Server\RebacExperiments.Server.Database\RebacExperiments.Server.Database.csproj", "{65D0E81C-B7C8-4639-8E4E-EC82E5C2B872}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
