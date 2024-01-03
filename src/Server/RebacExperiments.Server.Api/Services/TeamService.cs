@@ -131,7 +131,7 @@ namespace RebacExperiments.Server.Api.Services
             {
                 throw new EntityConcurrencyException()
                 {
-                    EntityName = nameof(TaskItem),
+                    EntityName = nameof(Team),
                     EntityId = team.Id,
                 };
             }

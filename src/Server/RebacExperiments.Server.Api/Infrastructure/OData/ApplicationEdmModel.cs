@@ -15,6 +15,8 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             modelBuilder.Namespace = "TaskManagementService";
 
+            modelBuilder.EntitySet<Language>("Languages");
+            modelBuilder.EntitySet<LocalizationRecord>("LocalizationRecords");
             modelBuilder.EntitySet<User>("Users");
             modelBuilder.EntitySet<Team>("Teams");
             modelBuilder.EntitySet<Organization>("Organizations");
@@ -59,13 +61,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             var signOutUserAction = modelBuilder.Action("SignOutUser");
 
             signOutUserAction.HasDescription().HasDescription("SignOutUser");
-        }
-
-        private static void RegisterGetCurrentStoreIdFunction(ODataConventionModelBuilder modelBuilder)
-        {
-            
-
-            
         }
     }
 }

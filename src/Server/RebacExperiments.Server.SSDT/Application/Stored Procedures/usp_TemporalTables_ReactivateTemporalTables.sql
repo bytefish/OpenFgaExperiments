@@ -49,7 +49,6 @@ AS BEGIN
 		ALTER TABLE [Application].[TeamRole] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[TeamRoleHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
 
-    
 	IF OBJECTPROPERTY(OBJECT_ID('[Application].[OrganizationRole]'), 'TableTemporalType') = 0
 	BEGIN
 		PRINT 'Reactivate Temporal Table for [Application].[OrganizationRole]'
@@ -65,6 +64,21 @@ AS BEGIN
 		ALTER TABLE [Application].[UserTaskItem] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
 		ALTER TABLE [Application].[UserTaskItem] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[UserTaskItemHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
+    
+    IF OBJECTPROPERTY(OBJECT_ID('[Application].[Language]'), 'TableTemporalType') = 0
+	BEGIN
+		PRINT 'Reactivate Temporal Table for [Application].[Language]'
 
+		ALTER TABLE [Application].[Language] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Application].[Language] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[LanguageHistory], DATA_CONSISTENCY_CHECK = ON));
+	END
+    
+    IF OBJECTPROPERTY(OBJECT_ID('[Application].[LocalizationRecord]'), 'TableTemporalType') = 0
+	BEGIN
+		PRINT 'Reactivate Temporal Table for [Application].[LocalizationRecord]'
+
+		ALTER TABLE [Application].[LocalizationRecord] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Application].[LocalizationRecord] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[LocalizationRecordHistory], DATA_CONSISTENCY_CHECK = ON));
+	END
     
 END

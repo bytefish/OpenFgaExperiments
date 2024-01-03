@@ -13,7 +13,6 @@ using System.Net;
 
 namespace RebacExperiments.Server.Api.Infrastructure.Errors
 {
-
     /// <summary>
     /// Handles errors returned by the application.
     /// </summary>

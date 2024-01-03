@@ -7,6 +7,7 @@ using RebacExperiments.Shared.ApiSdk.Models;
 using RebacExperiments.Blazor.Extensions;
 using RebacExperiments.Blazor.Shared.OData;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 
 namespace RebacExperiments.Blazor.Pages
 {

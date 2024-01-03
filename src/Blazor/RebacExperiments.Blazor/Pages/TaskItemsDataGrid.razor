@@ -1,10 +1,13 @@
 ﻿@page "/TaskItems"
+@using Microsoft.Extensions.Localization
 @using RebacExperiments.Blazor.Components
+@using RebacExperiments.Blazor.Localization
 @using RebacExperiments.Blazor.Shared.Models;
 @using RebacExperiments.Shared.ApiSdk;
 @using RebacExperiments.Shared.ApiSdk.Models;
 
 @inject ApiClient ApiClient
+@inject IStringLocalizer<SharedResource> Loc
 
 <PageTitle>User Tasks</PageTitle>
 
@@ -42,7 +45,9 @@
         </ColumnOptions>
     </PropertyColumn>
     <TemplateColumn Title="Actions" Align="@Align.End">
-        <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => EditTaskItem(context))" />
+        <FluentButton OnClick="@(() => EditTaskItem(context))">@Loc["DataGrid_Button_Details"]</FluentButton>
+        <FluentButton OnClick="@(() => EditTaskItem(context))">@Loc["DataGrid_Button_Edit"]</FluentButton>
+        <FluentButton OnClick="@(() => EditTaskItem(context))">@Loc["DataGrid_Button_Delete"]</FluentButton>
     </TemplateColumn>
 </FluentDataGrid>
 

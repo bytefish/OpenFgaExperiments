@@ -1,0 +1,1 @@
+﻿CREATE UNIQUE INDEX [UX_Application_LocalizationRecord_Name_LanguageID] ON [Application].[LocalizationRecord] ([Name], [LanguageID])

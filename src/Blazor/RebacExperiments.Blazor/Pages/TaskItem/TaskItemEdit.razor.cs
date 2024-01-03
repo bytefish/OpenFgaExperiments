@@ -3,9 +3,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using RebacExperiments.Blazor.Infrastructure;
-using RebacExperiments.Blazor.Localization;
 using RebacExperiments.Shared.ApiSdk.Models;
-using System.Net.Http.Headers;
 
 namespace RebacExperiments.Blazor.Pages
 {
@@ -20,7 +18,7 @@ namespace RebacExperiments.Blazor.Pages
         /// <summary>
         /// The TaskItem Details to be displayed.
         /// </summary>
-        public TaskItem CurrentTaskItem { get; set; } = null!;
+        public TaskItem CurrentTaskItem { get; set; } = new TaskItem();
 
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
@@ -85,6 +83,26 @@ namespace RebacExperiments.Blazor.Pages
             var newTaskItem = await ApiClient.Odata.TaskItems[currentTaskId].GetAsync();
 
             if(newTaskItem == null)
+            {
+                throw new InvalidOperationException($"Expected a TaskItem for Id '{currentTaskId}'");
+            }
+
+            CurrentTaskItem = newTaskItem;
+        }
+
+        private async Task HandleDiscardAsync()
+        {
+            if (CurrentTaskItem.Id == null)
+            {
+                throw new InvalidOperationException("No Id for update");
+            }
+
+            var currentTaskId = CurrentTaskItem.Id.Value;
+
+            // Reload the latest version, we could also cache the previous values, but... why though?
+            var newTaskItem = await ApiClient.Odata.TaskItems[currentTaskId].GetAsync();
+
+            if (newTaskItem == null)
             {
                 throw new InvalidOperationException($"Expected a TaskItem for Id '{currentTaskId}'");
             }

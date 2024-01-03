@@ -59,7 +59,9 @@ try
     builder.Services.AddScoped<ITaskItemService, TaskItemService>();
     builder.Services.AddScoped<ITeamService, TeamService>();
     builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+    builder.Services.AddScoped<ILocalizationRecordService, LocalizationRecordService>();
     builder.Services.AddScoped<IAclService, AclService>();
+    
 
     // Logging
     builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));

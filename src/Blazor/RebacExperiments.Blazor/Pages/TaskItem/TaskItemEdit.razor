@@ -19,27 +19,28 @@
     <FluentValidationSummary />
     <FluentStack Orientation="Orientation.Vertical">
         <div>
-            <FluentTextField Name="title" @bind-Value="CurrentTaskItem.Title" Label="Title" Required />
-            <FluentValidationMessage For="@(() => CurrentTaskItem.Title)" />
-        </div>
+            <FluentTextField Name="title" @bind-Value="CurrentTaskItem.Title" Label=@Loc["TaskItem_Title"] Required />
+             <FluentValidationMessage For="@(() => CurrentTaskItem.Title)" />
+         </div>
          <div>
-             <FluentTextArea Name="description" Rows=5 Cols=60 @bind-Value="CurrentTaskItem.Description" Label="Description" Required />
+             <FluentTextArea Name="description" Rows=5 Cols=60 @bind-Value="CurrentTaskItem.Description" Label=@Loc["TaskItem_Description"] Required />
              <FluentValidationMessage For="@(() => CurrentTaskItem.Description)" />
          </div>
          <div>
-             <FluentSelect TOption="TaskItemPriorityEnum?" @bind-SelectedOption=@CurrentTaskItem.TaskItemPriority @onchange=HandleTaskItemPriority>
-                 <FluentOption Value="-1">@Loc["TaskItemPriorityEnum_Select"]</FluentOption>
-                 @foreach (TaskItemPriorityEnum taskItemPriority in Enum.GetValues<TaskItemPriorityEnum>())
-                 {
+             <FluentSelect TOption="TaskItemPriorityEnum?" Label=@Loc["TaskItem_TaskItemPriority"] @bind-SelectedOption=@CurrentTaskItem.TaskItemPriority @onchange=HandleTaskItemPriority Required>
+                <FluentOption Value="-1">@Loc["TaskItemPriorityEnum_Select"]</FluentOption>
+                    @foreach (TaskItemPriorityEnum taskItemPriority in Enum.GetValues<TaskItemPriorityEnum>())
+                {
                     <FluentOption Value=@taskItemPriority.ToString() Selected=@(taskItemPriority == CurrentTaskItem.TaskItemPriority)>@Loc[$"TaskItemPriorityEnum_{taskItemPriority.ToString()}"]</FluentOption>
-                 }
-             </FluentSelect>
-             <FluentValidationMessage For="@(() => CurrentTaskItem.TaskItemPriority)" />
-         </div>
-        </FluentStack>
-        <FluentStack Orientation="Orientation.Horizontal">
-            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Save Changes</FluentButton>
-            <FluentButton Appearance="Appearance.Accent">Discard Changes</FluentButton>
-        </FluentStack>
-
-    </EditForm>
+                }
+            </FluentSelect>
+            <FluentValidationMessage For="@(() => CurrentTaskItem.TaskItemPriority)" />
+        </div>
+        <div>
+            <FluentStack Orientation="Orientation.Horizontal">
+                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Save Changes</FluentButton>
+                <FluentButton Appearance="Appearance.Accent" OnClick="@(async () => await HandleDiscardAsync())">Discard Changes</FluentButton>
+            </FluentStack>
+        </div>
+    </FluentStack>
+</EditForm>
