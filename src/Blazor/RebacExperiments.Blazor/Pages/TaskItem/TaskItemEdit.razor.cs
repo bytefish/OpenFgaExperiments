@@ -5,6 +5,7 @@ using Microsoft.Extensions.Localization;
 using RebacExperiments.Blazor.Infrastructure;
 using RebacExperiments.Blazor.Localization;
 using RebacExperiments.Shared.ApiSdk.Models;
+using System.Net.Http.Headers;
 
 namespace RebacExperiments.Blazor.Pages
 {
@@ -25,7 +26,7 @@ namespace RebacExperiments.Blazor.Pages
         /// <summary>
         /// The TaskItem Details to be displayed.
         /// </summary>
-        public TaskItem CurrentTaskItem { get; set; } = new TaskItem();
+        public TaskItem CurrentTaskItem { get; set; } = null!;
 
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
@@ -52,13 +53,49 @@ namespace RebacExperiments.Blazor.Pages
             return taskItem;
         }
 
+        public void HandleTaskItemPriority(ChangeEventArgs changeEventArgs)
+        {
+            var stringValue = changeEventArgs.Value?.ToString();
+
+            if(string.IsNullOrWhiteSpace(stringValue) || stringValue == "-1")
+            {
+                CurrentTaskItem.TaskItemPriority = null;
+            } 
+            else
+            {
+                CurrentTaskItem.TaskItemPriority = Enum.Parse<TaskItemPriorityEnum>(stringValue);
+            }
+
+            StateHasChanged();            
+        }
+
         /// <summary>
-        /// Submits the Form.
+        /// Submits the Form and reloads the updated data.
         /// </summary>
         /// <returns>An awaitable <see cref="Task"/></returns>
-        private Task HandleValidSubmitAsync()
+        private async Task HandleValidSubmitAsync()
         {
-            return Task.CompletedTask;
+            if(CurrentTaskItem.Id == null)
+            {
+                throw new InvalidOperationException("No Id for update");
+            }
+
+            var currentTaskId = CurrentTaskItem.Id.Value;
+
+            // Update the Task Item using the Patch-Endpoint:
+            await ApiClient.Odata.TaskItems[currentTaskId].PatchAsync(CurrentTaskItem);
+
+            // Kiota doesn't generate the Return Type, so we need to reload the TaskItem,
+            // which is inefficient. This should be researched and maybe an issue for 
+            // Kiota needs to be raised.
+            var newTaskItem = await ApiClient.Odata.TaskItems[currentTaskId].GetAsync();
+
+            if(newTaskItem == null)
+            {
+                throw new InvalidOperationException($"Expected a TaskItem for Id '{currentTaskId}'");
+            }
+
+            CurrentTaskItem = newTaskItem;
         }
 
         /// <summary>
