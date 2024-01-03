@@ -2,14 +2,17 @@
 
 @namespace RebacExperiments.Blazor.Pages
 
+@using Microsoft.Extensions.Localization
 @using RebacExperiments.Blazor.Components
 @using RebacExperiments.Blazor.Extensions
 @using RebacExperiments.Blazor.Infrastructure
+@using RebacExperiments.Blazor.Localization
 @using RebacExperiments.Blazor.Shared.Models;
 @using RebacExperiments.Shared.ApiSdk;
 @using RebacExperiments.Shared.ApiSdk.Models;
 
 @inject ApiClient ApiClient
+@inject IStringLocalizer<SharedResource> Loc
 
 <EditForm Model="@CurrentTaskItem" OnValidSubmit="@(async () => await HandleValidSubmitAsync())" FormName="task_item_edit" novalidate>
     <SimpleValidator TModel=TaskItem ValidationFunc="ValidateTaskItem" />

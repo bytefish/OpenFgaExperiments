@@ -18,12 +18,6 @@ namespace RebacExperiments.Blazor.Pages
         public int Id { get; set; }
 
         /// <summary>
-        /// Localizer to use for translating messages.
-        /// </summary>
-        [Inject]
-        public IStringLocalizer<SharedResource> Loc { get; set; } = null!;
-
-        /// <summary>
         /// The TaskItem Details to be displayed.
         /// </summary>
         public TaskItem CurrentTaskItem { get; set; } = null!;
