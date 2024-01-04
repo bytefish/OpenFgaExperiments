@@ -1,1 +1,0 @@
-﻿CREATE UNIQUE INDEX [UX_Application_Language_Name] ON [Application].[Language] ([Name])

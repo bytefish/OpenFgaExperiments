@@ -115,13 +115,5 @@
     <Build Include="Identity\Tables\UserRole.sql" />
     <Build Include="Identity\Sequences\sq_UserRole.sql" />
     <None Include="Scripts\Identity\pds-120-ins-identity-user-roles.sql" />
-    <Build Include="Application\Tables\LocalizationRecord.sql" />
-    <None Include="Scripts\Application\pds-180-ins-application-language.sql" />
-    <Build Include="Application\Tables\Language.sql" />
-    <Build Include="Application\Sequences\sq_Language.sql" />
-    <Build Include="Application\Sequences\sq_LocalizationRecord.sql" />
-    <None Include="Scripts\Application\pds-190-ins-application-localization-record.sql" />
-    <Build Include="Application\Indexes\UX_Application_Language_Name.sql" />
-    <Build Include="Application\Indexes\UX_Application_LocalizationRecord_Name_LanguageID.sql" />
   </ItemGroup>
 </Project>
