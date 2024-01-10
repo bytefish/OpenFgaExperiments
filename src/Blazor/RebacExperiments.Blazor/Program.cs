@@ -9,10 +9,14 @@ using Microsoft.Kiota.Http.HttpClientLibrary;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+
+// Auth
+builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthenticationStateProvider>();
 
 // We need the CookieHandler to send the Authentication Cookie to the Server.
 builder.Services.AddScoped<CookieHandler>();
