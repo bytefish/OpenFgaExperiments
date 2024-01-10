@@ -73,6 +73,18 @@ namespace RebacExperiments.Server.Api.Services
             return allowed;
         }
 
+        public async Task<bool> CheckUserRoleAsync(int userId, string roleName, CancellationToken cancellationToken)
+        {
+            var query = from userRole in _applicationDbContext.UserRoles
+                        join role in _applicationDbContext.Roles on userRole.RoleId equals role.Id
+                        where userRole.UserId.Equals(userId) && role.Name.Equals(roleName)
+                        select role;
+
+            return await query
+                .AnyAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         public async Task<List<TObjectType>> ListObjectsAsync<TObjectType, TSubjectType>(int subjectId, string relation, CancellationToken cancellationToken)
             where TObjectType : Entity
             where TSubjectType : Entity

@@ -18,13 +18,14 @@ namespace RebacExperiments.Server.Api.Services
         private readonly ILogger<UserService> _logger;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ApplicationDbContext _applicationDbContext;
+        private readonly IAclService _aclService;
 
-        public UserService(ILogger<UserService> logger, ApplicationDbContext applicationDbContext, IPasswordHasher passwordHasher)
+        public UserService(ILogger<UserService> logger, ApplicationDbContext applicationDbContext, IPasswordHasher passwordHasher, IAclService aclService)
         {
             _logger = logger;
             _applicationDbContext = applicationDbContext;
             _passwordHasher = passwordHasher;
-
+            _aclService = aclService;
         }
 
         public async Task<List<Claim>> GetClaimsAsync(string username, string password, CancellationToken cancellationToken)
@@ -91,6 +92,151 @@ namespace RebacExperiments.Server.Api.Services
             }
 
             return claims;
+        }
+
+        public async Task<User> CreateUserAsync(User user, int currentUserId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            // Make sure the Current User is the last editor:
+            user.LastEditedBy = currentUserId;
+
+            // Add the new Task, the HiLo Pattern automatically assigns a new Id using the HiLo Pattern
+            await _applicationDbContext
+                .AddAsync(user, cancellationToken)
+                .ConfigureAwait(false);
+
+            await _applicationDbContext
+                .SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return user;
+        }
+
+        public async Task<User> GetUserByIdAsync(int userId, int currentUserId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            var user = await _applicationDbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+
+            if (user == null)
+            {
+                throw new EntityNotFoundException()
+                {
+                    EntityName = nameof(User),
+                    EntityId = userId,
+                };
+            }
+
+            bool isAuthorized = await _aclService.CheckUserObjectAsync(currentUserId, user, Actions.CanRead, cancellationToken);
+
+            if (!isAuthorized)
+            {
+                throw new EntityUnauthorizedAccessException()
+                {
+                    EntityName = nameof(User),
+                    EntityId = userId,
+                    UserId = currentUserId,
+                };
+            }
+
+            return user;
+        }
+
+        public async Task<List<User>> GetUsersByUserIdAsync(int userId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            var users = await _aclService
+                .ListUserObjectsAsync<User>(userId, Relations.Viewer, cancellationToken)
+                .ConfigureAwait(false);
+
+            return users;
+        }
+
+        public async Task<User> UpdateUserAsync(User user, int currentUserId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            bool isAdministrator = await _aclService
+                .CheckUserRoleAsync(user.Id, Roles.Administrator, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!isAdministrator)
+            {
+                throw new EntityUnauthorizedAccessException()
+                {
+                    EntityName = nameof(User),
+                    EntityId = user.Id,
+                    UserId = currentUserId,
+                };
+            }
+
+            int rowsAffected = await _applicationDbContext.Users
+                .Where(t => t.Id == user.Id && t.RowVersion == user.RowVersion)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.FullName, user.FullName)
+                    .SetProperty(x => x.PreferredName, user.PreferredName)
+                    .SetProperty(x => x.IsPermittedToLogon, user.IsPermittedToLogon)
+                    .SetProperty(x => x.LogonName, user.LogonName)
+                    .SetProperty(x => x.HashedPassword, user.HashedPassword)
+                    .SetProperty(x => x.LastEditedBy, currentUserId), cancellationToken);
+
+            if (rowsAffected == 0)
+            {
+                throw new EntityConcurrencyException()
+                {
+                    EntityName = nameof(User),
+                    EntityId = user.Id,
+                };
+            }
+
+            return user;
+        }
+
+        public async Task DeleteUserAsync(int userId, int currentUserId, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            var user = await _applicationDbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+
+            if (user == null)
+            {
+                throw new EntityNotFoundException()
+                {
+                    EntityName = nameof(User),
+                    EntityId = userId,
+                };
+            }
+
+            bool isAdministrator = await _aclService
+                .CheckUserRoleAsync(userId, Roles.Administrator, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!isAdministrator)
+            {
+                throw new EntityUnauthorizedAccessException()
+                {
+                    EntityName = nameof(User),
+                    EntityId = userId,
+                    UserId = currentUserId,
+                };
+            }
+
+            await _applicationDbContext.Users
+                .Where(t => t.Id == userId)
+                .ExecuteDeleteAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            var tuplesToDelete = await _aclService
+                .ReadAllRelationshipsByObjectAsync<User>(userId)
+                .ConfigureAwait(false);
+
+            await _aclService.DeleteRelationshipsAsync(tuplesToDelete, cancellationToken);
         }
     }
 }

@@ -98,7 +98,7 @@ namespace RebacExperiments.Server.Api.Services
             _logger.TraceMethodEntry();
 
             var teams = await _aclService
-                .ListUserObjectsAsync<Team>(userId, Relations.Viewer, cancellationToken)
+                .ListUserObjectsAsync<Team>(userId, Actions.CanRead, cancellationToken)
                 .ConfigureAwait(false);
 
             return teams;

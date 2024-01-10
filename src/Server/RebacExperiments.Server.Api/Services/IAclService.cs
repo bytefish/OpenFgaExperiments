@@ -33,10 +33,18 @@ namespace RebacExperiments.Server.Api.Services
             where TObjectType : Entity;
 
         /// <summary>
+        /// Checks if a <see cref="User"/> is in a given <typeparamref name="TObjectType"/>. 
+        /// </summary>
+        /// <param name="objectId">Object Key</param>
+        /// <param name="relation">Relation</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns><see cref="true"/>, if the <typeparamref name="TSubjectType"/> is authorized; else <see cref="false"/></returns>
+        Task<bool> CheckUserRoleAsync(int userId, string roleName, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Checks if a <see cref="User"/> is authorized to access an <typeparamref name="TObjectType"/>. 
         /// </summary>
         /// <typeparam name="TObjectType">Object Type</typeparam>
-        /// <param name="context">DbContext</param>
         /// <param name="objectId">Object Key</param>
         /// <param name="relation">Relation</param>
         /// <param name="cancellationToken">Cancellation Token</param>
