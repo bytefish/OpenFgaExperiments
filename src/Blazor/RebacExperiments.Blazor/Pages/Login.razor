@@ -1,0 +1,40 @@
+﻿@page "/Login"
+@layout EmptyLayout
+
+@using RebacExperiments.Shared.ApiSdk
+
+@inject ApiClient ApiClient
+@inject IStringLocalizer<SharedResource> Loc
+@inject NavigationManager NavigationManager
+@inject CustomAuthenticationStateProvider AuthStateProvider
+
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+
+    <FluentMessageBar Title="Descriptive title" Intent="@MessageIntent.Error">
+    </FluentMessageBar>
+}
+<EditForm Model="@Input" OnValidSubmit="@(async () => await SignInUserAsync())" FormName="login_form" novalidate>
+    <SimpleValidator TModel=InputModel ValidationFunc="ValidateInputModel" />
+    <FluentValidationSummary />
+    <FluentStack Orientation="Orientation.Vertical">
+        <div>
+            <FluentTextField Name="login_eMail" @bind-Value="Input.Email" Label=@Loc["Login_Email"] Required />
+             <FluentValidationMessage For="@(() => Input.Email)" />
+         </div>
+         <div>
+             <FluentTextField Name="login_password" TextFieldType="TextFieldType.Password" @bind-Value="Input.Password" Label=@Loc["Login_Password"] Required />
+             <FluentValidationMessage For="@(() => Input.Password)" />
+         </div>
+         <div>
+             <FluentCheckbox Name="login_rememberMe" @bind-Value="Input.RememberMe" Label=@Loc["Login_RememberMe"] />
+             <FluentValidationMessage For="@(() => Input.RememberMe)" />
+         </div>
+         <div>
+             <FluentStack Orientation="Orientation.Horizontal">
+                 <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
+             </FluentStack>
+         </div>
+     </FluentStack>
+ </EditForm>

@@ -1,56 +1,63 @@
 ﻿@using Microsoft.AspNetCore.Components
 @using System.Runtime.InteropServices
 @using RebacExperiments.Blazor.Components
+@using RebacExperiments.Blazor.Components.RedirectToLogin
 @namespace RebacExperiments.Blazor.Shared
 
 <PageTitle>Relationship-based Experiments with ASP.NET Core OData</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        <div>
+            <FluentLayout>
+                <FluentHeader Class="siteheader">
+                    <a href="/">
+                        Relationship-based Experiments with ASP.NET Core OData
+                    </a>
+                    <FluentSpacer />
+                    <div class="notifications">
+                        <NotificationCenter />
+                    </div>
+                    <div class="settings">
+                        <SiteSettings />
+                    </div>
+                </FluentHeader>
+                <FluentStack Class="body-stack" Orientation="Orientation.Horizontal" Width="100%" HorizontalGap="0">
+                    <NavMenu />
+                    <FluentBodyContent id="body-content">
+                        <div class="content">
+                            <article id="article">
+                                <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
+                                <div>@Body</div>
+                            </article>
+                            <aside>
 
-<div>
-    <FluentLayout>
-        <FluentHeader Class="siteheader">
-            <a href="/">
-                Relationship-based Experiments with ASP.NET Core OData
-            </a>
-            <FluentSpacer />
-            <div class="notifications">
-                <NotificationCenter />
-            </div>
-            <div class="settings">
-                <SiteSettings />
-            </div>
-        </FluentHeader>
-        <FluentStack Class="body-stack" Orientation="Orientation.Horizontal" Width="100%" HorizontalGap="0">
-            <NavMenu />
-            <FluentBodyContent id="body-content">
-                <div class="content">
-                    <article id="article">
-                        <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
-                        <div>@Body</div>
-                    </article>
-                    <aside>
+                            </aside>
+                            <FluentToastProvider MaxToastCount="10" />
+                            <FluentDialogProvider />
+                            <FluentTooltipProvider />
+                        </div>
+                    </FluentBodyContent>
+                </FluentStack>
 
-                    </aside>
-                    <FluentToastProvider MaxToastCount="10" />
-                    <FluentDialogProvider />
-                    <FluentTooltipProvider />
-                </div>
-            </FluentBodyContent>
-        </FluentStack>
+                <FluentFooter Style="@("height: 40px; color: white;")">
+                    <div class="version">
+                        <small>
+                            Version: @_version
+                            &nbsp;-&nbsp;
+                            <a href="https://dotnet.microsoft.com/en-us/learn/aspnet/what-is-aspnet-core">Powered by @RuntimeInformation.FrameworkDescription</a>
+                        </small>
+                    </div>
+                    <FluentSpacer />
 
-        <FluentFooter Style="@("height: 40px; color: white;")">
-            <div class="version">
-                <small>
-                    Version: @_version
-                    &nbsp;-&nbsp;
-                    <a href="https://dotnet.microsoft.com/en-us/learn/aspnet/what-is-aspnet-core">Powered by @RuntimeInformation.FrameworkDescription</a>
-                </small>
-            </div>
-            <FluentSpacer />
+                    <div class="copy">
+                        <small>© 2023. All rights reserved.</small>
+                    </div>
+                </FluentFooter>
 
-            <div class="copy">
-                <small>© 2023. All rights reserved.</small>
-            </div>
-        </FluentFooter>
-
-    </FluentLayout>
-</div>
+            </FluentLayout>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin></RedirectToLogin>
+    </NotAuthorized>
+</AuthorizeView>

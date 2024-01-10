@@ -192,6 +192,18 @@
   <data name="FilterOperatorEnum_Yes" xml:space="preserve">
     <value>Yes</value>
   </data>
+  <data name="Login_Email" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Login_Failed" xml:space="preserve">
+    <value>Login failed</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Login_RememberMe" xml:space="preserve">
+    <value>Remember Me</value>
+  </data>
   <data name="TaskItemPriorityEnum_High" xml:space="preserve">
     <value>High</value>
   </data>
