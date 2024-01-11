@@ -8,33 +8,41 @@
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthStateProvider
 
+<div class="container">
+    <FluentCard Width="500px">
+        <EditForm Model="@Input" OnValidSubmit="@(async () => await SignInUserAsync())" FormName="login_form" novalidate>
+            <SimpleValidator TModel=InputModel ValidationFunc="ValidateInputModel" />
+            <FluentValidationSummary />
+            <FluentStack Orientation="Orientation.Vertical">
+                <FluentGrid Spacing="3" Justify="JustifyContent.Center">
+                    <FluentGridItem xs="12">
+                        <h1>Login</h1>
+                     </FluentGridItem>
+                    <FluentGridItem xs="12">
+                        <FluentTextField Name="login_eMail" Style="width: 100%" @bind-Value="Input.Email" Label=@Loc["Login_Email"] Required />
+                         <FluentValidationMessage For="@(() => Input.Email)" />
+                     </FluentGridItem>
+                     <FluentGridItem xs="12">
+                         <FluentTextField Name="login_password" Style="width: 100%" TextFieldType="TextFieldType.Password" @bind-Value="Input.Password" Label=@Loc["Login_Password"] Required />
+                         <FluentValidationMessage For="@(() => Input.Password)" />
+                     </FluentGridItem>
+                     <FluentGridItem xs="12">
+                         <FluentCheckbox Name="login_rememberMe" @bind-Value="Input.RememberMe" Label=@Loc["Login_RememberMe"] />
+                         <FluentValidationMessage For="@(() => Input.RememberMe)" />
+                     </FluentGridItem>
+                     <FluentGridItem xs="12">
+                         <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Login</FluentButton>
+                     </FluentGridItem>
+                     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                    {
+                        <FluentGridItem xs="12">
+                            <FluentMessageBar Style="width: 100%" Title="Descriptive title" Intent="@MessageIntent.Error">
+                            </FluentMessageBar>
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+            </FluentStack>
+        </EditForm>
 
-@if (!string.IsNullOrWhiteSpace(ErrorMessage))
-{
-
-    <FluentMessageBar Title="Descriptive title" Intent="@MessageIntent.Error">
-    </FluentMessageBar>
-}
-<EditForm Model="@Input" OnValidSubmit="@(async () => await SignInUserAsync())" FormName="login_form" novalidate>
-    <SimpleValidator TModel=InputModel ValidationFunc="ValidateInputModel" />
-    <FluentValidationSummary />
-    <FluentStack Orientation="Orientation.Vertical">
-        <div>
-            <FluentTextField Name="login_eMail" @bind-Value="Input.Email" Label=@Loc["Login_Email"] Required />
-             <FluentValidationMessage For="@(() => Input.Email)" />
-         </div>
-         <div>
-             <FluentTextField Name="login_password" TextFieldType="TextFieldType.Password" @bind-Value="Input.Password" Label=@Loc["Login_Password"] Required />
-             <FluentValidationMessage For="@(() => Input.Password)" />
-         </div>
-         <div>
-             <FluentCheckbox Name="login_rememberMe" @bind-Value="Input.RememberMe" Label=@Loc["Login_RememberMe"] />
-             <FluentValidationMessage For="@(() => Input.RememberMe)" />
-         </div>
-         <div>
-             <FluentStack Orientation="Orientation.Horizontal">
-                 <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
-             </FluentStack>
-         </div>
-     </FluentStack>
- </EditForm>
+    </FluentCard>
+</div>
