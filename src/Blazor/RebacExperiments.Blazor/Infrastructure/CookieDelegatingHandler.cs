@@ -5,11 +5,11 @@ using RebacExperiments.Blazor.Shared.Logging;
 
 namespace RebacExperiments.Blazor.Infrastructure
 {
-    public class CookieHandler : DelegatingHandler
+    public class CookieDelegatingHandler : DelegatingHandler
     {
-        private readonly ILogger<CookieHandler> _logger;
+        private readonly ILogger<CookieDelegatingHandler> _logger;
 
-        public CookieHandler(ILogger<CookieHandler> logger)
+        public CookieDelegatingHandler(ILogger<CookieDelegatingHandler> logger)
         {
             _logger = logger;
         }

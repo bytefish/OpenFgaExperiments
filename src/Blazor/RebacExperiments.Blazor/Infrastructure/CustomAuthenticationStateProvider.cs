@@ -8,6 +8,8 @@ namespace RebacExperiments.Blazor.Infrastructure
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
+        private const string LocalStorageKey = "currentUser";
+
         private readonly LocalStorageService _localStorageService;
 
         public CustomAuthenticationStateProvider(LocalStorageService localStorageService)
@@ -17,17 +19,17 @@ namespace RebacExperiments.Blazor.Infrastructure
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var currentUser = await GetCurrentUserAsync();
+            var cachedCurrentUser = await GetCurrentUserAsync();
 
-            if(currentUser == null)
+            if(cachedCurrentUser == null)
             {
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
 
             Claim[] claims = [
-                new Claim(ClaimTypes.NameIdentifier, currentUser.Id!.ToString()!),
-                new Claim(ClaimTypes.Name, currentUser.LogonName!.ToString()!),
-                new Claim(ClaimTypes.Email, currentUser.LogonName!.ToString()!)
+                new Claim(ClaimTypes.NameIdentifier, cachedCurrentUser.Id!.ToString()!),
+                new Claim(ClaimTypes.Name, cachedCurrentUser.LogonName!.ToString()!),
+                new Claim(ClaimTypes.Email, cachedCurrentUser.LogonName!.ToString()!)
             ];
 
             var authenticationState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims, authenticationType: nameof(CustomAuthenticationStateProvider))));
@@ -35,13 +37,13 @@ namespace RebacExperiments.Blazor.Infrastructure
             return authenticationState;
         }
 
-        public async Task SetCurrentUser(User? currentUser)
-        {
-            await _localStorageService.SetItem("currentUser", currentUser);
+        public async Task SetCurrentUserAsync(User? currentUser)
+        { 
+            await _localStorageService.SetItem(LocalStorageKey, currentUser);
             
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
 
-        public Task<User?> GetCurrentUserAsync() => _localStorageService.GetItemAsync<User>("currentUser");
+        public Task<User?> GetCurrentUserAsync() => _localStorageService.GetItemAsync<User>(LocalStorageKey);
     }
 }

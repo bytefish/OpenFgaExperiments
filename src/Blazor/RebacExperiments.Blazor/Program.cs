@@ -25,14 +25,16 @@ builder.Services.AddSingleton<CustomAuthenticationStateProvider>();
 builder.Services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<CustomAuthenticationStateProvider>());
 
 // We need the CookieHandler to send the Authentication Cookie to the Server.
-builder.Services.AddScoped<CookieHandler>();
+builder.Services.AddScoped<CookieDelegatingHandler>();
+builder.Services.AddScoped<UnauthorizedDelegatingHandler>();
 
 // Add the Kiota Client.
 builder.Services.AddScoped<IAuthenticationProvider, AnonymousAuthenticationProvider>();
 
 builder.Services
     .AddHttpClient<IRequestAdapter, HttpClientRequestAdapter>(client => client.BaseAddress = new Uri("https://localhost:5000"))
-    .AddHttpMessageHandler<CookieHandler>();
+    .AddHttpMessageHandler<UnauthorizedDelegatingHandler>()
+    .AddHttpMessageHandler<CookieDelegatingHandler>();
 
 builder.Services.AddScoped<ApiClient>();
 

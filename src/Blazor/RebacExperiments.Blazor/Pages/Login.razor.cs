@@ -8,6 +8,7 @@ using System.Text.Json.Nodes;
 using Microsoft.Kiota.Abstractions;
 using RebacExperiments.Blazor.Infrastructure;
 using Microsoft.Extensions.Localization;
+using System.Web;
 
 namespace RebacExperiments.Blazor.Pages
 {
@@ -22,6 +23,13 @@ namespace RebacExperiments.Blazor.Pages
 
             public const bool RememberMe = true;
         }
+
+
+        /// <summary>
+        /// If a Return URL is given, we will navigate there after login.
+        /// </summary>
+        [SupplyParameterFromQuery(Name = "returnUrl")]
+        private string? ReturnUrl { get; set; }
 
         /// <summary>
         /// Data Model for binding to the Form.
@@ -83,17 +91,28 @@ namespace RebacExperiments.Blazor.Pages
                 // Now refresh the Authentication State:
                 var me = await ApiClient.Odata.Me.GetAsync();
 
-                await AuthStateProvider.SetCurrentUser(me);
+                await AuthStateProvider.SetCurrentUserAsync(me);
 
-                NavigationManager.NavigateTo("/");
+                var navigationUrl = GetNavigationUrl();
+
+                NavigationManager.NavigateTo(navigationUrl);
             }
             catch
             {
-                // TODO
                 ErrorMessage = Loc["Login_Failed"];
 
-                await AuthStateProvider.SetCurrentUser(null);
+                await AuthStateProvider.SetCurrentUserAsync(null);
             }
+        }
+
+        private string GetNavigationUrl()
+        {
+            if(ReturnUrl == null)
+            {
+                return "/";
+            }
+
+            return ReturnUrl;
         }
 
         public async Task SignInUser_Philipp()
@@ -145,15 +164,6 @@ namespace RebacExperiments.Blazor.Pages
                 {
                     PropertyName = nameof(model.Password),
                     ErrorMessage = Loc.GetString("Validation_IsRequired", nameof(model.Password))
-                };
-            }
-
-            if (model.RememberMe == null)
-            {
-                yield return new ValidationError
-                {
-                    PropertyName = nameof(model.RememberMe),
-                    ErrorMessage = Loc.GetString("Validation_IsRequired", nameof(model.RememberMe))
                 };
             }
         }
