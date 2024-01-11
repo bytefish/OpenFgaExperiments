@@ -3,34 +3,13 @@
 using Microsoft.AspNetCore.Components;
 using RebacExperiments.Shared.ApiSdk.Odata.SignInUser;
 using System.ComponentModel.DataAnnotations;
-using static System.Net.WebRequestMethods;
-using System.Text.Json.Nodes;
-using Microsoft.Kiota.Abstractions;
 using RebacExperiments.Blazor.Infrastructure;
 using Microsoft.Extensions.Localization;
-using System.Web;
 
 namespace RebacExperiments.Blazor.Pages
 {
     public partial class Login
     {
-        // Default Values.
-        private class Defaults
-        {
-            public const string Email = "philipp@bytefish.de";
-
-            public const string Password = "5!F25GbKwU3P";
-
-            public const bool RememberMe = true;
-        }
-
-
-        /// <summary>
-        /// If a Return URL is given, we will navigate there after login.
-        /// </summary>
-        [SupplyParameterFromQuery(Name = "returnUrl")]
-        private string? ReturnUrl { get; set; }
-
         /// <summary>
         /// Data Model for binding to the Form.
         /// </summary>
@@ -41,14 +20,14 @@ namespace RebacExperiments.Blazor.Pages
             /// </summary>
             [Required]
             [EmailAddress]
-            public string Email { get; set; } = "";
+            public required string Email { get; set; }
 
             /// <summary>
             /// Gets or sets the Password.
             /// </summary>
             [Required]
             [DataType(DataType.Password)]
-            public string Password { get; set; } = "";
+            public required string Password { get; set; }
 
             /// <summary>
             /// Gets or sets the RememberMe Flag.
@@ -57,15 +36,40 @@ namespace RebacExperiments.Blazor.Pages
             public bool RememberMe { get; set; } = false;
         }
 
+        // Default Values.
+        private static class Defaults
+        {
+            public static class Philipp
+            {
+                public const string Email = "philipp@bytefish.de";
+                public const string Password = "5!F25GbKwU3P";
+                public const bool RememberMe = true;
+            }
+
+            public static class MaxMustermann
+            {
+                public const string Email = "max@mustermann.local";
+                public const string Password = "5!F25GbKwU3P";
+                public const bool RememberMe = true;
+            }
+        }
+
+
+        /// <summary>
+        /// If a Return URL is given, we will navigate there after login.
+        /// </summary>
+        [SupplyParameterFromQuery(Name = "returnUrl")]
+        private string? ReturnUrl { get; set; }
+
         /// <summary>
         /// The Model the Form is going to bind to.
         /// </summary>
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new()
         {
-            Email = Defaults.Email,
-            Password = Defaults.Password,
-            RememberMe = Defaults.RememberMe
+            Email = Defaults.Philipp.Email,
+            Password = Defaults.Philipp.Password,
+            RememberMe = Defaults.Philipp.RememberMe
         };
 
         /// <summary>
@@ -107,39 +111,12 @@ namespace RebacExperiments.Blazor.Pages
 
         private string GetNavigationUrl()
         {
-            if(ReturnUrl == null)
+            if(string.IsNullOrWhiteSpace(ReturnUrl))
             {
                 return "/";
             }
 
             return ReturnUrl;
-        }
-
-        public async Task SignInUser_Philipp()
-        {
-            await ApiClient.Odata.SignInUser
-                .PostAsync(new SignInUserPostRequestBody
-                {
-                    Username = "philipp@bytefish.de",
-                    Password = "5!F25GbKwU3P",
-                    RememberMe = true
-                });
-        }
-
-        public async Task SignInUser_Max()
-        {
-            await ApiClient.Odata.SignInUser
-                .PostAsync(new SignInUserPostRequestBody
-                {
-                    Username = "max@mustermann.local",
-                    Password = "5!F25GbKwU3P",
-                    RememberMe = true
-                });
-        }
-
-        public async Task SignOutUser()
-        {
-            await ApiClient.Odata.SignOutUser.PostAsync();
         }
 
         /// <summary>

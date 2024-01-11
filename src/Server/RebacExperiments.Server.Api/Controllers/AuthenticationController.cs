@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
-using RebacExperiments.Server.Database;
 using System.Security.Claims;
 
 namespace RebacExperiments.Server.Api.Controllers
@@ -26,7 +25,7 @@ namespace RebacExperiments.Server.Api.Controllers
         }
 
         [HttpPost("odata/SignInUser")]
-        public async Task<IActionResult> SignInUser([FromServices] ApplicationDbContext context, [FromServices] IUserService userService, [FromBody] ODataActionParameters parameters, CancellationToken cancellationToken)
+        public async Task<IActionResult> SignInUser([FromServices] IUserService userService, [FromBody] ODataActionParameters parameters, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 

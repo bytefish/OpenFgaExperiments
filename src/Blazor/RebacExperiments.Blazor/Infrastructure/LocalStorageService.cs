@@ -1,4 +1,6 @@
-﻿using Microsoft.JSInterop;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.JSInterop;
 using System.Text.Json;
 
 namespace RebacExperiments.Blazor.Infrastructure

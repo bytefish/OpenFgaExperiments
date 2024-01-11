@@ -19,17 +19,17 @@ namespace RebacExperiments.Blazor.Infrastructure
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var cachedCurrentUser = await GetCurrentUserAsync();
+            var currentUser = await GetCurrentUserAsync();
 
-            if(cachedCurrentUser == null)
+            if(currentUser == null)
             {
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
 
             Claim[] claims = [
-                new Claim(ClaimTypes.NameIdentifier, cachedCurrentUser.Id!.ToString()!),
-                new Claim(ClaimTypes.Name, cachedCurrentUser.LogonName!.ToString()!),
-                new Claim(ClaimTypes.Email, cachedCurrentUser.LogonName!.ToString()!)
+                new Claim(ClaimTypes.NameIdentifier, currentUser.Id!.ToString()!),
+                new Claim(ClaimTypes.Name, currentUser.LogonName!.ToString()!),
+                new Claim(ClaimTypes.Email, currentUser.LogonName!.ToString()!)
             ];
 
             var authenticationState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims, authenticationType: nameof(CustomAuthenticationStateProvider))));
