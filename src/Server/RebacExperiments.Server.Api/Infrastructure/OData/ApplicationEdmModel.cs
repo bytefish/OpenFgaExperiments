@@ -15,9 +15,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             modelBuilder.Namespace = "TaskManagementService";
 
-            // Configure Complex Types
-            modelBuilder.ComplexType<User>()
-                .Ignore(x => x.HashedPassword);
 
             // Configure EntitySets
             modelBuilder.EntitySet<User>("Users");
@@ -29,6 +26,10 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             // Configure EnumTypes
             modelBuilder.EnumType<TaskItemStatusEnum>().RemoveMember(TaskItemStatusEnum.None);
             modelBuilder.EnumType<TaskItemPriorityEnum>().RemoveMember(TaskItemPriorityEnum.None);
+
+            // Configure EntityTypes
+            modelBuilder.EntityType<User>()
+                .Ignore(x => x.HashedPassword);
 
             // Configure Singletons
             modelBuilder.Singleton<User>("Me");
