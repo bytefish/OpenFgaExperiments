@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ApiError_Auth_000001" xml:space="preserve">
+    <value>Login failed. Invalid user ID or password.</value>
+  </data>
+  <data name="ApiError_System_000001" xml:space="preserve">
+    <value>An Internal Server Error occured. Please try again later.</value>
+  </data>
+  <data name="ApiError_System_000002" xml:space="preserve">
+    <value>A Bad Request has been sent to the Server.</value>
+  </data>
+  <data name="ApplicationError_Exception" xml:space="preserve">
+    <value>An unexpected application error occured. Try contacting the support.</value>
+  </data>
   <data name="DataGrid_Button_Delete" xml:space="preserve">
     <value>Delete</value>
   </data>

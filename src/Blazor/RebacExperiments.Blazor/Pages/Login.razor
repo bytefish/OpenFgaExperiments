@@ -4,13 +4,14 @@
 @using RebacExperiments.Shared.ApiSdk
 
 @inject ApiClient ApiClient
+@inject ApplicationErrorTranslator ApplicationErrorTranslator
 @inject IStringLocalizer<SharedResource> Loc
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthStateProvider
 
 <div class="container">
     <FluentCard Width="500px">
-        <EditForm Model="@Input" OnValidSubmit="@(async () => await SignInUserAsync())" FormName="login_form" novalidate>
+        <EditForm Model="@Input" OnValidSubmit="SignInUserAsync" FormName="login_form" novalidate>
             <SimpleValidator TModel=InputModel ValidationFunc="ValidateInputModel" />
             <FluentValidationSummary />
             <FluentStack Orientation="Orientation.Vertical">
@@ -33,13 +34,13 @@
                      <FluentGridItem xs="12">
                          <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Login</FluentButton>
                      </FluentGridItem>
-                     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
-                    {
+                     @if(!string.IsNullOrWhiteSpace(ErrorMessage)) {
                         <FluentGridItem xs="12">
-                            <FluentMessageBar Style="width: 100%" Title="Descriptive title" Intent="@MessageIntent.Error">
+                            <FluentMessageBar Style="width: 100%" Title="Error" Intent="@MessageIntent.Error" Type="MessageType.MessageBar">
+                                @ErrorMessage
                             </FluentMessageBar>
                         </FluentGridItem>
-                    }
+                     }
                 </FluentGrid>
             </FluentStack>
         </EditForm>

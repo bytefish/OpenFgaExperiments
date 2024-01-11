@@ -24,7 +24,12 @@ namespace RebacExperiments.Blazor.Infrastructure
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                await _customAuthenticationStateProvider.SetCurrentUserAsync(null); // Clears the Current User and should trigger a Login
+                var currentUser = await _customAuthenticationStateProvider.GetCurrentUserAsync();
+
+                if(currentUser != null)
+                {
+                    await _customAuthenticationStateProvider.SetCurrentUserAsync(null);
+                }
             }
 
             return response;

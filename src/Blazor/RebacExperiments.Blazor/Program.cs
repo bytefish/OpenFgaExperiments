@@ -18,6 +18,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // LocalStorage
 builder.Services.AddSingleton<LocalStorageService>();
 
+// Error Handling
+builder.Services.AddSingleton<ApplicationErrorTranslator>();
+
 // Auth
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();

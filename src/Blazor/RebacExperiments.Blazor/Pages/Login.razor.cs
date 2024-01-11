@@ -75,7 +75,7 @@ namespace RebacExperiments.Blazor.Pages
         /// <summary>
         /// Error Message.
         /// </summary>
-        private string ErrorMessage = string.Empty;
+        public string? ErrorMessage { get; set; }
 
         /// <summary>
         /// Signs in the User to the Service using Cookie Authentication.
@@ -83,8 +83,11 @@ namespace RebacExperiments.Blazor.Pages
         /// <returns></returns>
         public async Task SignInUserAsync()
         {
+            ErrorMessage = null;
+
             try
             {
+                // Sign in the User, which sets the Auth Cookie ...
                 await ApiClient.Odata.SignInUser.PostAsync(new SignInUserPostRequestBody
                 {
                     Username = Input.Email,
@@ -92,20 +95,20 @@ namespace RebacExperiments.Blazor.Pages
                     RememberMe = true
                 });
 
-                // Now refresh the Authentication State:
+                // ... then get the User Profile ...
                 var me = await ApiClient.Odata.Me.GetAsync();
 
+                // ... then set the new User Profile ...
                 await AuthStateProvider.SetCurrentUserAsync(me);
 
+                // ... and navigate to the ReturnUrl.
                 var navigationUrl = GetNavigationUrl();
 
                 NavigationManager.NavigateTo(navigationUrl);
             }
-            catch
+            catch(Exception e)
             {
-                ErrorMessage = Loc["Login_Failed"];
-
-                await AuthStateProvider.SetCurrentUserAsync(null);
+                ErrorMessage = ApplicationErrorTranslator.GetErrorMessage(e);
             }
         }
 
