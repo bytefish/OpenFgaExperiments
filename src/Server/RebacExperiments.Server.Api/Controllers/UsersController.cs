@@ -153,7 +153,5 @@ namespace RebacExperiments.Server.Api.Controllers
                 return _applicationErrorHandler.HandleException(HttpContext, ex);
             }
         }
-
-
     }
 }

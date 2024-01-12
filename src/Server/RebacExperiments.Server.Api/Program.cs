@@ -172,7 +172,7 @@ try
     // Add the Rate Limiting
     builder.Services.AddRateLimiter(options =>
     {
-        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.OnRejected = (ctx, cancellationToken) => throw new RateLimitException(); // Handle this in the middleware ...
 
         options.AddPolicy(Policies.PerUserRatelimit, context =>
         {

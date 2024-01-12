@@ -8,7 +8,6 @@ using Microsoft.OData;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Infrastructure.OData;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace RebacExperiments.Server.Api.Infrastructure.Errors
@@ -27,6 +26,8 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             _logger = logger;
             _options = options.Value;
         }
+
+        #region ModelState Handling
 
         public ActionResult HandleInvalidModelState(HttpContext httpContext, ModelStateDictionary modelStateDictionary)
         {
@@ -107,6 +108,10 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             return result;
         }
 
+        #endregion ModelState Handling
+
+        #region Exception Handling
+
         public ActionResult HandleException(HttpContext httpContext, Exception exception)
         {
             _logger.TraceMethodEntry();
@@ -115,15 +120,20 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
 
             return exception switch
             {
+                // Authentication
                 AuthenticationFailedException e => HandleAuthenticationException(httpContext, e),
+                // Entities
                 EntityConcurrencyException e => HandleEntityConcurrencyException(httpContext, e),
                 EntityNotFoundException e => HandleEntityNotFoundException(httpContext, e),
                 EntityUnauthorizedAccessException e => HandleEntityUnauthorizedException(httpContext, e),
+                // Rate Limiting
+                RateLimitException e => HandleRateLimitException(httpContext, e),
+                // Global Handler
                 Exception e => HandleSystemException(httpContext, e)
             };
         }
 
-        private ActionResult HandleAuthenticationException(HttpContext httpContext, AuthenticationFailedException e)
+        private UnauthorizedODataResult HandleAuthenticationException(HttpContext httpContext, AuthenticationFailedException e)
         {
             _logger.TraceMethodEntry();
 
@@ -138,7 +148,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             return new UnauthorizedODataResult(error);
         }
 
-        private ActionResult HandleEntityConcurrencyException(HttpContext httpContext, EntityConcurrencyException e)
+        private ConflictODataResult HandleEntityConcurrencyException(HttpContext httpContext, EntityConcurrencyException e)
         {
             _logger.TraceMethodEntry();
 
@@ -153,7 +163,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             return new ConflictODataResult(error);
         }
 
-        private ActionResult HandleEntityNotFoundException(HttpContext httpContext, EntityNotFoundException e)
+        private NotFoundODataResult HandleEntityNotFoundException(HttpContext httpContext, EntityNotFoundException e)
         {
             _logger.TraceMethodEntry();
 
@@ -168,7 +178,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             return new NotFoundODataResult(error);
         }
 
-        private ActionResult HandleEntityUnauthorizedException(HttpContext httpContext, EntityUnauthorizedAccessException e)
+        private ForbiddenODataResult HandleEntityUnauthorizedException(HttpContext httpContext, EntityUnauthorizedAccessException e)
         {
             _logger.TraceMethodEntry();
 
@@ -182,8 +192,26 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
 
             return new ForbiddenODataResult(error);
         }
+        
+        private ObjectResult HandleRateLimitException(HttpContext httpContext, RateLimitException e)
+        {
+            _logger.TraceMethodEntry();
 
-        private ActionResult HandleSystemException(HttpContext httpContext, Exception e)
+            var error = new ODataError
+            {
+                ErrorCode = ErrorCodes.TooManyRequests,
+                Message = "Too many requests. The Rate Limit for the user has been exceeded"
+            };
+
+            AddInnerError(httpContext, error, e);
+
+            return new ObjectResult(error)
+            {
+                StatusCode = (int)HttpStatusCode.TooManyRequests,
+            };
+        }
+
+        private ObjectResult HandleSystemException(HttpContext httpContext, Exception e)
         {
             _logger.TraceMethodEntry();
 
@@ -201,6 +229,10 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             };
         }
 
+        #endregion Exception Handling
+
+        #region Debug Information
+
         private void AddInnerError(HttpContext httpContext, ODataError error, Exception? e)
         {
             _logger.TraceMethodEntry();
@@ -216,5 +248,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
                 error.InnerError.TypeName = e.GetType().Name;
             }
         }
+
+        #endregion Debug Information
     }
 }

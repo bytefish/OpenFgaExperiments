@@ -1,4 +1,6 @@
-﻿namespace RebacExperiments.Server.Api.Infrastructure.Errors
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace RebacExperiments.Server.Api.Infrastructure.Errors
 {
     /// <summary>
     /// Error Codes used in the Application.
@@ -24,6 +26,11 @@
         /// General Authentication Error.
         /// </summary>
         public const string AuthenticationFailed = "ApiError_Auth_000001";
+
+        /// <summary>
+        /// Too many requests have been issued.
+        /// </summary>
+        public const string TooManyRequests = "ApiError_RateLimit_000001";
 
         /// <summary>
         /// Entity has not been found.

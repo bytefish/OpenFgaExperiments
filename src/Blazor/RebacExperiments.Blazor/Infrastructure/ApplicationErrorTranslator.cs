@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Localization;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Extensions.Localization;
 using RebacExperiments.Blazor.Localization;
 using RebacExperiments.Shared.ApiSdk.Models.ODataErrors;
 using System.Diagnostics.CodeAnalysis;
@@ -34,10 +36,10 @@ namespace RebacExperiments.Blazor.Infrastructure
             // Format with Trace ID for correlating user error reports with logs.
             if(TryGetRequestTraceId(error.Error!, out string? traceId))
             {
-                return $"{errorCodeMessage} (TraceID = {traceId})";
+                return $"{errorCodeMessage} (Error Code = '{errorCode}', TraceID = '{traceId}')";
             }
 
-            return errorCodeMessage;
+            return $"{errorCodeMessage} (Error Code = '{errorCode}')";
         }
 
         private string GetErrorMessageFromException(Exception e)
