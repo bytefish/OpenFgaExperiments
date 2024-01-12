@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.Extensions.Options;
@@ -15,39 +16,74 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
     /// <summary>
     /// Handles errors returned by the application.
     /// </summary>
-    public class ApplicationErrorHandler
+    public class ODataExceptionFilter : IAsyncExceptionFilter
     {
-        private readonly ILogger<ApplicationErrorHandler> _logger;
+        private readonly ILogger<ODataExceptionFilter> _logger;
 
-        private readonly ApplicationErrorHandlerOptions _options;
+        private readonly ODataExceptionFilterOptions _options;
 
-        public ApplicationErrorHandler(ILogger<ApplicationErrorHandler> logger, IOptions<ApplicationErrorHandlerOptions> options)
+        public ODataExceptionFilter(ILogger<ODataExceptionFilter> logger, IOptions<ODataExceptionFilterOptions> options)
         {
             _logger = logger;
             _options = options.Value;
         }
 
-        #region ModelState Handling
+        public async Task OnExceptionAsync(ExceptionContext context)
+        {
+            var actionResult = HandleException(context.HttpContext, context.Exception);
 
-        public ActionResult HandleInvalidModelState(HttpContext httpContext, ModelStateDictionary modelStateDictionary)
+            await actionResult
+                .ExecuteResultAsync(context)
+                .ConfigureAwait(false);
+
+            context.ExceptionHandled = true;
+        }
+
+        public ActionResult HandleException(HttpContext httpContext, Exception exception)
         {
             _logger.TraceMethodEntry();
+
+            _logger.LogError(exception, "Call to '{RequestPath}' failed due to an Exception", httpContext.Request.Path);
+
+            return exception switch
+            {
+                // Authentication
+                AuthenticationFailedException e => HandleAuthenticationException(httpContext, e),
+                // Entities
+                EntityConcurrencyException e => HandleEntityConcurrencyException(httpContext, e),
+                EntityNotFoundException e => HandleEntityNotFoundException(httpContext, e),
+                EntityUnauthorizedAccessException e => HandleEntityUnauthorizedException(httpContext, e),
+                // Rate Limiting
+                RateLimitException e => HandleRateLimitException(httpContext, e),
+                // Global Handler
+                Exception e => HandleSystemException(httpContext, e)
+            };
+        }
+
+        public ActionResult HandleInvalidModelStateException(HttpContext httpContext, InvalidModelStateException e)
+        {
+            _logger.TraceMethodEntry();
+
+            if(e.ModelStateDictionary.IsValid)
+            {
+                throw new InvalidOperationException("Could not create an error response from a valid ModelStateDictionary");
+            }
 
             ODataError error = new ODataError()
             {
                 ErrorCode = ErrorCodes.BadRequest,
                 Message = "One or more validation errors occured",
-                Details = GetODataErrorDetails(modelStateDictionary),
+                Details = GetODataErrorDetails(e.ModelStateDictionary),
             };
 
             // If we have something like a Deserialization issue, the ModelStateDictionary has
             // a lower-level Exception. We cannot do anything sensible with exceptions, so 
             // we add them to the InnerError.
-            var firstException = GetFirstException(modelStateDictionary);
+            var firstException = GetFirstException(e.ModelStateDictionary);
 
             AddInnerError(httpContext, error, firstException);
-            
-            return new BadRequestObjectResult(error);
+
+            return new BadRequestODataResult(error);
         }
 
         private Exception? GetFirstException(ModelStateDictionary modelStateDictionary)
@@ -96,7 +132,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
 
                     var odataErrorDetail = new ODataErrorDetail
                     {
-                        ErrorCode = errorCode, 
+                        ErrorCode = errorCode,
                         Message = modelError.ErrorMessage,
                         Target = modelStateEntry.Key,
                     };
@@ -106,31 +142,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             }
 
             return result;
-        }
-
-        #endregion ModelState Handling
-
-        #region Exception Handling
-
-        public ActionResult HandleException(HttpContext httpContext, Exception exception)
-        {
-            _logger.TraceMethodEntry();
-
-            _logger.LogError(exception, "Call to '{RequestPath}' failed due to an Exception", httpContext.Request.Path);
-
-            return exception switch
-            {
-                // Authentication
-                AuthenticationFailedException e => HandleAuthenticationException(httpContext, e),
-                // Entities
-                EntityConcurrencyException e => HandleEntityConcurrencyException(httpContext, e),
-                EntityNotFoundException e => HandleEntityNotFoundException(httpContext, e),
-                EntityUnauthorizedAccessException e => HandleEntityUnauthorizedException(httpContext, e),
-                // Rate Limiting
-                RateLimitException e => HandleRateLimitException(httpContext, e),
-                // Global Handler
-                Exception e => HandleSystemException(httpContext, e)
-            };
         }
 
         private UnauthorizedODataResult HandleAuthenticationException(HttpContext httpContext, AuthenticationFailedException e)
@@ -230,8 +241,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
                 HttpStatusCode = (int)HttpStatusCode.TooManyRequests,
             };
         }
-
-        #endregion Exception Handling
 
         #region Debug Information
 

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
+using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database.Models;
@@ -19,12 +20,10 @@ namespace RebacExperiments.Server.Api.Controllers
     public class OrganizationsController : ODataController
     {
         private readonly ILogger<OrganizationsController> _logger;
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public OrganizationsController(ILogger<OrganizationsController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public OrganizationsController(ILogger<OrganizationsController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -35,19 +34,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
+            var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(organization);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(organization);
         }
 
         [HttpGet]
@@ -59,19 +54,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var organizations = await organizationService.GetOrganizationsByUserIdAsync(User.GetUserId(), cancellationToken);
+            var organizations = await organizationService.GetOrganizationsByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(organizations.AsQueryable()));
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(queryOptions.ApplyTo(organizations.AsQueryable()));
         }
 
         [HttpPost]
@@ -83,19 +74,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await organizationService.CreateOrganizationAsync(Organization, User.GetUserId(), cancellationToken);
+            await organizationService.CreateOrganizationAsync(Organization, User.GetUserId(), cancellationToken);
 
-                return Created(Organization);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Created(Organization);
         }
 
         [HttpPut]
@@ -108,26 +95,22 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                // Get the TaskItem with the current values:
-                var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
+            // Get the TaskItem with the current values:
+            var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                // Patch the Values to it:
-                delta.Patch(organization);
+            // Patch the Values to it:
+            delta.Patch(organization);
 
-                // Update the Values:
-                await organizationService.UpdateOrganizationAsync(organization, User.GetUserId(), cancellationToken);
+            // Update the Values:
+            await organizationService.UpdateOrganizationAsync(organization, User.GetUserId(), cancellationToken);
 
-                return Updated(organization);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Updated(organization);
         }
 
         [HttpDelete]
@@ -139,19 +122,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await organizationService.DeleteOrganizationAsync(key, User.GetUserId(), cancellationToken);
+            await organizationService.DeleteOrganizationAsync(key, User.GetUserId(), cancellationToken);
 
-                return StatusCode(StatusCodes.Status204NoContent);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return StatusCode(StatusCodes.Status204NoContent);
         }
     }
 }

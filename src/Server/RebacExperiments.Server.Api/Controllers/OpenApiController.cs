@@ -7,6 +7,7 @@ using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.OData;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OData.Edm;
+using RebacExperiments.Server.Api.Infrastructure.Logging;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
@@ -17,40 +18,30 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
 
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
-
-        public OpenApiController(ILogger<AuthenticationController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public OpenApiController(ILogger<AuthenticationController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [HttpGet("odata/openapi.json")]
         public IActionResult GetOpenApiJson()
         {
-            try
+            _logger.TraceMethodEntry();
+
+            var edmModel = ApplicationEdmModel.GetEdmModel();
+
+            var openApiSettings = new OpenApiConvertSettings
             {
-                var edmModel = ApplicationEdmModel.GetEdmModel();
+                ServiceRoot = new("https://localhost:5000"),
+                PathPrefix = "odata",
+                EnableKeyAsSegment = true,
+            };
 
-                var openApiSettings = new OpenApiConvertSettings
-                {
-                    ServiceRoot = new("https://localhost:5000"),
-                    PathPrefix = "odata",
-                    EnableKeyAsSegment = true,
-                };
+            var openApiDocument = edmModel.ConvertToOpenApi(openApiSettings);
 
-                var openApiDocument = edmModel.ConvertToOpenApi(openApiSettings);
+            var openApiDocumentAsJson = openApiDocument.SerializeAsJson(OpenApiSpecVersion.OpenApi3_0);
 
-                var openApiDocumentAsJson = openApiDocument.SerializeAsJson(OpenApiSpecVersion.OpenApi3_0);
-
-                return Content(openApiDocumentAsJson, "application/json");
-            } 
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, "Failed to generate the OpenAPI Schema from the EDM Schema");
-
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Content(openApiDocumentAsJson, "application/json");
         }
     }
 }

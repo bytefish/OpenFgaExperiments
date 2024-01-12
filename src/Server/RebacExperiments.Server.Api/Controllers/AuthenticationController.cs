@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
+using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
 using System.Security.Claims;
@@ -16,12 +17,9 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
 
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
-
-        public AuthenticationController(ILogger<AuthenticationController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public AuthenticationController(ILogger<AuthenticationController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [HttpPost("odata/SignInUser")]
@@ -31,34 +29,30 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
             string username = (string)parameters["username"];
             string password = (string)parameters["password"];
             bool rememberMe = (bool)parameters["rememberMe"];
 
-            try
-            {
-                // Create ClaimsPrincipal from Database 
-                var userClaims = await userService.GetClaimsAsync(
-                    username: username,
-                    password: password,
-                    cancellationToken: cancellationToken);
+            // Create ClaimsPrincipal from Database 
+            var userClaims = await userService.GetClaimsAsync(
+                username: username,
+                password: password,
+                cancellationToken: cancellationToken);
 
-                // Create the ClaimsPrincipal
-                var claimsIdentity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+            // Create the ClaimsPrincipal
+            var claimsIdentity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                // It's a valid ClaimsPrincipal, sign in
-                await HttpContext.SignInAsync(claimsPrincipal, new AuthenticationProperties { IsPersistent = rememberMe });
+            // It's a valid ClaimsPrincipal, sign in
+            await HttpContext.SignInAsync(claimsPrincipal, new AuthenticationProperties { IsPersistent = rememberMe });
 
-                return Ok();
-            } 
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok();
         }
 
         [HttpPost("odata/SignOutUser")]
@@ -66,14 +60,7 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            try
-            {
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            } 
-            catch(Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return Ok();
         }

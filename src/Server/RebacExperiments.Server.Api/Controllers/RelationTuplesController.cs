@@ -12,18 +12,17 @@ using System.Threading;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.EntityFrameworkCore;
+using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
     public class RelationTuplesController : ODataController
     {
         private readonly ILogger<RelationTuplesController> _logger;
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public RelationTuplesController(ILogger<RelationTuplesController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public RelationTuplesController(ILogger<RelationTuplesController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [HttpGet]
@@ -33,19 +32,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var queryable = aclService.GetAllRelationshipsQueryable();
+            var queryable = aclService.GetAllRelationshipsQueryable();
 
-                return Ok(options.ApplyTo(queryable));
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(options.ApplyTo(queryable));
         }
 
         [HttpPost]
@@ -55,28 +50,24 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
-            }
-
-            try
-            {
-                var tupleToInsert = new RelationTuple
+                throw new InvalidModelStateException
                 {
-                    Object = relationTuple.Object,
-                    Relation = relationTuple.Relation,
-                    Subject = relationTuple.Subject
+                    ModelStateDictionary = ModelState
                 };
-
-                await aclService
-                    .AddRelationshipsAsync(new[] { tupleToInsert }, cancellationToken)
-                    .ConfigureAwait(false);
-
-                return Ok();
             }
-            catch (Exception ex)
+
+            var tupleToInsert = new RelationTuple
             {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+                Object = relationTuple.Object,
+                Relation = relationTuple.Relation,
+                Subject = relationTuple.Subject
+            };
+
+            await aclService
+                .AddRelationshipsAsync(new[] { tupleToInsert }, cancellationToken)
+                .ConfigureAwait(false);
+
+            return Ok();
         }
 
         [HttpDelete]
@@ -86,39 +77,35 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
-            }
-
-            try
-            {
-                var tuplesToDelete = await aclService
-                    .GetAllRelationshipsQueryable()
-                    .Where(x => x.Id == key)
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                if(tuplesToDelete.Count == 0)
+                throw new InvalidModelStateException
                 {
-                    return NotFound();
-                }
-
-                var tupleToDelete = new RelationTuple
-                {
-                    Object = tuplesToDelete[0].Object,
-                    Relation = tuplesToDelete[0].Relation,
-                    Subject = tuplesToDelete[0].Subject
+                    ModelStateDictionary = ModelState
                 };
-
-                await aclService
-                    .DeleteRelationshipsAsync(new[] { tupleToDelete }, cancellationToken)
-                    .ConfigureAwait(false);
-
-                return StatusCode(StatusCodes.Status204NoContent);
             }
-            catch (Exception ex)
+
+            var tuplesToDelete = await aclService
+                .GetAllRelationshipsQueryable()
+                .Where(x => x.Id == key)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (tuplesToDelete.Count == 0)
             {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
+                return NotFound();
             }
+
+            var tupleToDelete = new RelationTuple
+            {
+                Object = tuplesToDelete[0].Object,
+                Relation = tuplesToDelete[0].Relation,
+                Subject = tuplesToDelete[0].Subject
+            };
+
+            await aclService
+                .DeleteRelationshipsAsync(new[] { tupleToDelete }, cancellationToken)
+                .ConfigureAwait(false);
+
+            return StatusCode(StatusCodes.Status204NoContent);
         }
 
         [HttpGet("/odata/GetCurrentStoreId()")]
@@ -128,19 +115,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId");
+            var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId");
 
-                return Ok(currentStoreId);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(currentStoreId);
         }
 
         [HttpGet]
@@ -150,25 +133,18 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId")!;
-                
-                var queryable = aclService
-                    .GetAllRelationshipsByStoreQueryable(currentStoreId);
+            var currentStoreId = configuration.GetValue<string>("OpenFga:StoreId")!;
 
-                return Ok(options.ApplyTo(queryable));
+            var queryable = aclService
+                .GetAllRelationshipsByStoreQueryable(currentStoreId);
 
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
-
-
+            return Ok(options.ApplyTo(queryable));
         }
     }
 }

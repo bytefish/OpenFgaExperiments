@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
-using RebacExperiments.Server.Api.Infrastructure.Errors;
+using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database.Models;
@@ -19,12 +19,10 @@ namespace RebacExperiments.Server.Api.Controllers
     public class UsersController : ODataController
     {
         private readonly ILogger<UsersController> _logger;
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public UsersController(ILogger<UsersController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public UsersController(ILogger<UsersController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -35,19 +33,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
+            var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(user);
         }
 
         [HttpGet]
@@ -59,19 +53,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var users = await userService.GetUsersByUserIdAsync(User.GetUserId(), cancellationToken);
+            var users = await userService.GetUsersByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(users.AsQueryable()));
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(queryOptions.ApplyTo(users.AsQueryable()));
         }
 
         [HttpPost]
@@ -83,19 +73,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await userService.CreateUserAsync(user, User.GetUserId(), cancellationToken);
+            await userService.CreateUserAsync(user, User.GetUserId(), cancellationToken);
 
-                return Created(user);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Created(user);
         }
 
         [HttpPut]
@@ -108,28 +94,23 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
+            var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                // Patch the Values to it:
-                delta.Patch(user);
+            // Patch the Values to it:
+            delta.Patch(user);
 
-                // Update the Values:
-                await userService.UpdateUserAsync(user, User.GetUserId(), cancellationToken);
+            // Update the Values:
+            await userService.UpdateUserAsync(user, User.GetUserId(), cancellationToken);
 
-                return Updated(user);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Updated(user);
         }
 
-        
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
@@ -139,19 +120,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await userService.DeleteUserAsync(key, User.GetUserId(), cancellationToken);
+            await userService.DeleteUserAsync(key, User.GetUserId(), cancellationToken);
 
-                return StatusCode(StatusCodes.Status204NoContent);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return StatusCode(StatusCodes.Status204NoContent);
         }
     }
 }

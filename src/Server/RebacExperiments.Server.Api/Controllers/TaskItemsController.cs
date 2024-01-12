@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
+using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database.Models;
@@ -19,12 +20,10 @@ namespace RebacExperiments.Server.Api.Controllers
     public class TaskItemsController : ODataController
     {
         private readonly ILogger<TaskItemsController> _logger;
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public TaskItemsController(ILogger<TaskItemsController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public TaskItemsController(ILogger<TaskItemsController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -35,19 +34,16 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+            var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(taskItem);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(taskItem);
+
         }
 
         [HttpGet]
@@ -59,19 +55,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var taskItems = await taskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
+            var taskItems = await taskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(taskItems.AsQueryable()));
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(queryOptions.ApplyTo(taskItems.AsQueryable()));
         }
 
         [HttpPost]
@@ -83,19 +75,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await taskItemService.CreateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
+            await taskItemService.CreateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
 
-                return Created(taskItem);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Created(taskItem);
         }
 
         [HttpPut]
@@ -108,26 +96,22 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                // Get the TaskItem with the current values:
-                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+            // Get the TaskItem with the current values:
+            var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                // Patch the Values to it:
-                delta.Patch(taskItem);
+            // Patch the Values to it:
+            delta.Patch(taskItem);
 
-                // Update the Values:
-                await taskItemService.UpdateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
+            // Update the Values:
+            await taskItemService.UpdateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
 
-                return Updated(taskItem);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Updated(taskItem);
         }
 
         [HttpDelete]
@@ -139,19 +123,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await taskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
+            await taskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
 
-                return StatusCode(StatusCodes.Status204NoContent);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return StatusCode(StatusCodes.Status204NoContent);
         }
     }
 }

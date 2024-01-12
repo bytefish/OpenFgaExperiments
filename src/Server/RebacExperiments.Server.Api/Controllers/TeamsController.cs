@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
+using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database.Models;
@@ -19,12 +20,10 @@ namespace RebacExperiments.Server.Api.Controllers
     public class TeamsController : ODataController
     {
         private readonly ILogger<TeamsController> _logger;
-        private readonly ApplicationErrorHandler _applicationErrorHandler;
 
-        public TeamsController(ILogger<TeamsController> logger, ApplicationErrorHandler applicationErrorHandler)
+        public TeamsController(ILogger<TeamsController> logger)
         {
             _logger = logger;
-            _applicationErrorHandler = applicationErrorHandler;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -35,19 +34,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var team = await teamService.GetTeamByIdAsync(key, User.GetUserId(), cancellationToken);
+            var team = await teamService.GetTeamByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                return Ok(team);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(team);
         }
 
         [HttpGet]
@@ -59,19 +54,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                var teams = await teamService.GetTeamsByUserIdAsync(User.GetUserId(), cancellationToken);
+            var teams = await teamService.GetTeamsByUserIdAsync(User.GetUserId(), cancellationToken);
 
-                return Ok(queryOptions.ApplyTo(teams.AsQueryable()));
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Ok(queryOptions.ApplyTo(teams.AsQueryable()));
         }
 
         [HttpPost]
@@ -83,19 +74,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await teamService.CreateTeamAsync(team, User.GetUserId(), cancellationToken);
+            await teamService.CreateTeamAsync(team, User.GetUserId(), cancellationToken);
 
-                return Created(team);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Created(team);
         }
 
         [HttpPut]
@@ -108,29 +95,25 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                // Get the TaskItem with the current values:
-                var team = await teamService.GetTeamByIdAsync(key, User.GetUserId(), cancellationToken);
+            // Get the TaskItem with the current values:
+            var team = await teamService.GetTeamByIdAsync(key, User.GetUserId(), cancellationToken);
 
-                // Patch the Values to it:
-                delta.Patch(team);
+            // Patch the Values to it:
+            delta.Patch(team);
 
-                // Update the Values:
-                await teamService.UpdateTeamAsync(team, User.GetUserId(), cancellationToken);
+            // Update the Values:
+            await teamService.UpdateTeamAsync(team, User.GetUserId(), cancellationToken);
 
-                return Updated(team);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return Updated(team);
         }
 
-        
+
         [HttpDelete]
         [Authorize(Policy = Policies.RequireUserRole)]
         [EnableRateLimiting(Policies.PerUserRatelimit)]
@@ -140,19 +123,15 @@ namespace RebacExperiments.Server.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return _applicationErrorHandler.HandleInvalidModelState(HttpContext, ModelState);
+                throw new InvalidModelStateException
+                {
+                    ModelStateDictionary = ModelState
+                };
             }
 
-            try
-            {
-                await teamService.DeleteTeamAsync(key, User.GetUserId(), cancellationToken);
+            await teamService.DeleteTeamAsync(key, User.GetUserId(), cancellationToken);
 
-                return StatusCode(StatusCodes.Status204NoContent);
-            }
-            catch (Exception ex)
-            {
-                return _applicationErrorHandler.HandleException(HttpContext, ex);
-            }
+            return StatusCode(StatusCodes.Status204NoContent);
         }
     }
 }

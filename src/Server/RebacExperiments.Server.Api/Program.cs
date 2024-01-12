@@ -1,18 +1,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OData;
 using OpenFga.Sdk.Client;
-using OpenFga.Sdk.Model;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
@@ -127,12 +121,12 @@ try
     });
 
     // Add Error Handler
-    builder.Services.Configure<ApplicationErrorHandlerOptions>(o =>
+    builder.Services.Configure<ODataExceptionFilterOptions>(o =>
     {
         o.IncludeExceptionDetails = builder.Environment.IsDevelopment() || builder.Environment.IsStaging();
     });
 
-    builder.Services.AddSingleton<ApplicationErrorHandler>();
+    builder.Services.AddSingleton<ODataExceptionFilter>();
 
     // Cookie Authentication
     builder.Services
@@ -142,12 +136,24 @@ try
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax; // We don't want to deal with CSRF Tokens
 
-            options.Events.OnRedirectToAccessDenied = (context) => throw new AuthenticationFailedException(); // Handle this in the middleware ...
-            options.Events.OnRedirectToLogin = (context) => throw new AuthenticationFailedException(); // Handle this in the middleware ...
+            options.Events.OnRedirectToAccessDenied = (context) =>
+            {
+                context.Response.StatusCode = 403;
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnRedirectToLogin = (context) =>
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            };
         });
 
     builder.Services
-        .AddControllers()
+        .AddControllers((options) => 
+        {
+            options.Filters.Add<ODataExceptionFilter>();
+        })
         // Register OData Routes:
         .AddOData((options) =>
         {
@@ -195,37 +201,6 @@ try
 
     var app = builder.Build();
 
-    // We want all Exceptions to return an ODataError in the Response. So all Exceptions should be handled and run through
-    // this ExceptionHandler. This should only happen for things deep down in the ASP.NET Core stack, such as not resolving
-    // routes.
-    // 
-    // Anything else should run through the Controllers and the Error Handlers are going to work there.
-    //
-    app.UseExceptionHandler(options =>
-    {
-        options.Run(async context =>
-        {
-            // Get the ExceptionHandlerFeature, so we get access to the original Exception
-            var exceptionHandlerFeature = context.Features.GetRequiredFeature<IExceptionHandlerFeature>();
-            
-            // The ODataErrorHandler is required for adding an ODataError to all failed HTTP responses
-            var odataErrorHandler = context.RequestServices.GetRequiredService<ApplicationErrorHandler>();
-
-            // We can get the underlying Exception from the ExceptionHandlerFeature
-            var exception = exceptionHandlerFeature.Error;
-
-            // This isn't nice, because we probably shouldn't work with MVC types here. It would be better 
-            // to rewrite the ApplicationErrorHandler to working with the HttpResponse.
-            var actionContext = new ActionContext { HttpContext = context };
-
-            var actionResult = odataErrorHandler.HandleException(context, exception);
-
-            await actionResult
-                .ExecuteResultAsync(actionContext)
-                .ConfigureAwait(false);
-        });
-    });
-
     if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
         app.UseSwagger();
@@ -238,7 +213,6 @@ try
     app.UseCors("CorsPolicy");
 
     app.UseAuthorization();
-
     app.MapControllers();
 
     app.Run();
