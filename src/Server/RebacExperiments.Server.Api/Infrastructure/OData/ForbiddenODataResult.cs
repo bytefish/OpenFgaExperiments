@@ -20,24 +20,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="message">Error Message</param>
-        public ForbiddenODataResult(string message)
-        {
-            if (message == null)
-            {
-                ArgumentNullException.ThrowIfNull("message");
-            }
-
-            Error = new ODataError
-            {
-                Message = message,
-                ErrorCode = StatusCodes.Status403Forbidden.ToString()
-            };
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
         /// <param name="odataError">OData Error.</param>
         public ForbiddenODataResult(ODataError odataError)
         {

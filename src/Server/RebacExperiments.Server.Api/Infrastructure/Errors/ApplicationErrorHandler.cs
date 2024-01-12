@@ -193,7 +193,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             return new ForbiddenODataResult(error);
         }
         
-        private ObjectResult HandleRateLimitException(HttpContext httpContext, RateLimitException e)
+        private ObjectODataErrorResult HandleRateLimitException(HttpContext httpContext, RateLimitException e)
         {
             _logger.TraceMethodEntry();
 
@@ -205,13 +205,14 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
 
             AddInnerError(httpContext, error, e);
 
-            return new ObjectResult(error)
+            return new ObjectODataErrorResult
             {
-                StatusCode = (int)HttpStatusCode.TooManyRequests,
+                Error = error,
+                HttpStatusCode = (int)HttpStatusCode.TooManyRequests,
             };
         }
 
-        private ObjectResult HandleSystemException(HttpContext httpContext, Exception e)
+        private ObjectODataErrorResult HandleSystemException(HttpContext httpContext, Exception e)
         {
             _logger.TraceMethodEntry();
 
@@ -223,9 +224,10 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
 
             AddInnerError(httpContext, error, e);
 
-            return new ObjectResult(error)
+            return new ObjectODataErrorResult
             {
-                StatusCode = (int)HttpStatusCode.InternalServerError,
+                Error = error,
+                HttpStatusCode = (int)HttpStatusCode.TooManyRequests,
             };
         }
 
