@@ -1,7 +1,8 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.Extensions.Options;
@@ -16,27 +17,64 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
     /// <summary>
     /// Handles errors returned by the application.
     /// </summary>
-    public class ODataExceptionFilter : IAsyncExceptionFilter
+    public class ODataExceptionHandler : IExceptionHandler
     {
-        private readonly ILogger<ODataExceptionFilter> _logger;
+        private readonly ILogger<ODataExceptionHandler> _logger;
 
-        private readonly ODataExceptionFilterOptions _options;
+        private readonly ODataExceptionHandlerOptions _options;
 
-        public ODataExceptionFilter(ILogger<ODataExceptionFilter> logger, IOptions<ODataExceptionFilterOptions> options)
+        public ODataExceptionHandler(ILogger<ODataExceptionHandler> logger, IOptions<ODataExceptionHandlerOptions> options)
         {
             _logger = logger;
             _options = options.Value;
         }
 
-        public async Task OnExceptionAsync(ExceptionContext context)
+        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            var actionResult = HandleException(context.HttpContext, context.Exception);
+            var exceptionHandlerFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
+
+            if (exceptionHandlerFeature == null)
+            {
+                return false;
+            }
+
+            var endpoint = exceptionHandlerFeature.Endpoint;
+
+            if (endpoint == null)
+            {
+                return false;
+            }
+            
+            // Get the Action Result from the Exception
+            var actionResult = HandleException(httpContext, exception);
+
+            // Get the Action Descriptor, if we are running in MVC
+            var actionDescriptor = endpoint.Metadata.GetMetadata<ActionDescriptor>();
+            
+            if (actionDescriptor == null)
+            {
+                actionDescriptor = new ActionDescriptor();
+            }
+
+            var routeData = httpContext.GetRouteData();
+
+            if(routeData == null)
+            {
+                routeData = new RouteData();
+            }
+
+            var actionContext = new ActionContext
+            {
+                HttpContext = httpContext,
+                ActionDescriptor = actionDescriptor,
+                RouteData = routeData,
+            };
 
             await actionResult
-                .ExecuteResultAsync(context)
+                .ExecuteResultAsync(actionContext)
                 .ConfigureAwait(false);
 
-            context.ExceptionHandled = true;
+            return true;
         }
 
         public ActionResult HandleException(HttpContext httpContext, Exception exception)
@@ -47,8 +85,9 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
 
             return exception switch
             {
-                // Authentication
+                // Auth
                 AuthenticationFailedException e => HandleAuthenticationException(httpContext, e),
+                AuthorizationFailedException e => HandleAuthorizationFailed(httpContext, e),
                 // Entities
                 EntityConcurrencyException e => HandleEntityConcurrencyException(httpContext, e),
                 EntityNotFoundException e => HandleEntityNotFoundException(httpContext, e),
@@ -159,6 +198,21 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             return new UnauthorizedODataResult(error);
         }
 
+        private ForbiddenODataResult HandleAuthorizationFailed(HttpContext httpContext, AuthorizationFailedException e)
+        {
+            _logger.TraceMethodEntry();
+
+            var error = new ODataError
+            {
+                ErrorCode = ErrorCodes.AuthorizationFailed,
+                Message = e.ErrorMessage,
+            };
+
+            AddInnerError(httpContext, error, e);
+
+            return new ForbiddenODataResult(error);
+        }
+
         private ConflictODataResult HandleEntityConcurrencyException(HttpContext httpContext, EntityConcurrencyException e)
         {
             _logger.TraceMethodEntry();
@@ -242,8 +296,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
             };
         }
 
-        #region Debug Information
-
         private void AddInnerError(HttpContext httpContext, ODataError error, Exception? e)
         {
             _logger.TraceMethodEntry();
@@ -259,7 +311,5 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
                 error.InnerError.TypeName = e.GetType().Name;
             }
         }
-
-        #endregion Debug Information
     }
 }

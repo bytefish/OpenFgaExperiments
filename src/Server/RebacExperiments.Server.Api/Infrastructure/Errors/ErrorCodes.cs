@@ -28,6 +28,11 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
         public const string AuthenticationFailed = "ApiError_Auth_000001";
 
         /// <summary>
+        /// General Authorization Error.
+        /// </summary>
+        public const string AuthorizationFailed = "ApiError_Auth_000002";
+
+        /// <summary>
         /// Too many requests have been issued.
         /// </summary>
         public const string TooManyRequests = "ApiError_RateLimit_000001";

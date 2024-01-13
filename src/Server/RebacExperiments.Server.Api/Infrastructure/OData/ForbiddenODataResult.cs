@@ -9,7 +9,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
     /// <summary>
     /// Represents a result that when executed will produce a Forbidden (403) response.
     /// </summary>
-    /// <remarks>This result creates an <see cref="ODataError"/> with status code: 401.</remarks>
+    /// <remarks>This result creates an <see cref="ODataError"/> with status code: 403.</remarks>
     public class ForbiddenODataResult : ForbidResult, IODataErrorResult
     {
         /// <summary>

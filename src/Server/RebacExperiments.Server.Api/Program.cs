@@ -1,10 +1,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
-using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.EntityFrameworkCore;
 using OpenFga.Sdk.Client;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
@@ -55,7 +56,7 @@ try
     builder.Services.AddScoped<ITeamService, TeamService>();
     builder.Services.AddScoped<IOrganizationService, OrganizationService>();
     builder.Services.AddScoped<IAclService, AclService>();
-    
+
     // Logging
     builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
@@ -120,13 +121,13 @@ try
             .AllowCredentials());
     });
 
-    // Add Error Handler
-    builder.Services.Configure<ODataExceptionFilterOptions>(o =>
+    // Add ODataExceptionHandler
+    builder.Services.Configure<ODataExceptionHandlerOptions>(o =>
     {
         o.IncludeExceptionDetails = builder.Environment.IsDevelopment() || builder.Environment.IsStaging();
     });
 
-    builder.Services.AddSingleton<ODataExceptionFilter>();
+    builder.Services.AddExceptionHandler<ODataExceptionHandler>();
 
     // Cookie Authentication
     builder.Services
@@ -138,22 +139,17 @@ try
 
             options.Events.OnRedirectToAccessDenied = (context) =>
             {
-                context.Response.StatusCode = 403;
-                return Task.CompletedTask;
+                throw new AuthorizationFailedException();
             };
 
             options.Events.OnRedirectToLogin = (context) =>
             {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
+                throw new AuthenticationFailedException();
             };
         });
 
     builder.Services
-        .AddControllers((options) => 
-        {
-            options.Filters.Add<ODataExceptionFilter>();
-        })
+        .AddControllers()
         // Register OData Routes:
         .AddOData((options) =>
         {
@@ -178,7 +174,7 @@ try
     // Add the Rate Limiting
     builder.Services.AddRateLimiter(options =>
     {
-        options.OnRejected = (ctx, cancellationToken) => throw new RateLimitException(); // Handle this in the middleware ...
+        options.OnRejected = (ctx, cancellationToken) => throw new RateLimitException();
 
         options.AddPolicy(Policies.PerUserRatelimit, context =>
         {
@@ -191,15 +187,17 @@ try
                 {
                     ReplenishmentPeriod = TimeSpan.FromSeconds(10),
                     AutoReplenishment = true,
-                    TokenLimit = 100,
-                    TokensPerPeriod = 100,
-                    QueueLimit = 100,
+                    TokenLimit = 1,
+                    TokensPerPeriod = 1,
+                    QueueLimit = 1,
                 };
             });
         });
     });
 
     var app = builder.Build();
+
+    app.UseExceptionHandler(_ => { }); // // https://github.com/dotnet/aspnetcore/issues/51888
 
     if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
@@ -210,14 +208,15 @@ try
         });
     }
 
-    app.UseCors("CorsPolicy");
 
+    app.UseCors("CorsPolicy");
     app.UseAuthorization();
+    app.UseRateLimiter();
     app.MapControllers();
 
     app.Run();
-} 
-catch(Exception exception)
+}
+catch (Exception exception)
 {
     Log.Fatal(exception, "An unhandeled exception occured.");
 }

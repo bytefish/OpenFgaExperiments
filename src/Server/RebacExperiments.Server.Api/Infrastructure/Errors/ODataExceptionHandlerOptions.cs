@@ -3,9 +3,9 @@
 namespace RebacExperiments.Server.Api.Infrastructure.Errors
 {
     /// <summary>
-    /// Options for the <see cref="ODataExceptionFilter"/>.
+    /// Options for the <see cref="ODataExceptionHandler"/>.
     /// </summary>
-    public class ODataExceptionFilterOptions
+    public class ODataExceptionHandlerOptions
     {
         /// <summary>
         /// Gets or sets the option to include the Exception Details in the response.

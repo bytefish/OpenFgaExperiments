@@ -9,7 +9,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
         /// <summary>
         /// Gets or sets an error code.
         /// </summary>
-        public override string ErrorCode => ErrorCodes.EntityNotFound;
+        public override string ErrorCode => ErrorCodes.EntityUnauthorized;
 
         /// <summary>
         /// Gets or sets an error code.
