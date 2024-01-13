@@ -1,9 +1,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +14,8 @@ using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database;
 using RebacExperiments.Server.OpenFga;
 using Serilog;
+using Serilog.Core;
+using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
@@ -33,6 +32,7 @@ string logFilePath = Path.Combine(logDirectory, "LogRebacExperiments-.log");
 // to the Microsoft.Extensions.Logging LoggingBuilder using the 
 // LoggingBuilder#AddSerilog(...) extension.
 Log.Logger = new LoggerConfiguration()
+    .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware"))
     .Enrich.FromLogContext()
     .Enrich.WithMachineName()
     .Enrich.WithEnvironmentName()
@@ -137,15 +137,8 @@ try
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax; // We don't want to deal with CSRF Tokens
 
-            options.Events.OnRedirectToAccessDenied = (context) =>
-            {
-                throw new AuthorizationFailedException();
-            };
-
-            options.Events.OnRedirectToLogin = (context) =>
-            {
-                throw new AuthenticationFailedException();
-            };
+            options.Events.OnRedirectToLogin = (context) => throw new AuthenticationFailedException();
+            options.Events.OnRedirectToAccessDenied = (context) => throw new AuthorizationFailedException();
         });
 
     builder.Services
@@ -178,7 +171,6 @@ try
 
         options.AddPolicy(Policies.PerUserRatelimit, context =>
         {
-            // We always have a user name
             var username = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             return RateLimitPartition.GetTokenBucketLimiter(username, key =>
@@ -187,9 +179,9 @@ try
                 {
                     ReplenishmentPeriod = TimeSpan.FromSeconds(10),
                     AutoReplenishment = true,
-                    TokenLimit = 1,
-                    TokensPerPeriod = 1,
-                    QueueLimit = 1,
+                    TokenLimit = 100,
+                    TokensPerPeriod = 100,
+                    QueueLimit = 100,
                 };
             });
         });
