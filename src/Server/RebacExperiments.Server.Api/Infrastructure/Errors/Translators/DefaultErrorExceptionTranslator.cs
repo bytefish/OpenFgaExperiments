@@ -29,7 +29,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors.Translators
 
             // Create the Inner Error
             error.InnerError = new ODataInnerError();
-
+            
             if (includeExceptionDetails)
             {
                 error.InnerError.Message = exception.Message;

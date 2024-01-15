@@ -1,11 +1,9 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Infrastructure.OData;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace RebacExperiments.Server.Api.Infrastructure.Errors.Translators
 {

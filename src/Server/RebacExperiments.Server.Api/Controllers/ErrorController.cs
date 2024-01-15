@@ -1,26 +1,13 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Formatter;
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Microsoft.Extensions.Options;
 using Microsoft.OData;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
-using RebacExperiments.Server.Api.Infrastructure.OData;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
-
     public class ErrorController : ControllerBase
     {
         private readonly ILogger<ErrorController> _logger;
@@ -64,6 +51,7 @@ namespace RebacExperiments.Server.Api.Controllers
             error.InnerError = new ODataInnerError();
             error.InnerError.Properties["trace-id"] = new ODataPrimitiveValue(HttpContext.TraceIdentifier);
 
+     
             return new ContentResult
             {
                 Content = error.ToString(),
@@ -82,7 +70,7 @@ namespace RebacExperiments.Server.Api.Controllers
                 ErrorCode = ErrorCodes.ResourceNotFound,
                 Message = "ResourceNotFound"
             };
-
+            
             error.InnerError = new ODataInnerError();
             error.InnerError.Properties["trace-id"] = new ODataPrimitiveValue(HttpContext.TraceIdentifier);
 
@@ -137,6 +125,5 @@ namespace RebacExperiments.Server.Api.Controllers
                 StatusCode = StatusCodes.Status429TooManyRequests
             };
         }
-
     }
 }
