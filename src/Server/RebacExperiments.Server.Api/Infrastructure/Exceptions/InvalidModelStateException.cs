@@ -7,24 +7,22 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
 {
     public class InvalidModelStateException : ApplicationErrorException
     {
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorCode => ErrorCodes.ValidationFailed;
 
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorMessage => $"ValidationFailure";
+
+        /// <inheritdoc/>
+        public override int HttpStatusCode => StatusCodes.Status400BadRequest;
 
         /// <summary>
         /// Gets or sets the ModelStateDictionary.
         /// </summary>
         public required ModelStateDictionary ModelStateDictionary { get; set; }
 
-
         /// <summary>
-        /// Creates a new <see cref="EntityNotFoundException"/>.
+        /// Creates a new <see cref="InvalidModelStateException"/>.
         /// </summary>
         /// <param name="message">Error Message</param>
         /// <param name="innerException">Reference to the Inner Exception</param>

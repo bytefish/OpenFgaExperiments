@@ -1,5 +1,7 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 using RebacExperiments.Shared.ApiSdk.Odata.SignInUser;
 
 namespace RebacExperiments.Blazor.Pages
@@ -36,6 +38,16 @@ namespace RebacExperiments.Blazor.Pages
         public async Task SignOutUser()
         {
             await ApiClient.Odata.SignOutUser.PostAsync();
+        }
+
+        public async Task SendInvalidRequest()
+        {
+            var client = httpClientFactory.CreateClient(nameof(IRequestAdapter));
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "/not-exist");
+
+            httpRequestMessage.Headers.TryAddWithoutValidation("Accept", "application/json;odata.metadata=minimal");
+
+            var res = await client.SendAsync(httpRequestMessage);
         }
     }
 }

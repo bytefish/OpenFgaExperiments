@@ -6,15 +6,14 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
 {
     public class EntityUnauthorizedAccessException : ApplicationErrorException
     {
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorCode => ErrorCodes.EntityUnauthorized;
 
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>        
         public override string ErrorMessage => $"EntityUnauthorizedAccess (User = {UserId}, Entity = {EntityName}, EntityID = {EntityId})";
+
+        /// <inheritdoc/>
+        public override int HttpStatusCode => StatusCodes.Status403Forbidden;
 
         /// <summary>
         /// Gets or sets the User ID.
@@ -31,8 +30,9 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
         /// </summary>
         public required int EntityId { get; set; }
 
+
         /// <summary>
-        /// Creates a new <see cref="EntityNotFoundException"/>.
+        /// Creates a new <see cref="EntityUnauthorizedAccessException"/>.
         /// </summary>
         /// <param name="message">Error Message</param>
         /// <param name="innerException">Reference to the Inner Exception</param>

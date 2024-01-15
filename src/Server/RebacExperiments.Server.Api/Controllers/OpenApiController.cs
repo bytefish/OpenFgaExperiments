@@ -18,9 +18,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
 
-        public OpenApiController(ILogger<AuthenticationController> logger)
+        private readonly ODataErrorMapper _odataErrorMapper;
+
+        public OpenApiController(ILogger<AuthenticationController> logger, ODataErrorMapper odataErrorMapper)
         {
             _logger = logger;
+            _odataErrorMapper = odataErrorMapper;
         }
 
         [HttpGet("odata/openapi.json")]
@@ -28,20 +31,27 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            var edmModel = ApplicationEdmModel.GetEdmModel();
-
-            var openApiSettings = new OpenApiConvertSettings
+            try
             {
-                ServiceRoot = new("https://localhost:5000"),
-                PathPrefix = "odata",
-                EnableKeyAsSegment = true,
-            };
+                var edmModel = ApplicationEdmModel.GetEdmModel();
 
-            var openApiDocument = edmModel.ConvertToOpenApi(openApiSettings);
+                var openApiSettings = new OpenApiConvertSettings
+                {
+                    ServiceRoot = new("https://localhost:5000"),
+                    PathPrefix = "odata",
+                    EnableKeyAsSegment = true,
+                };
 
-            var openApiDocumentAsJson = openApiDocument.SerializeAsJson(OpenApiSpecVersion.OpenApi3_0);
+                var openApiDocument = edmModel.ConvertToOpenApi(openApiSettings);
 
-            return Content(openApiDocumentAsJson, "application/json");
+                var openApiDocumentAsJson = openApiDocument.SerializeAsJson(OpenApiSpecVersion.OpenApi3_0);
+
+                return Content(openApiDocumentAsJson, "application/json");
+            }
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
     }
 }

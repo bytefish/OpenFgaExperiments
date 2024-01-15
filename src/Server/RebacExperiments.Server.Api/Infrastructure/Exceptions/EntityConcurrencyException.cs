@@ -6,15 +6,14 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
 {
     public class EntityConcurrencyException : ApplicationErrorException
     {
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorCode => ErrorCodes.EntityConcurrencyFailure;
 
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorMessage => $"EntityConcurrencyFailure (Entity = {EntityName}, EntityID = {EntityId})";
+
+        /// <inheritdoc/>
+        public override int HttpStatusCode => StatusCodes.Status409Conflict;
 
         /// <summary>
         /// Gets or sets the Entity Name.
@@ -27,7 +26,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
         public required int EntityId { get; set; }
 
         /// <summary>
-        /// Creates a new <see cref="EntityNotFoundException"/>.
+        /// Creates a new <see cref="EntityConcurrencyException"/>.
         /// </summary>
         /// <param name="message">Error Message</param>
         /// <param name="innerException">Reference to the Inner Exception</param>

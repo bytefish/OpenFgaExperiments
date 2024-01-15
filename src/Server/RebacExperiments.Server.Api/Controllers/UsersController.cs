@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
+using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
@@ -20,9 +21,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(ILogger<UsersController> logger)
+        private readonly ODataErrorMapper _odataErrorMapper;
+
+        public UsersController(ILogger<UsersController> logger, ODataErrorMapper odataErrorMapper)
         {
             _logger = logger;
+            _odataErrorMapper = odataErrorMapper;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -31,17 +35,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
+
+                return Ok(user);
             }
-
-            var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
-
-            return Ok(user);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpGet]
@@ -51,17 +62,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var users = await userService.GetUsersByUserIdAsync(User.GetUserId(), cancellationToken);
+
+               return Ok(queryOptions.ApplyTo(users.AsQueryable()));
             }
-
-            var users = await userService.GetUsersByUserIdAsync(User.GetUserId(), cancellationToken);
-
-            return Ok(queryOptions.ApplyTo(users.AsQueryable()));
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpPost]
@@ -71,17 +89,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                await userService.CreateUserAsync(user, User.GetUserId(), cancellationToken);
+
+                return Created(user);
             }
-
-            await userService.CreateUserAsync(user, User.GetUserId(), cancellationToken);
-
-            return Created(user);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpPut]
@@ -92,23 +117,30 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
+
+                // Patch the Values to it:
+                delta.Patch(user);
+
+                // Update the Values:
+                await userService.UpdateUserAsync(user, User.GetUserId(), cancellationToken);
+
+                return Updated(user);
             }
-
-            var user = await userService.GetUserByIdAsync(key, User.GetUserId(), cancellationToken);
-
-            // Patch the Values to it:
-            delta.Patch(user);
-
-            // Update the Values:
-            await userService.UpdateUserAsync(user, User.GetUserId(), cancellationToken);
-
-            return Updated(user);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpDelete]
@@ -118,17 +150,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                await userService.DeleteUserAsync(key, User.GetUserId(), cancellationToken);
+
+                return StatusCode(StatusCodes.Status204NoContent);
             }
-
-            await userService.DeleteUserAsync(key, User.GetUserId(), cancellationToken);
-
-            return StatusCode(StatusCodes.Status204NoContent);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
     }
 }

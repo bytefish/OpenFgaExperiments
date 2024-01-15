@@ -21,9 +21,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<OrganizationsController> _logger;
 
-        public OrganizationsController(ILogger<OrganizationsController> logger)
+        private readonly ODataErrorMapper _odataErrorMapper;
+
+        public OrganizationsController(ILogger<OrganizationsController> logger, ODataErrorMapper odataErrorMapper)
         {
             _logger = logger;
+            _odataErrorMapper = odataErrorMapper;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -32,17 +35,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
+
+                return Ok(organization);
             }
-
-            var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
-
-            return Ok(organization);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpGet]
@@ -52,17 +62,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var organizations = await organizationService.GetOrganizationsByUserIdAsync(User.GetUserId(), cancellationToken);
+
+                return Ok(queryOptions.ApplyTo(organizations.AsQueryable()));
             }
-
-            var organizations = await organizationService.GetOrganizationsByUserIdAsync(User.GetUserId(), cancellationToken);
-
-            return Ok(queryOptions.ApplyTo(organizations.AsQueryable()));
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpPost]
@@ -72,17 +89,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                await organizationService.CreateOrganizationAsync(Organization, User.GetUserId(), cancellationToken);
+
+                return Created(Organization);
             }
-
-            await organizationService.CreateOrganizationAsync(Organization, User.GetUserId(), cancellationToken);
-
-            return Created(Organization);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpPut]
@@ -93,24 +117,31 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                // Get the TaskItem with the current values:
+                var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
+
+                // Patch the Values to it:
+                delta.Patch(organization);
+
+                // Update the Values:
+                await organizationService.UpdateOrganizationAsync(organization, User.GetUserId(), cancellationToken);
+
+                return Updated(organization);
             }
-
-            // Get the TaskItem with the current values:
-            var organization = await organizationService.GetOrganizationByIdAsync(key, User.GetUserId(), cancellationToken);
-
-            // Patch the Values to it:
-            delta.Patch(organization);
-
-            // Update the Values:
-            await organizationService.UpdateOrganizationAsync(organization, User.GetUserId(), cancellationToken);
-
-            return Updated(organization);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpDelete]
@@ -120,17 +151,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                await organizationService.DeleteOrganizationAsync(key, User.GetUserId(), cancellationToken);
+
+                return StatusCode(StatusCodes.Status204NoContent);
             }
-
-            await organizationService.DeleteOrganizationAsync(key, User.GetUserId(), cancellationToken);
-
-            return StatusCode(StatusCodes.Status204NoContent);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
     }
 }

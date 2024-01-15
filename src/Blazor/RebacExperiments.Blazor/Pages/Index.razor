@@ -2,6 +2,7 @@
 @using RebacExperiments.Shared.ApiSdk
 
 @inject ApiClient ApiClient
+@inject IHttpClientFactory httpClientFactory
 
 <PageTitle>Index</PageTitle>
 
@@ -15,4 +16,5 @@
     <FluentButton Appearance="Appearance.Accent" OnClick="SignInUser_Philipp">Sign In as "philipp@bytefish.de"</FluentButton>
     <FluentButton Appearance="Appearance.Accent" OnClick="SignInUser_Max">Sign In as "max@mustermann.local"</FluentButton>
     <FluentButton Appearance="Appearance.Accent" OnClick="SignOutUser">Sign Out</FluentButton>
+    <FluentButton Appearance="Appearance.Accent" OnClick="SendInvalidRequest">Send Invalid Request</FluentButton>
 </FluentStack>

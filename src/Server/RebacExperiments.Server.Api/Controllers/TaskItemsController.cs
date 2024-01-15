@@ -21,9 +21,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<TaskItemsController> _logger;
 
-        public TaskItemsController(ILogger<TaskItemsController> logger)
+        private readonly ODataErrorMapper _odataErrorMapper;
+
+        public TaskItemsController(ILogger<TaskItemsController> logger, ODataErrorMapper odataErrorMapper)
         {
             _logger = logger;
+            _odataErrorMapper = odataErrorMapper;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -32,18 +35,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+
+                return Ok(taskItem);
             }
-
-            var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
-
-            return Ok(taskItem);
-
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpGet]
@@ -53,17 +62,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                var taskItems = await taskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
+
+                return Ok(queryOptions.ApplyTo(taskItems.AsQueryable()));
             }
-
-            var taskItems = await taskItemService.GetTaskItemsByUserIdAsync(User.GetUserId(), cancellationToken);
-
-            return Ok(queryOptions.ApplyTo(taskItems.AsQueryable()));
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpPost]
@@ -73,17 +89,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                await taskItemService.CreateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
+
+                return Created(taskItem);
             }
-
-            await taskItemService.CreateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
-
-            return Created(taskItem);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpPut]
@@ -94,24 +117,32 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                // Get the TaskItem with the current values:
+                var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
+
+                // Patch the Values to it:
+                delta.Patch(taskItem);
+
+                // Update the Values:
+                await taskItemService.UpdateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
+
+                return Updated(taskItem);
             }
-
-            // Get the TaskItem with the current values:
-            var taskItem = await taskItemService.GetTaskItemByIdAsync(key, User.GetUserId(), cancellationToken);
-
-            // Patch the Values to it:
-            delta.Patch(taskItem);
-
-            // Update the Values:
-            await taskItemService.UpdateTaskItemAsync(taskItem, User.GetUserId(), cancellationToken);
-
-            return Updated(taskItem);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
 
         [HttpDelete]
@@ -121,17 +152,24 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                await taskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
+
+                return StatusCode(StatusCodes.Status204NoContent);
             }
-
-            await taskItemService.DeleteTaskItemAsync(key, User.GetUserId(), cancellationToken);
-
-            return StatusCode(StatusCodes.Status204NoContent);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
     }
 }

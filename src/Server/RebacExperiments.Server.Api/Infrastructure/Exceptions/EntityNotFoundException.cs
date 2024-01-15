@@ -6,15 +6,14 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
 {
     public class EntityNotFoundException : ApplicationErrorException
     {
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorCode => ErrorCodes.EntityNotFound;
 
-        /// <summary>
-        /// Gets or sets an error code.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorMessage => $"EntityNotFound (Entity = {EntityName}, EntityID = {EntityId})";
+
+        /// <inheritdoc/>
+        public override int HttpStatusCode => StatusCodes.Status404NotFound;
 
         /// <summary>
         /// Gets or sets the Entity Name.

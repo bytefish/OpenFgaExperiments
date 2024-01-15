@@ -6,18 +6,17 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
 {
     public class AuthorizationFailedException : ApplicationErrorException
     {
-        /// <summary>
-        /// Gets or sets an ErrorCode.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorCode => ErrorCodes.AuthenticationFailed;
 
-        /// <summary>
-        /// Gets or sets an ErrorMessage.
-        /// </summary>
+        /// <inheritdoc/>
         public override string ErrorMessage => $"AuthorizationFailed";
 
+        /// <inheritdoc/>
+        public override int HttpStatusCode => StatusCodes.Status403Forbidden;
+
         /// <summary>
-        /// Creates a new <see cref="EntityNotFoundException"/>.
+        /// Creates a new <see cref="AuthorizationFailedException"/>.
         /// </summary>
         /// <param name="message">Error Message</param>
         /// <param name="innerException">Reference to the Inner Exception</param>

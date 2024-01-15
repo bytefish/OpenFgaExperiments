@@ -33,6 +33,11 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
         public const string AuthorizationFailed = "ApiError_Auth_000002";
 
         /// <summary>
+        /// Unauthorized.
+        /// </summary>
+        public const string Unauthorized = "ApiError_Auth_000003";
+
+        /// <summary>
         /// Too many requests have been issued.
         /// </summary>
         public const string TooManyRequests = "ApiError_RateLimit_000001";
@@ -51,5 +56,15 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
         /// Entity has been modified concurrently.
         /// </summary>
         public const string EntityConcurrencyFailure = "ApiError_Entity_000003";
+
+        /// <summary>
+        /// Resource has not been found.
+        /// </summary>
+        public const string ResourceNotFound = "ApiError_Routing_000001";
+
+        /// <summary>
+        /// Method was not allowed.
+        /// </summary>
+        public const string MethodNotAllowed = "ApiError_Routing_000002";
     }
 }

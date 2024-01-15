@@ -2,9 +2,6 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.AspNetCore.OData.Formatter;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
@@ -13,7 +10,6 @@ using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.Logging;
 using RebacExperiments.Server.Api.Services;
-using RebacExperiments.Server.Database.Models;
 
 namespace RebacExperiments.Server.Api.Controllers
 {
@@ -21,9 +17,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<UsersController> _logger;
 
-        public MeController(ILogger<UsersController> logger)
+        private readonly ODataErrorMapper _odataErrorMapper;
+
+        public MeController(ILogger<UsersController> logger, ODataErrorMapper odataErrorMapper)
         {
             _logger = logger;
+            _odataErrorMapper = odataErrorMapper;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -32,20 +31,27 @@ namespace RebacExperiments.Server.Api.Controllers
         {
             _logger.TraceMethodEntry();
 
-            if (!ModelState.IsValid)
+            try
             {
-                throw new InvalidModelStateException
+                if (!ModelState.IsValid)
                 {
-                    ModelStateDictionary = ModelState
-                };
+                    throw new InvalidModelStateException
+                    {
+                        ModelStateDictionary = ModelState
+                    };
+                }
+
+                // Get the User ID extracted by the Authentication Middleware:
+                var meUserId = User.GetUserId();
+
+                var user = await userService.GetUserByIdAsync(meUserId, meUserId, cancellationToken);
+
+                return Ok(user);
             }
-
-            // Get the User ID extracted by the Authentication Middleware:
-            var meUserId = User.GetUserId();
-
-            var user = await userService.GetUserByIdAsync(meUserId, meUserId, cancellationToken);
-
-            return Ok(user);
+            catch (Exception exception)
+            {
+                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+            }
         }
     }
 }

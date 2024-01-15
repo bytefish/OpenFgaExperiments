@@ -16,7 +16,12 @@ namespace RebacExperiments.Server.Api.Infrastructure.Exceptions
         /// Gets the Error Message.
         /// </summary>
         public abstract string ErrorMessage { get; }
-
+        
+        /// <summary>
+        /// Gets the HttpStatusCode.
+        /// </summary>
+        public abstract int HttpStatusCode { get; }
+        
         protected ApplicationErrorException(string? message, Exception? innerException)
             : base(message, innerException)
         {

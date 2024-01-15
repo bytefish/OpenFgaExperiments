@@ -1,23 +1,29 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using OpenFga.Sdk.Client;
+using RebacExperiments.Server.Api.Controllers;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
+using RebacExperiments.Server.Api.Infrastructure.Errors.Translators;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.OData;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database;
 using RebacExperiments.Server.OpenFga;
 using Serilog;
-using Serilog.Core;
 using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 // We will log to %LocalAppData%/RebacExperiments to store the Logs, so it doesn't need to be configured 
@@ -121,13 +127,17 @@ try
             .AllowCredentials());
     });
 
-    // Add ODataExceptionHandler
-    builder.Services.Configure<ODataExceptionHandlerOptions>(o =>
+    // Add Exception Handling
+    builder.Services.AddSingleton<IODataExceptionTranslator, DefaultErrorExceptionTranslator>();
+    builder.Services.AddSingleton<IODataExceptionTranslator, ApplicationErrorExceptionTranslator>();
+    builder.Services.AddSingleton<IODataExceptionTranslator, InvalidModelStateExceptionTranslator>();
+
+    builder.Services.Configure<ODataErrorMapperOptions>(o =>
     {
         o.IncludeExceptionDetails = builder.Environment.IsDevelopment() || builder.Environment.IsStaging();
     });
 
-    builder.Services.AddExceptionHandler<ODataExceptionHandler>();
+    builder.Services.AddSingleton<ODataErrorMapper>();
 
     // Cookie Authentication
     builder.Services
@@ -137,8 +147,19 @@ try
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax; // We don't want to deal with CSRF Tokens
 
-            options.Events.OnRedirectToLogin = (context) => throw new AuthenticationFailedException();
-            options.Events.OnRedirectToAccessDenied = (context) => throw new AuthorizationFailedException();
+            options.Events.OnRedirectToLogin = (context) =>
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnRedirectToAccessDenied = (context) =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+                return Task.CompletedTask;
+            };
         });
 
     builder.Services
@@ -167,7 +188,12 @@ try
     // Add the Rate Limiting
     builder.Services.AddRateLimiter(options =>
     {
-        options.OnRejected = (ctx, cancellationToken) => throw new RateLimitException();
+        options.OnRejected = (context, cancellationToken) =>
+        {
+            context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+            return ValueTask.CompletedTask;
+        };
 
         options.AddPolicy(Policies.PerUserRatelimit, context =>
         {
@@ -187,9 +213,21 @@ try
         });
     });
 
-    var app = builder.Build();
+    // Configure Json Options for Middleware
+    builder.Services.Configure<JsonOptions>(options =>
+    {
+        options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
+        options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
-    app.UseExceptionHandler(_ => { }); // // https://github.com/dotnet/aspnetcore/issues/51888
+    // Configure JsonOptions for Mvc
+    builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
+
+    var app = builder.Build();
 
     if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
@@ -200,6 +238,8 @@ try
         });
     }
 
+    app.UseExceptionHandler("/error");
+    app.UseStatusCodePagesWithReExecute("/error/{0}");
 
     app.UseCors("CorsPolicy");
     app.UseAuthorization();
