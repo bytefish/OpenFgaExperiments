@@ -11,14 +11,14 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
     /// <summary>
     /// Handles errors returned by the application.
     /// </summary>
-    public class ODataErrorMapper
+    public class ExceptionToODataErrorMapper
     {
-        private readonly ILogger<ODataErrorMapper> _logger;
+        private readonly ILogger<ExceptionToODataErrorMapper> _logger;
 
-        private readonly ODataErrorMapperOptions _options;
+        private readonly ExceptionToODataErrorMapperOptions _options;
         private readonly Dictionary<Type, IODataExceptionTranslator> _translators;
 
-        public ODataErrorMapper(ILogger<ODataErrorMapper> logger, IOptions<ODataErrorMapperOptions> options, IEnumerable<IODataExceptionTranslator> translators)
+        public ExceptionToODataErrorMapper(ILogger<ExceptionToODataErrorMapper> logger, IOptions<ExceptionToODataErrorMapperOptions> options, IEnumerable<IODataExceptionTranslator> translators)
         {
             _logger = logger;
             _options = options.Value;

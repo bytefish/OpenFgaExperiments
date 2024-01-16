@@ -3,9 +3,9 @@
 namespace RebacExperiments.Server.Api.Infrastructure.Errors
 {
     /// <summary>
-    /// Options for the <see cref="ODataErrorMapper"/>.
+    /// Options for the <see cref="ExceptionToODataErrorMapper"/>.
     /// </summary>
-    public class ODataErrorMapperOptions
+    public class ExceptionToODataErrorMapperOptions
     {
         /// <summary>
         /// Gets or sets the option to include the Exception Details in the response.

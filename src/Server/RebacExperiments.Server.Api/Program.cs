@@ -1,20 +1,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
-using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using OpenFga.Sdk.Client;
-using RebacExperiments.Server.Api.Controllers;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Constants;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Errors.Translators;
-using RebacExperiments.Server.Api.Infrastructure.Exceptions;
 using RebacExperiments.Server.Api.Infrastructure.OData;
 using RebacExperiments.Server.Api.Services;
 using RebacExperiments.Server.Database;
@@ -23,7 +17,6 @@ using Serilog;
 using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Security.Claims;
-using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 // We will log to %LocalAppData%/RebacExperiments to store the Logs, so it doesn't need to be configured 
@@ -132,12 +125,12 @@ try
     builder.Services.AddSingleton<IODataExceptionTranslator, ApplicationErrorExceptionTranslator>();
     builder.Services.AddSingleton<IODataExceptionTranslator, InvalidModelStateExceptionTranslator>();
 
-    builder.Services.Configure<ODataErrorMapperOptions>(o =>
+    builder.Services.Configure<ExceptionToODataErrorMapperOptions>(o =>
     {
         o.IncludeExceptionDetails = builder.Environment.IsDevelopment() || builder.Environment.IsStaging();
     });
 
-    builder.Services.AddSingleton<ODataErrorMapper>();
+    builder.Services.AddSingleton<ExceptionToODataErrorMapper>();
 
     // Cookie Authentication
     builder.Services
@@ -211,20 +204,6 @@ try
                 };
             });
         });
-    });
-
-    // Configure Json Options for Middleware
-    builder.Services.Configure<JsonOptions>(options =>
-    {
-        options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
-        options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-    });
-
-    // Configure JsonOptions for Mvc
-    builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
-    {
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
     var app = builder.Build();

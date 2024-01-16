@@ -12,12 +12,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<ErrorController> _logger;
 
-        private readonly ODataErrorMapper _odataErrorMapper;
+        private readonly ExceptionToODataErrorMapper _exceptionToODataErrorMapper;
 
-        public ErrorController(ILogger<ErrorController> logger, ODataErrorMapper exceptionToODataErrorMapper)
+        public ErrorController(ILogger<ErrorController> logger, ExceptionToODataErrorMapper exceptionToODataErrorMapper)
         {
             _logger = logger;
-            _odataErrorMapper = exceptionToODataErrorMapper;
+            _exceptionToODataErrorMapper = exceptionToODataErrorMapper;
         }
 
         [Route("/error")]
@@ -27,7 +27,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
             var exceptionHandlerFeature = HttpContext.Features.Get<IExceptionHandlerFeature>()!;
 
-            var error = _odataErrorMapper.CreateODataErrorResult(HttpContext, exceptionHandlerFeature.Error);
+            var error = _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exceptionHandlerFeature.Error);
 
             return new ContentResult
             {

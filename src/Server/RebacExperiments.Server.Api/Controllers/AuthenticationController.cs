@@ -17,12 +17,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
 
-        private readonly ODataErrorMapper _odataErrorMapper;
+        private readonly ExceptionToODataErrorMapper _exceptionToODataErrorMapper;
 
-        public AuthenticationController(ILogger<AuthenticationController> logger, ODataErrorMapper odataErrorMapper)
+        public AuthenticationController(ILogger<AuthenticationController> logger, ExceptionToODataErrorMapper exceptionToODataErrorMapper)
         {
             _logger = logger;
-            _odataErrorMapper = odataErrorMapper;
+            _exceptionToODataErrorMapper = exceptionToODataErrorMapper;
         }
 
         [HttpPost("odata/SignInUser")]
@@ -61,7 +61,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
 
@@ -78,7 +78,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
     }

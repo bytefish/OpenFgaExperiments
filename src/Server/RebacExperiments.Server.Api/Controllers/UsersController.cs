@@ -21,12 +21,12 @@ namespace RebacExperiments.Server.Api.Controllers
     {
         private readonly ILogger<UsersController> _logger;
 
-        private readonly ODataErrorMapper _odataErrorMapper;
+        private readonly ExceptionToODataErrorMapper _exceptionToODataErrorMapper;
 
-        public UsersController(ILogger<UsersController> logger, ODataErrorMapper odataErrorMapper)
+        public UsersController(ILogger<UsersController> logger, ExceptionToODataErrorMapper exceptionToODataErrorMapper)
         {
             _logger = logger;
-            _odataErrorMapper = odataErrorMapper;
+            _exceptionToODataErrorMapper = exceptionToODataErrorMapper;
         }
 
         [Authorize(Policy = Policies.RequireUserRole)]
@@ -51,7 +51,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
 
@@ -78,7 +78,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
 
@@ -105,7 +105,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
 
@@ -139,7 +139,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
 
@@ -166,7 +166,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
             catch (Exception exception)
             {
-                return _odataErrorMapper.CreateODataErrorResult(HttpContext, exception);
+                return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
     }
