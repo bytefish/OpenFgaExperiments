@@ -65,4 +65,13 @@ AS BEGIN
 		ALTER TABLE [Application].[UserTaskItem] DROP PERIOD FOR SYSTEM_TIME;
 	END
 
+    IF OBJECTPROPERTY(OBJECT_ID('[Application].[Language]'), 'TableTemporalType') = 2
+	BEGIN
+		PRINT 'Deactivate Temporal Table for [Application].[Language]'
+
+		ALTER TABLE [Application].[Language] SET (SYSTEM_VERSIONING = OFF);
+		ALTER TABLE [Application].[Language] DROP PERIOD FOR SYSTEM_TIME;
+	END
+
+
 END

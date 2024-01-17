@@ -1,9 +1,13 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Net.Http.Headers;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.FluentUI.AspNetCore.Components;
 using Microsoft.JSInterop;
+using RebacExperiments.Shared.ApiSdk.Models.ODataErrors;
 
 namespace RebacExperiments.Blazor.Shared
 {
@@ -24,11 +28,18 @@ namespace RebacExperiments.Blazor.Shared
         [Parameter]
         public RenderFragment? Body { get; set; }
 
+        private ErrorBoundary? _errorBoundary;
+
         protected override void OnInitialized()
         {
             _version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
             _prevUri = NavigationManager.Uri;
             NavigationManager.LocationChanged += LocationChanged;
+        }
+
+        protected override void OnParametersSet()
+        {
+            _errorBoundary?.Recover();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -39,6 +50,25 @@ namespace RebacExperiments.Blazor.Shared
                 _mobile = await jsModule.InvokeAsync<bool>("isDevice");
                 await jsModule.DisposeAsync();
             }
+        }
+
+        private void HandleException(Exception exception)
+        {
+            (var errorMessage, var errorCode) = ApplicationErrorTranslator.GetErrorMessage(exception);
+
+            MessageService.ShowMessageBar(options =>
+            {
+                options.Intent = MessageIntent.Error;
+                options.ClearAfterNavigation = false;
+                options.Title = "Error";
+                options.Body = errorMessage;
+                options.Timestamp = DateTime.Now;
+                options.Link = new ActionLink<Message>
+                {
+                    Href = "/Help/Error/{errorCode}",
+                    Text = "Show Help" // TODO Localize
+                };
+            });
         }
 
         private void HandleChecked()

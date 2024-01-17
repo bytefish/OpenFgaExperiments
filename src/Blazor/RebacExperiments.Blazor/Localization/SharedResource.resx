@@ -138,6 +138,9 @@
   <data name="DataGrid_Button_Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
+  <data name="DefaultErrorKey" xml:space="preserve">
+    <value>An unexpected error occured</value>
+  </data>
   <data name="FilterOperatorEnum_After" xml:space="preserve">
     <value>After</value>
   </data>

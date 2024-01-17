@@ -59,6 +59,9 @@ GO
 :r .\Application\pds-170-ins-application-user-task-item.sql
 GO
 
+:r .\Application\pds-180-ins-application-language.sql
+GO
+
 
 /*
   We need to reactivate all Temporal Tables after the initial data load.

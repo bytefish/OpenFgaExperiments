@@ -16,7 +16,7 @@ namespace RebacExperiments.Server.Database
         /// <param name="options">Options to configure the base <see cref="DbContext"/></param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        {            
+        {
         }
 
         /// <summary>
@@ -35,12 +35,12 @@ namespace RebacExperiments.Server.Database
         public DbSet<TaskItem> TaskItems { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the TaskItems.
+        /// Gets or sets the Teams.
         /// </summary>
         public DbSet<Team> Teams { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the TaskItems.
+        /// Gets or sets the Organizations.
         /// </summary>
         public DbSet<Organization> Organizations { get; set; } = null!;
 
@@ -50,19 +50,24 @@ namespace RebacExperiments.Server.Database
         public DbSet<UserRole> UserRoles { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the UserRoles.
+        /// Gets or sets the UserTaskItems.
         /// </summary>
         public DbSet<UserTaskItem> UserTaskItems { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the UserTeams.
+        /// Gets or sets the TeamRoles.
         /// </summary>
         public DbSet<TeamRole> TeamRoles { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the UserTeams.
+        /// Gets or sets the OrganizationRoles.
         /// </summary>
         public DbSet<OrganizationRole> OrganizationRoles { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the Languages.
+        /// </summary>
+        public DbSet<Language> Languages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -599,7 +604,82 @@ namespace RebacExperiments.Server.Database
                     .IsRequired(true);
             });
 
+            modelBuilder.HasSequence<int>("sq_Language", schema: "Application")
+                .StartsAt(38187)
+                .IncrementsBy(1);
 
+            modelBuilder.Entity<Language>(entity =>
+            {
+                entity.ToTable("Language", "Application");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(x => x.Id)
+                    .HasColumnType("INT")
+                    .HasColumnName("LanguageID")
+                    .UseHiLo("sq_Language", "Application")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name)
+                    .HasColumnType("NVARCHAR(255)")
+                    .HasColumnName("Name")
+                    .IsRequired(true)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.DisplayName)
+                    .HasColumnType("NVARCHAR(255)")
+                    .HasColumnName("DisplayName")
+                    .IsRequired(true)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.EnglishName)
+                    .HasColumnType("NVARCHAR(255)")
+                    .HasColumnName("EnglishName")
+                    .IsRequired(true)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.TwoLetterISOLanguageName)
+                    .HasColumnType("NCHAR(2)")
+                    .HasColumnName("TwoLetterISOLanguageName")
+                    .IsRequired(true)
+                    .HasMaxLength(2);
+
+                entity.Property(e => e.ThreeLetterISOLanguageName)
+                    .HasColumnType("NCHAR(3)")
+                    .HasColumnName("ThreeLetterISOLanguageName")
+                    .IsRequired(true)
+                    .HasMaxLength(3);
+
+                entity.Property(e => e.ThreeLetterWindowsLanguageName)
+                    .HasColumnType("NCHAR(3)")
+                    .HasColumnName("ThreeLetterWindowsLanguageName")
+                    .IsRequired(true)
+                    .HasMaxLength(3);
+
+                entity.Property(e => e.RowVersion)
+                    .HasColumnType("ROWVERSION")
+                    .HasColumnName("RowVersion")
+                    .IsConcurrencyToken()
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidFrom)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidFrom")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.ValidTo)
+                    .HasColumnType("DATETIME2(7)")
+                    .HasColumnName("ValidTo")
+                    .IsRequired(false)
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.Property(e => e.LastEditedBy)
+                    .HasColumnType("INT")
+                    .HasColumnName("LastEditedBy")
+                    .IsRequired(true);
+            });
 
             base.OnModelCreating(modelBuilder);
         }

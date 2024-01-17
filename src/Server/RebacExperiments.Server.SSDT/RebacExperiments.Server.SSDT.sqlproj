@@ -67,6 +67,7 @@
     <Folder Include="Identity\Sequences" />
     <Folder Include="Identity\Stored Procedures" />
     <Folder Include="Identity\Tables" />
+    <Folder Include="Application\Views" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment1.sql" />
@@ -115,5 +116,9 @@
     <Build Include="Identity\Tables\UserRole.sql" />
     <Build Include="Identity\Sequences\sq_UserRole.sql" />
     <None Include="Scripts\Identity\pds-120-ins-identity-user-roles.sql" />
+    <Build Include="Application\Tables\Language.sql" />
+    <Build Include="Application\Indexes\UX_Application_Language_Name.sql" />
+    <Build Include="Application\Sequences\sq_Language.sql" />
+    <None Include="Scripts\Application\pds-180-ins-application-language.sql" />
   </ItemGroup>
 </Project>

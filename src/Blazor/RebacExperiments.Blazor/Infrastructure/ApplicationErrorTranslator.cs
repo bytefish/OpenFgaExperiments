@@ -16,12 +16,12 @@ namespace RebacExperiments.Blazor.Infrastructure
             _sharedLocalizer = sharedLocalizer;
         }
 
-        public string GetErrorMessage(Exception exception) 
+        public (string ErrorCode, string ErrorMessage) GetErrorMessage(Exception exception) 
         {
             return exception switch
             {
-                ODataError e => GetErrorMessageFromODataError(e),
-                Exception e => GetErrorMessageFromException(e),
+                ODataError e => (e.Error!.Code!, GetErrorMessageFromODataError(e)),
+                Exception e => (LocalizationConstants.DefaultErrorKey, GetErrorMessageFromException(e)),
             };
         }
 

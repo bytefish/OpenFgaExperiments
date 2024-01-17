@@ -4,6 +4,10 @@
 @using RebacExperiments.Blazor.Components.RedirectToLogin
 @namespace RebacExperiments.Blazor.Shared
 
+@inject IMessageService MessageService
+@inject IStringLocalizer<SharedResource> Loc
+@inject ApplicationErrorTranslator ApplicationErrorTranslator
+
 <PageTitle>Relationship-based Experiments with ASP.NET Core OData</PageTitle>
 <AuthorizeView>
     <Authorized>
@@ -27,7 +31,16 @@
                         <div class="content">
                             <article id="article">
                                 <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
-                                <div>@Body</div>
+                                <ErrorBoundary @ref="_errorBoundary">
+                                    <ChildContent>
+                                        <div>@Body</div>
+                                    </ChildContent>
+                                    <ErrorContent Context="exception">
+                                        @{
+                                            HandleException(exception);
+                                        }
+                                    </ErrorContent>
+                                </ErrorBoundary>
                             </article>
                             <aside>
 

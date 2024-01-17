@@ -65,4 +65,12 @@ AS BEGIN
 		ALTER TABLE [Application].[UserTaskItem] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[UserTaskItemHistory], DATA_CONSISTENCY_CHECK = ON));
 	END
     
+        IF OBJECTPROPERTY(OBJECT_ID('[Application].[Language]'), 'TableTemporalType') = 0
+	BEGIN
+		PRINT 'Reactivate Temporal Table for [Application].[Language]'
+
+		ALTER TABLE [Application].[Language] ADD PERIOD FOR SYSTEM_TIME([ValidFrom], [ValidTo]);
+		ALTER TABLE [Application].[Language] SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [Application].[LanguageHistory], DATA_CONSISTENCY_CHECK = ON));
+	END
+
 END

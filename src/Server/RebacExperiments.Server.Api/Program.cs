@@ -51,6 +51,7 @@ try
     builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
     builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<ILanguageService, LanguageService>();
     builder.Services.AddScoped<ITaskItemService, TaskItemService>();
     builder.Services.AddScoped<ITeamService, TeamService>();
     builder.Services.AddScoped<IOrganizationService, OrganizationService>();

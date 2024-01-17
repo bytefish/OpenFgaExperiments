@@ -20,6 +20,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             modelBuilder.EntitySet<User>("Users");
             modelBuilder.EntitySet<Team>("Teams");
             modelBuilder.EntitySet<Organization>("Organizations");
+            modelBuilder.EntitySet<Language>("Languages");
             modelBuilder.EntitySet<TaskItem>("TaskItems");
             modelBuilder.EntitySet<StoredRelationTuple>("RelationTuples");
 
