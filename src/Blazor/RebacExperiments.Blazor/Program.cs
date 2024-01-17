@@ -15,6 +15,9 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+// Cache Storage
+builder.Services.AddSingleton<CacheStorageAccessor>();
+
 // LocalStorage
 builder.Services.AddSingleton<LocalStorageService>();
 
@@ -26,6 +29,9 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddSingleton<CustomAuthenticationStateProvider>();
 builder.Services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<CustomAuthenticationStateProvider>());
+
+// Static Content
+builder.Services.AddSingleton<IStaticAssetService, HttpBasedStaticAssetService>();
 
 // We need the CookieHandler to send the Authentication Cookie to the Server.
 builder.Services.AddScoped<CookieDelegatingHandler>();

@@ -120,11 +120,35 @@
   <data name="ApiError_Auth_000001" xml:space="preserve">
     <value>Login failed. Invalid user ID or password.</value>
   </data>
+  <data name="ApiError_Auth_000002" xml:space="preserve">
+    <value>Authorization has failed. This indicates you are missing permissions to access the data.</value>
+  </data>
+  <data name="ApiError_Auth_000003" xml:space="preserve">
+    <value>User is Unauthorized. This indicates you are no longer signed in to the system.</value>
+  </data>
+  <data name="ApiError_Entity_000001" xml:space="preserve">
+    <value>The entity was not found. It might have been deleted.</value>
+  </data>
+  <data name="ApiError_Entity_000002" xml:space="preserve">
+    <value>The user is not authorized to perform this action. This usually indicates missing permissions to access the data.</value>
+  </data>
+  <data name="ApiError_Entity_000003" xml:space="preserve">
+    <value>The data has been edited by another user. Please try to reload the data.</value>
+  </data>
+  <data name="ApiError_RateLimit_000001" xml:space="preserve">
+    <value>Too Many Requests. The Rate Limit has been exeeded.</value>
+  </data>
+  <data name="ApiError_Routing_000001" xml:space="preserve">
+    <value>The requested Resource was not found on the server. Please report this error to support.</value>
+  </data>
+  <data name="ApiError_Routing_000002" xml:space="preserve">
+    <value>A Resource was accessed with an invalid HTTP Verb. Please report this error to support.</value>
+  </data>
   <data name="ApiError_System_000001" xml:space="preserve">
     <value>An Internal Server Error occured. Please try again later.</value>
   </data>
-  <data name="ApiError_System_000002" xml:space="preserve">
-    <value>A Bad Request has been sent to the Server.</value>
+  <data name="ApiError_Validation_000001" xml:space="preserve">
+    <value>The Validation has failed. Please check your input data.</value>
   </data>
   <data name="ApplicationError_Exception" xml:space="preserve">
     <value>An unexpected application error occured. Try contacting the support.</value>
@@ -218,6 +242,9 @@
   </data>
   <data name="Login_RememberMe" xml:space="preserve">
     <value>Remember Me</value>
+  </data>
+  <data name="Message_ShowHelp" xml:space="preserve">
+    <value>Show Help</value>
   </data>
   <data name="TaskItemPriorityEnum_High" xml:space="preserve">
     <value>High</value>

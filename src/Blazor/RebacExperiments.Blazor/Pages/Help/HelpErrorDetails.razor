@@ -1,0 +1,16 @@
+﻿@page "/Help/ErrorDetails/{ErrorCode}"
+
+@namespace RebacExperiments.Blazor.Pages
+
+
+@using RebacExperiments.Blazor.Components
+
+@inject ApplicationErrorTranslator ApplicationErrorTranslator
+
+@if(!string.IsNullOrWhiteSpace(_assetUrl)) {
+    <MarkdownSection FromAsset=@_assetUrl />
+} 
+else
+{
+    <p>Loading Error Information ...</p>
+}

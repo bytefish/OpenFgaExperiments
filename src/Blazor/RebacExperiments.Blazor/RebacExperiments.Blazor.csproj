@@ -20,6 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Components\Markdown\MainLayout.razor.js" />
       <None Remove="Shared\MainLayout - Copy.razor.js" />
       <None Remove="Shared\MainLayout.razor.js" />
     </ItemGroup>
@@ -29,6 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Markdig" Version="0.34.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.0" />
         <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.2.1" />

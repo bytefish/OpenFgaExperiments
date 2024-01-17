@@ -1,13 +1,11 @@
 ﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Net.Http.Headers;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Microsoft.JSInterop;
-using RebacExperiments.Shared.ApiSdk.Models.ODataErrors;
 
 namespace RebacExperiments.Blazor.Shared
 {
@@ -54,10 +52,11 @@ namespace RebacExperiments.Blazor.Shared
 
         private void HandleException(Exception exception)
         {
-            (var errorMessage, var errorCode) = ApplicationErrorTranslator.GetErrorMessage(exception);
+            (var errorCode, var errorMessage) = ApplicationErrorTranslator.GetErrorMessage(exception);
 
             MessageService.ShowMessageBar(options =>
             {
+                options.Section = App.MESSAGES_TOP;
                 options.Intent = MessageIntent.Error;
                 options.ClearAfterNavigation = false;
                 options.Title = "Error";
@@ -65,11 +64,13 @@ namespace RebacExperiments.Blazor.Shared
                 options.Timestamp = DateTime.Now;
                 options.Link = new ActionLink<Message>
                 {
-                    Href = "/Help/Error/{errorCode}",
-                    Text = "Show Help" // TODO Localize
+                    Text = Loc["Message_ShowHelp"], 
+                    Href = $"Help/ErrorDetails/{errorCode}", // Open Help in a new window...
                 };
             });
         }
+
+
 
         private void HandleChecked()
         {

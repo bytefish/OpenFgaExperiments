@@ -40,7 +40,6 @@ AS BEGIN
 		ALTER TABLE [Application].[Team] DROP PERIOD FOR SYSTEM_TIME;
 	END
 
-        
 	IF OBJECTPROPERTY(OBJECT_ID('[Application].[OrganizationRole]'), 'TableTemporalType') = 2
 	BEGIN
 		PRINT 'Deactivate Temporal Table for [Application].[OrganizationRole]'

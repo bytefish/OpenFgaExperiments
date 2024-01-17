@@ -13,11 +13,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.Errors
         public const string InternalServerError = "ApiError_System_000001";
 
         /// <summary>
-        /// BadRequest.
-        /// </summary>
-        public const string BadRequest = "ApiError_System_000002";
-
-        /// <summary>
         /// Validation Error.
         /// </summary>
         public const string ValidationFailed = "ApiError_Validation_000001";
