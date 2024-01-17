@@ -57,15 +57,16 @@ namespace RebacExperiments.Blazor.Components
         protected override void OnInitialized()
         {
             if (Content is null && string.IsNullOrEmpty(FromAsset))
+            {
                 throw new ArgumentException("You need to provide either Content or FromAsset parameter");
+            }
 
             InternalContent = Content;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-
-            if (firstRender && !string.IsNullOrEmpty(FromAsset))
+            if (!string.IsNullOrEmpty(FromAsset))
             {
                 InternalContent = await StaticAssetService.GetAsync(FromAsset);
             }

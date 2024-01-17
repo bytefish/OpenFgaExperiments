@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace RebacExperiments.Blazor.Pages
 {
-    public partial class HelpErrorDetails
+    public partial class ErrorDetail
     {
         /// <summary>
         /// Gets or sets the Error Code to view information for.

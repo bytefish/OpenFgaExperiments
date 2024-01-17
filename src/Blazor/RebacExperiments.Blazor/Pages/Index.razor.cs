@@ -63,8 +63,16 @@ namespace RebacExperiments.Blazor.Pages
                 Error = new MainError
                 {
                     Code = "ApiError_RateLimit_000001",
-                    Message = "My Message"
-                }
+                    Message = "My Message",
+                    Innererror = new InnerError
+                    {
+                        AdditionalData =
+                        {
+                            { "trace-id", "my-trace-id" }
+                        }
+                    }
+                },
+                
             };
         }
     }

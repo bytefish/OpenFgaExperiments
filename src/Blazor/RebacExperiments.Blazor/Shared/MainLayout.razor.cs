@@ -65,12 +65,15 @@ namespace RebacExperiments.Blazor.Shared
                 options.Link = new ActionLink<Message>
                 {
                     Text = Loc["Message_ShowHelp"], 
-                    Href = $"Help/ErrorDetails/{errorCode}", // Open Help in a new window...
+                    OnClick = (message) =>
+                    {
+                        NavigationManager.NavigateTo($"Help/Errors/{errorCode}");
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
         }
-
-
 
         private void HandleChecked()
         {

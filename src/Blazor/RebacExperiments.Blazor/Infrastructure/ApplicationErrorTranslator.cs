@@ -21,7 +21,7 @@ namespace RebacExperiments.Blazor.Infrastructure
             return exception switch
             {
                 ODataError e => (e.Error!.Code!, GetErrorMessageFromODataError(e)),
-                Exception e => (LocalizationConstants.DefaultErrorKey, GetErrorMessageFromException(e)),
+                Exception e => (LocalizationConstants.ClientError_UnexpectedError, GetErrorMessageFromException(e)),
             };
         }
 

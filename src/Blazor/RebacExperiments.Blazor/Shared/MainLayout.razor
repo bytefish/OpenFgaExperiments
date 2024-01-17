@@ -2,6 +2,7 @@
 @using System.Runtime.InteropServices
 @using RebacExperiments.Blazor.Components
 @using RebacExperiments.Blazor.Components.RedirectToLogin
+
 @namespace RebacExperiments.Blazor.Shared
 
 @inject IMessageService MessageService
@@ -31,6 +32,7 @@
                         <div class="content">
                             <article id="article">
                                 <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
+
                                 <ErrorBoundary @ref="_errorBoundary">
                                     <ChildContent>
                                         <div>@Body</div>

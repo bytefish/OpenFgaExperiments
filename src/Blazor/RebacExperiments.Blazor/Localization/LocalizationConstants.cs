@@ -2,6 +2,6 @@
 {
     public static class LocalizationConstants
     {
-        public const string DefaultErrorKey = "DefaultErrorKey";
+        public const string ClientError_UnexpectedError = "ClientError_UnexpectedError";
     }
 }

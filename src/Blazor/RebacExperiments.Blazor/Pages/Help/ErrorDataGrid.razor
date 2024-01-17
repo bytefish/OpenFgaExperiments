@@ -1,0 +1,17 @@
+﻿@page "/Help/Errors"
+
+@using RebacExperiments.Blazor.Components
+
+@namespace RebacExperiments.Blazor.Pages
+
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> Loc
+
+<FluentDataGrid Items="@Errors" ResizableColumns=true GridTemplateColumns="0.2fr 0.2fr 1fr" TGridItem="ErrorListItem">
+    <PropertyColumn Property="@(c => c.Code)" Sortable="true" Align="Align.Start" />
+    <PropertyColumn Property="@(c => c.Title)" Sortable="true" Align="Align.Start" />
+    <TemplateColumn Title="Actions" Align="@Align.Start">
+        <FluentButton OnClick="@(() => ShowDetails(context))">@Loc["DataGrid_Button_Details"]</FluentButton>
+    </TemplateColumn>
+</FluentDataGrid>
+

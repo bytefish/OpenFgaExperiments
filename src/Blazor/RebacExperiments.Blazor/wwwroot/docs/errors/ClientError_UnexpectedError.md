@@ -1,4 +1,4 @@
-# An Unexpected Error Occured (DefaultErrorKey)
+# Client: Unexpected Error Occured (ClientError_UnexpectedError)
 
 Processing you action failed due to an unexpected failure. This usually indicates a problem in 
 the client. There is not much you can do to fix the problem, you should contact support to 

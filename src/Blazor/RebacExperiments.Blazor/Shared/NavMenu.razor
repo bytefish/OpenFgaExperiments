@@ -7,12 +7,18 @@
                 <h3>Home</h3>
             </FluentNavLink>
 
-            <FluentNavGroup Expanded="true" Title="Task Management" Gap="10px">
-                <FluentNavLink Href="/TaskItems" Icon="@(new Icons.Regular.Size20.Info())">User Tasks</FluentNavLink>
+            <FluentNavGroup Expanded="true" Title="Task Management" Gap="10px" Icon="@(new Icons.Regular.Size20.TasksApp())">
+                <FluentNavLink Href="/TaskItems">User Tasks</FluentNavLink>
             </FluentNavGroup>
 
-            <FluentNavGroup Expanded="true" Title="Identity Management" Gap="10px">
-                <FluentNavLink Href="/RelationTuples" Icon="@(new Icons.Regular.Size20.Info())">Relation Tuples</FluentNavLink>
+            <FluentNavGroup Expanded="true" Title="Identity Management" Gap="10px" Icon="@(new Icons.Regular.Size20.Key())">
+                <FluentNavLink Href="/RelationTuples" >Relation Tuples</FluentNavLink>
+            </FluentNavGroup>
+
+            <FluentNavGroup Expanded="true" Title="Documentation" Icon="@(new Icons.Regular.Size20.Document())">
+                <FluentNavGroup Expanded="true" Title="Errors" Gap="10px" Icon="@(new Icons.Regular.Size20.Warning())">
+                    <FluentNavLink Href="/Help/Errors">Error List</FluentNavLink>
+                </FluentNavGroup>
             </FluentNavGroup>
         </FluentNavMenu>
     </nav>
