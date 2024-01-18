@@ -22,7 +22,8 @@ builder.Services.AddSingleton<CacheStorageAccessor>();
 builder.Services.AddSingleton<LocalStorageService>();
 
 // Error Handling
-builder.Services.AddSingleton<ApplicationErrorTranslator>();
+builder.Services.AddScoped<ApplicationErrorTranslator>();
+builder.Services.AddScoped<ApplicationErrorMessageService>();
 
 // Auth
 builder.Services.AddAuthorizationCore();

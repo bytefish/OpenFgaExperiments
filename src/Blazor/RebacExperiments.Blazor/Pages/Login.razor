@@ -4,10 +4,11 @@
 @using RebacExperiments.Shared.ApiSdk
 
 @inject ApiClient ApiClient
-@inject ApplicationErrorTranslator ApplicationErrorTranslator
+
 @inject IStringLocalizer<SharedResource> Loc
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthStateProvider
+@inject ApplicationErrorMessageService ApplicationErrorMessageService
 
 <div class="container">
     <FluentCard Width="500px">
@@ -18,7 +19,7 @@
                 <FluentGrid Spacing="3" Justify="JustifyContent.Center">
                     <FluentGridItem xs="12">
                         <h1>Login</h1>
-                     </FluentGridItem>
+                    </FluentGridItem>
                     <FluentGridItem xs="12">
                         <FluentTextField Name="login_eMail" Style="width: 100%" @bind-Value="Input.Email" Label=@Loc["Login_Email"] Required />
                          <FluentValidationMessage For="@(() => Input.Email)" />
@@ -34,15 +35,11 @@
                      <FluentGridItem xs="12">
                          <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Login</FluentButton>
                      </FluentGridItem>
-                     @if(!string.IsNullOrWhiteSpace(ErrorMessage)) {
-                        <FluentGridItem xs="12">
-                            <FluentMessageBar Style="width: 100%" Title="Error" Intent="@MessageIntent.Error" Type="MessageType.MessageBar">
-                                @ErrorMessage
-                            </FluentMessageBar>
-                        </FluentGridItem>
-                     }
-                </FluentGrid>
-            </FluentStack>
-        </EditForm>
-    </FluentCard>
-</div>
+                     <FluentGridItem xs="12">
+                         <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
+                     </FluentGridItem>
+                 </FluentGrid>
+             </FluentStack>
+         </EditForm>
+     </FluentCard>
+ </div>

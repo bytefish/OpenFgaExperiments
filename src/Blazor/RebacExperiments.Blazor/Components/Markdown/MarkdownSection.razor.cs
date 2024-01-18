@@ -19,19 +19,21 @@ namespace RebacExperiments.Blazor.Components
         private IStaticAssetService StaticAssetService { get; set; } = default!;
 
         /// <summary>
-        /// Gets or sets the Markdown content 
+        /// Gets or sets asset to read the Markdown from.
         /// </summary>
         [Parameter]
-        public string? Content { get; set; }
+        public required string FromAsset { get; set; }
 
         /// <summary>
-        /// Gets or sets asset to read the Markdown from
+        /// Raised, when the Content has been converted.
         /// </summary>
         [Parameter]
-        public string? FromAsset { get; set; }
-
-        [Parameter]
         public EventCallback OnContentConverted { get; set; }
+
+        /// <summary>
+        /// Sanitized HTML Content.
+        /// </summary>
+        public MarkupString HtmlContent { get; private set; }
 
         public string? InternalContent
         {
@@ -39,46 +41,32 @@ namespace RebacExperiments.Blazor.Components
             set
             {
                 _content = value;
-                HtmlContent = ConvertToMarkupString(_content);
 
+                HtmlContent = ConvertToMarkupString(_content);
 
                 if (OnContentConverted.HasDelegate)
                 {
                     OnContentConverted.InvokeAsync();
                 }
+
                 _raiseContentConverted = true;
+
                 StateHasChanged();
             }
         }
 
-        public MarkupString HtmlContent { get; private set; }
-
-
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            if (Content is null && string.IsNullOrEmpty(FromAsset))
-            {
-                throw new ArgumentException("You need to provide either Content or FromAsset parameter");
-            }
-
-            InternalContent = Content;
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (!string.IsNullOrEmpty(FromAsset))
-            {
-                InternalContent = await StaticAssetService.GetAsync(FromAsset);
-            }
+            InternalContent = await StaticAssetService.GetAsync(FromAsset);
 
             if (_raiseContentConverted)
             {
                 _raiseContentConverted = false;
+
                 if (OnContentConverted.HasDelegate)
                 {
                     await OnContentConverted.InvokeAsync();
                 }
-
             }
         }
 

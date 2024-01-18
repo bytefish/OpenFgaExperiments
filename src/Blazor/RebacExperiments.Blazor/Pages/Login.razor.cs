@@ -108,9 +108,7 @@ namespace RebacExperiments.Blazor.Pages
             }
             catch(Exception e)
             {
-                (var _, var errorMessage)= ApplicationErrorTranslator.GetErrorMessage(e);
-
-                ErrorMessage = errorMessage;
+                ApplicationErrorMessageService.ShowErrorMessage(e);
             }
         }
 

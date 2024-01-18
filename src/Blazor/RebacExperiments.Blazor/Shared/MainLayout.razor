@@ -7,7 +7,7 @@
 
 @inject IMessageService MessageService
 @inject IStringLocalizer<SharedResource> Loc
-@inject ApplicationErrorTranslator ApplicationErrorTranslator
+@inject ApplicationErrorMessageService ApplicationErrorMessageService
 
 <PageTitle>Relationship-based Experiments with ASP.NET Core OData</PageTitle>
 <AuthorizeView>
@@ -32,16 +32,14 @@
                         <div class="content">
                             <article id="article">
                                 <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
-
                                 <ErrorBoundary @ref="_errorBoundary">
                                     <ChildContent>
                                         <div>@Body</div>
                                     </ChildContent>
                                     <ErrorContent Context="exception">
                                         @{
-                                            HandleException(exception);
+                                            ApplicationErrorMessageService.ShowErrorMessage(exception);
                                         }
-                                        <div>@Body</div>
                                     </ErrorContent>
                                 </ErrorBoundary>
                             </article>

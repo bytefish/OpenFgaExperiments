@@ -50,31 +50,6 @@ namespace RebacExperiments.Blazor.Shared
             }
         }
 
-        private void HandleException(Exception exception)
-        {
-            (var errorCode, var errorMessage) = ApplicationErrorTranslator.GetErrorMessage(exception);
-
-            MessageService.ShowMessageBar(options =>
-            {
-                options.Section = App.MESSAGES_TOP;
-                options.Intent = MessageIntent.Error;
-                options.ClearAfterNavigation = false;
-                options.Title = "Error";
-                options.Body = errorMessage;
-                options.Timestamp = DateTime.Now;
-                options.Link = new ActionLink<Message>
-                {
-                    Text = Loc["Message_ShowHelp"], 
-                    OnClick = (message) =>
-                    {
-                        NavigationManager.NavigateTo($"Help/Errors/{errorCode}");
-
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-        }
-
         private void HandleChecked()
         {
             _menuChecked = !_menuChecked;

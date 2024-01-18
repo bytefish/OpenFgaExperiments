@@ -5,11 +5,17 @@
 @namespace RebacExperiments.Blazor.Pages
 
 @inject ApplicationErrorTranslator ApplicationErrorTranslator
+<style>
+    p {
+        max-width: 700px;  
+    }
+</style>
 
-@if(!string.IsNullOrWhiteSpace(_assetUrl)) {
-    <MarkdownSection FromAsset=@_assetUrl />
-} 
-else
-{
-    <p>Loading Error Information ...</p>
-}
+    @if (!string.IsNullOrWhiteSpace(_assetUrl))
+    {
+        <MarkdownSection FromAsset=@_assetUrl />
+    }
+    else
+    {
+        <p>Loading Error Information ...</p>
+    }
