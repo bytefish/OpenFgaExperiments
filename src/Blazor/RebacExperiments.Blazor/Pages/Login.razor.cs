@@ -116,6 +116,32 @@ namespace RebacExperiments.Blazor.Pages
         }
 
         /// <summary>
+        /// Signs in the User to the Service using Cookie Authentication.
+        /// </summary>
+        /// <returns></returns>
+        public async Task SignInGitHubAsync()
+        {
+            try
+            {
+
+                // ... then get the User Profile ...
+                var me = await ApiClient.Odata.Me.GetAsync();
+
+                // ... then set the new User Profile ...
+                await AuthStateProvider.SetCurrentUserAsync(me);
+
+                // ... and navigate to the ReturnUrl.
+                var navigationUrl = GetNavigationUrl();
+
+                NavigationManager.NavigateTo(navigationUrl);
+            }
+            catch (Exception e)
+            {
+                ApplicationErrorMessageService.ShowErrorMessage(e);
+            }
+        }
+
+        /// <summary>
         /// Validates an <see cref="InputModel"/>.
         /// </summary>
         /// <param name="model">InputModel to validate</param>

@@ -1,0 +1,51 @@
+@namespace RebacExperiments.Blazor.Components
+
+
+@inherits FluentComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<FluentButton Appearance="Appearance.Accent" class=@Class style=@Style @attributes=@AdditionalAttributes OnClick="OnClickAsync">
+    @ChildContent
+</FluentButton>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string Href { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private IJSObjectReference _jsModule = default!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/LinkButton/LinkButton.razor.js");
+        }
+    }
+
+    private async Task OnClickAsync()
+    {
+        await _jsModule.InvokeVoidAsync("navigateToHref", Href);
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_jsModule is not null)
+            {
+                await _jsModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The JSRuntime side may routinely be gone already if the reason we're disposing is that
+            // the client disconnected. This is not an error.
+        }
+    }
+}

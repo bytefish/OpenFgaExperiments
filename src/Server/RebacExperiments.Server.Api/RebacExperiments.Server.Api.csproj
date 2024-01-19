@@ -17,6 +17,7 @@
     <ItemGroup>
         <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="8.0.0" />
         <PackageReference Include="Azure.Identity" Version="1.10.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
@@ -39,6 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Blazor\RebacExperiments.Blazor\RebacExperiments.Blazor.csproj" />
       <ProjectReference Include="..\RebacExperiments.Server.Database\RebacExperiments.Server.Database.csproj" />
       <ProjectReference Include="..\RebacExperiments.Server.OpenFga\RebacExperiments.Server.OpenFga.csproj" />
     </ItemGroup>

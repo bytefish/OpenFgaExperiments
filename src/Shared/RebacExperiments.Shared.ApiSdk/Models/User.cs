@@ -16,14 +16,6 @@ namespace RebacExperiments.Shared.ApiSdk.Models {
 #else
         public string FullName { get; set; }
 #endif
-        /// <summary>The hashedPassword property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? HashedPassword { get; set; }
-#nullable restore
-#else
-        public string HashedPassword { get; set; }
-#endif
         /// <summary>The id property</summary>
         public int? Id { get; set; }
         /// <summary>The isPermittedToLogon property</summary>
@@ -78,7 +70,6 @@ namespace RebacExperiments.Shared.ApiSdk.Models {
         public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers() {
             return new Dictionary<string, Action<IParseNode>> {
                 {"fullName", n => { FullName = n.GetStringValue(); } },
-                {"hashedPassword", n => { HashedPassword = n.GetStringValue(); } },
                 {"id", n => { Id = n.GetIntValue(); } },
                 {"isPermittedToLogon", n => { IsPermittedToLogon = n.GetBoolValue(); } },
                 {"lastEditedBy", n => { LastEditedBy = n.GetIntValue(); } },
@@ -96,7 +87,6 @@ namespace RebacExperiments.Shared.ApiSdk.Models {
         public virtual void Serialize(ISerializationWriter writer) {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("fullName", FullName);
-            writer.WriteStringValue("hashedPassword", HashedPassword);
             writer.WriteIntValue("id", Id);
             writer.WriteBoolValue("isPermittedToLogon", IsPermittedToLogon);
             writer.WriteIntValue("lastEditedBy", LastEditedBy);

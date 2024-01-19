@@ -86,7 +86,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
                 var authenticationProperties = new AuthenticationProperties
                 {
-                    RedirectUri = "/odata/github-authenticated",
+                    RedirectUri = "/odata/signin-external-github",
                 };
 
                 return Challenge(authenticationProperties, GitHubAuthenticationDefaults.AuthenticationScheme);
@@ -97,7 +97,7 @@ namespace RebacExperiments.Server.Api.Controllers
             }
         }
 
-        [HttpGet("odata/github-authenticated")]
+        [HttpGet("odata/signin-external-github")]
         public async Task<IActionResult> GitHubSignIn([FromServices] IUserService userService, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
@@ -145,7 +145,7 @@ namespace RebacExperiments.Server.Api.Controllers
                 };
 
                 // This signals, that we authenticated the user against an external provider.
-                authenticationProperties.SetString("ExternalProviderName", CookieAuthenticationDefaults.AuthenticationScheme);
+                authenticationProperties.SetString("ExternalProviderName", GitHubAuthenticationDefaults.AuthenticationScheme);
 
                 // If we have received a token (we should have), we can add it to the Cookie.
                 var accessToken = await HttpContext
@@ -166,23 +166,19 @@ namespace RebacExperiments.Server.Api.Controllers
                     authenticationProperties.StoreTokens(tokens);
                 }
 
-                // Delete any Cookie set by the GitHub Dance
-                //await HttpContext.SignOutAsync(GitHubAuthenticationDefaults.AuthenticationScheme);
-
                 // Perform the SignIn, so we set the Authentication Cookie.
-                await HttpContext.SignInAsync(
-                    scheme: CookieAuthenticationDefaults.AuthenticationScheme, 
-                    principal: claimsPrincipal, 
-                    properties: authenticationProperties);
+                await HttpContext.SignInAsync(claimsPrincipal, authenticationProperties);
 
-                return Redirect("/");
+                // Delete all Correlation Cookies set during the OAuth Dance.
+                await HttpContext.SignOutAsync(AuthenticationSchemes.ExternalScheme);
+
+                return Redirect("/RedirectExternal");
             }
             catch (Exception exception)
             {
                 return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
         }
-
 
         [HttpPost("odata/SignOutUser")]
         public async Task<IActionResult> SignOutUser()

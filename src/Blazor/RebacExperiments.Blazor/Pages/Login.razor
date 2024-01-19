@@ -1,6 +1,7 @@
 ﻿@page "/Login"
 @layout EmptyLayout
 
+@using RebacExperiments.Blazor.Components
 @using RebacExperiments.Shared.ApiSdk
 
 @inject ApiClient ApiClient
@@ -11,35 +12,41 @@
 @inject ApplicationErrorMessageService ApplicationErrorMessageService
 
 <div class="container">
-    <FluentCard Width="500px">
-        <EditForm Model="@Input" OnValidSubmit="SignInUserAsync" FormName="login_form" novalidate>
-            <SimpleValidator TModel=InputModel ValidationFunc="ValidateInputModel" />
-            <FluentValidationSummary />
-            <FluentStack Orientation="Orientation.Vertical">
-                <FluentGrid Spacing="3" Justify="JustifyContent.Center">
-                    <FluentGridItem xs="12">
-                        <h1>Login</h1>
-                    </FluentGridItem>
-                    <FluentGridItem xs="12">
-                        <FluentTextField Name="login_eMail" Style="width: 100%" @bind-Value="Input.Email" Label=@Loc["Login_Email"] Required />
-                         <FluentValidationMessage For="@(() => Input.Email)" />
-                     </FluentGridItem>
-                     <FluentGridItem xs="12">
-                         <FluentTextField Name="login_password" Style="width: 100%" TextFieldType="TextFieldType.Password" @bind-Value="Input.Password" Label=@Loc["Login_Password"] Required />
-                         <FluentValidationMessage For="@(() => Input.Password)" />
-                     </FluentGridItem>
-                     <FluentGridItem xs="12">
-                         <FluentCheckbox Name="login_rememberMe" @bind-Value="Input.RememberMe" Label=@Loc["Login_RememberMe"] />
-                         <FluentValidationMessage For="@(() => Input.RememberMe)" />
-                     </FluentGridItem>
-                     <FluentGridItem xs="12">
-                         <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Login</FluentButton>
-                     </FluentGridItem>
-                     <FluentGridItem xs="12">
+    <FluentStack Orientation="Orientation.Vertical">
+        <FluentCard Width="500px">
+            <EditForm Model="@Input" OnValidSubmit="SignInUserAsync" FormName="login_form" novalidate>
+                <SimpleValidator TModel=InputModel ValidationFunc="ValidateInputModel" />
+                <FluentValidationSummary />
+                <FluentStack Orientation="Orientation.Vertical">
+                    <FluentGrid Spacing="3" Justify="JustifyContent.Center">
+                        <FluentGridItem xs="12">
+                            <h1>Login</h1>
+                        </FluentGridItem>
+                        <FluentGridItem xs="12">
+                            <FluentTextField Name="login_eMail" Style="width: 100%" @bind-Value="Input.Email" Label=@Loc["Login_Email"] Required />
+                             <FluentValidationMessage For="@(() => Input.Email)" />
+                         </FluentGridItem>
+                         <FluentGridItem xs="12">
+                             <FluentTextField Name="login_password" Style="width: 100%" TextFieldType="TextFieldType.Password" @bind-Value="Input.Password" Label=@Loc["Login_Password"] Required />
+                             <FluentValidationMessage For="@(() => Input.Password)" />
+                         </FluentGridItem>
+                         <FluentGridItem xs="12">
+                             <FluentCheckbox Name="login_rememberMe" @bind-Value="Input.RememberMe" Label=@Loc["Login_RememberMe"] />
+                             <FluentValidationMessage For="@(() => Input.RememberMe)" />
+                         </FluentGridItem>
+                         <FluentGridItem xs="12">
+                             <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Login</FluentButton>
+                         </FluentGridItem>
+                         <FluentGridItem xs="12">
+                             <div class="separator">or</div>
+                         </FluentGridItem>
+                         <FluentGridItem xs="12">
+                             <LinkButton Href="odata/login-github()" Style="width: 100%">Login with GitHub</LinkButton>
+                         </FluentGridItem>
                          <FluentMessageBarProvider Section="@App.MESSAGES_TOP" />
-                     </FluentGridItem>
-                 </FluentGrid>
-             </FluentStack>
-         </EditForm>
-     </FluentCard>
+                     </FluentGrid>
+                 </FluentStack>
+             </EditForm>
+         </FluentCard>
+     </FluentStack>
  </div>

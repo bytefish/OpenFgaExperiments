@@ -6,7 +6,7 @@
     {
         var baseRelativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
 
-        if(string.IsNullOrWhiteSpace(baseRelativePath))
+        if (string.IsNullOrWhiteSpace(baseRelativePath) || string.Equals("index.html", baseRelativePath, StringComparison.InvariantCultureIgnoreCase))
         {
             Navigation.NavigateTo($"Login", true);
         } else

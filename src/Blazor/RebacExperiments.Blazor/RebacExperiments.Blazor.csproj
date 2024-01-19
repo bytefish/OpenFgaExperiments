@@ -20,12 +20,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Components\LinkButton\LinkButton.razor.js" />
       <None Remove="Components\Markdown\MainLayout.razor.js" />
       <None Remove="Shared\MainLayout - Copy.razor.js" />
       <None Remove="Shared\MainLayout.razor.js" />
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="Components\LinkButton\LinkButton.razor.js" />
       <Content Include="Shared\MainLayout.razor.js" />
     </ItemGroup>
 

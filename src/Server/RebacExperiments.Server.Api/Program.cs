@@ -190,6 +190,8 @@ try
             options.Select().OrderBy().Filter().SetMaxTop(250).Count();
         });
 
+    builder.Services.AddRazorPages();;
+
     builder.Services.AddSwaggerGen();
 
     // Add Policies
@@ -237,20 +239,29 @@ try
 
     if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
+        app.UseWebAssemblyDebugging();
+
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
             options.SwaggerEndpoint("https://localhost:5000/odata/openapi.json", "TaskManagement Service");
         });
     }
+    
+    app.UseBlazorFrameworkFiles();
+    app.UseStaticFiles();
 
     app.UseExceptionHandler("/error");
     app.UseStatusCodePagesWithReExecute("/error/{0}");
-
+        
     app.UseCors("CorsPolicy");
+    
     app.UseAuthorization();
     app.UseRateLimiter();
+
     app.MapControllers();
+
+    app.MapFallbackToFile("index.html");
 
     app.Run();
 }
