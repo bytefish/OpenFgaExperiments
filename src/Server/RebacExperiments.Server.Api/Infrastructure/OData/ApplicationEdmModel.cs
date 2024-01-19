@@ -15,7 +15,6 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             modelBuilder.Namespace = "TaskManagementService";
 
-
             // Configure EntitySets
             modelBuilder.EntitySet<User>("Users");
             modelBuilder.EntitySet<Team>("Teams");
@@ -49,6 +48,10 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             RegisterSignInUserAction(modelBuilder);
             RegisterSignOutUserAction(modelBuilder);
 
+            // Extenal Authentication
+            RegisterLogInGitHubFunction(modelBuilder);
+            //RegisterSignInGitHubFunction(modelBuilder);
+
             // Send as Lower Camel Case Properties, so the JSON looks better:
             modelBuilder.EnableLowerCamelCase();
 
@@ -64,6 +67,27 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             signInUserAction.Parameter<string>("username").Required();
             signInUserAction.Parameter<string>("password").Required();
             signInUserAction.Parameter<bool>("rememberMe").Required();
+        }
+
+        private static void RegisterLogInGitHubFunction(ODataConventionModelBuilder modelBuilder)
+        {
+            var logInGitHubFunction = modelBuilder.Function("login-github");
+
+            logInGitHubFunction
+                .Returns<bool>();
+
+            logInGitHubFunction.HasDescription()
+                .HasDescription("Start a Login with GitHub");
+        }
+
+        private static void RegisterSignInGitHubFunction(ODataConventionModelBuilder modelBuilder)
+        {
+            var signInGitHubFunction = modelBuilder.Function("signin-github");
+
+            signInGitHubFunction.Returns<bool>();
+
+            signInGitHubFunction.HasDescription()
+                .HasDescription("Called by the GitHub Authentication");
         }
 
         private static void RegisterSignOutUserAction(ODataConventionModelBuilder modelBuilder)

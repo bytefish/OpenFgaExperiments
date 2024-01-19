@@ -7,11 +7,11 @@
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> Loc
 
-<FluentDataGrid Items="@Errors" ResizableColumns=true GridTemplateColumns="1fr 1fr 0.5fr" TGridItem="ErrorListItem">
+<FluentDataGrid Items="@Errors" ResizableColumns=true GridTemplateColumns="0.2fr 0.2fr 1fr 0.2fr" TGridItem="ErrorListItem">
     <PropertyColumn Property="@(c => c.Code)" Sortable="true" Align="Align.Start" />
     <PropertyColumn Property="@(c => c.Title)" Sortable="true" Align="Align.Start" />
+    <PropertyColumn Property="@(c => c.Message)" Sortable="true" Align="Align.Start" />
     <TemplateColumn Title="Actions" Align="@Align.Start">
         <FluentButton OnClick="@(() => ShowDetails(context))">@Loc["DataGrid_Button_Details"]</FluentButton>
     </TemplateColumn>
 </FluentDataGrid>
-

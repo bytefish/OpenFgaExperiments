@@ -69,6 +69,39 @@ namespace RebacExperiments.Server.Api.Services
             return claims;
         }
 
+        public async Task<List<Claim>> GetClaimsAsync(string username, CancellationToken cancellationToken)
+        {
+            _logger.TraceMethodEntry();
+
+            var user = await _applicationDbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.LogonName == username, cancellationToken);
+
+            if (user == null)
+            {
+                throw new AuthenticationFailedException();
+            }
+
+            if (!user.IsPermittedToLogon)
+            {
+                throw new AuthenticationFailedException();
+            }
+
+            var query = from userRole in _applicationDbContext.UserRoles
+                        join role in _applicationDbContext.Roles on userRole.RoleId equals role.Id
+                        where userRole.UserId.Equals(user.Id)
+                        select role;
+
+            var roles = await query
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            // Build the Claims for the ClaimsPrincipal
+            var claims = CreateClaims(user, roles);
+
+            return claims;
+        }
+
         private List<Claim> CreateClaims(User user, List<Role> roles)
         {
             _logger.TraceMethodEntry();

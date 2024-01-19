@@ -73,18 +73,11 @@ namespace RebacExperiments.Blazor.Pages
         };
 
         /// <summary>
-        /// Error Message.
-        /// </summary>
-        public string? ErrorMessage { get; set; }
-
-        /// <summary>
         /// Signs in the User to the Service using Cookie Authentication.
         /// </summary>
         /// <returns></returns>
         public async Task SignInUserAsync()
         {
-            ErrorMessage = null;
-
             try
             {
                 // Sign in the User, which sets the Auth Cookie ...

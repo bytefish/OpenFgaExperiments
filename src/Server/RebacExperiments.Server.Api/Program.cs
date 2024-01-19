@@ -1,5 +1,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using AspNet.Security.OAuth.GitHub;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
@@ -135,7 +136,9 @@ try
 
     // Cookie Authentication
     builder.Services
+        // Using Cookie Authentication between Frontend and Backend
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        // We are going to use Cookies for ...
         .AddCookie(options =>
         {
             options.Cookie.HttpOnly = true;
@@ -152,6 +155,23 @@ try
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
+                return Task.CompletedTask;
+            };
+        })
+        // This is the Cookie, that ASP.NET Core needs to correlate 
+        .AddCookie(AuthenticationSchemes.ExternalScheme)
+        // Support External Authentication
+        .AddGitHub(options =>
+        {
+            options.SignInScheme = AuthenticationSchemes.ExternalScheme;
+            options.ClientId = builder.Configuration["Authentication:Schemes:GitHub:ClientId"]!;
+            options.ClientSecret = builder.Configuration["Authentication:Schemes:GitHub:ClientSecret"]!;
+            options.CallbackPath = new PathString("/odata/signin-github");
+
+            options.Scope.Add("user:email");
+
+            options.Events.OnTicketReceived = (context) =>
+            {
                 return Task.CompletedTask;
             };
         });
@@ -208,6 +228,12 @@ try
     });
 
     var app = builder.Build();
+
+    app.UseCookiePolicy(new CookiePolicyOptions()
+    {
+        Secure = CookieSecurePolicy.Always,
+        MinimumSameSitePolicy = SameSiteMode.Lax
+    });
 
     if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
