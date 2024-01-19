@@ -5,7 +5,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JSRuntime
 
-<FluentButton Appearance="Appearance.Accent" class=@Class style=@Style @attributes=@AdditionalAttributes OnClick="OnClickAsync">
+<FluentButton Appearance=@Appearance class=@Class style=@Style @attributes=@AdditionalAttributes OnClick="OnClickAsync">
     @ChildContent
 </FluentButton>
 
@@ -16,6 +16,9 @@
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public Appearance? Appearance { get; set; }
 
     private IJSObjectReference _jsModule = default!;
 

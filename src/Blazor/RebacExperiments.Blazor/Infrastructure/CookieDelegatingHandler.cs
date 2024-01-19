@@ -19,7 +19,7 @@ namespace RebacExperiments.Blazor.Infrastructure
             _logger.TraceMethodEntry();
 
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-
+            
             return await base.SendAsync(request, cancellationToken);
         }
     }
