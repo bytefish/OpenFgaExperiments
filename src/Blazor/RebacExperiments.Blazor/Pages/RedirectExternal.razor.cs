@@ -7,18 +7,18 @@ namespace RebacExperiments.Blazor.Pages
 {
     public partial class RedirectExternal
     {
+        [SupplyParameterFromQuery(Name = "returnUrl")]
+        public string? ReturnUrl { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             try
             {
-                // ... then get the User Profile ...
                 var me = await ApiClient.Odata.Me.GetAsync();
 
-                // ... then set the new User Profile ...
                 await AuthStateProvider.SetCurrentUserAsync(me);
 
-                // ... and navigate to the ReturnUrl.
-                var navigationUrl = "/";
+                var navigationUrl = GetNavigationUrl();
 
                 NavigationManager.NavigateTo(navigationUrl);
             }
@@ -27,6 +27,16 @@ namespace RebacExperiments.Blazor.Pages
                 ApplicationErrorMessageService.ShowErrorMessage(e);
             }
 
+        }
+
+        private string GetNavigationUrl()
+        {
+            if (string.IsNullOrWhiteSpace(ReturnUrl))
+            {
+                return "/";
+            }
+
+            return ReturnUrl;
         }
     }
 }

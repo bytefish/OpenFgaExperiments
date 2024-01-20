@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.OData;
 using RebacExperiments.Server.Api.Infrastructure.Authentication;
 using RebacExperiments.Server.Api.Infrastructure.Errors;
 using RebacExperiments.Server.Api.Infrastructure.Exceptions;
@@ -69,8 +70,8 @@ namespace RebacExperiments.Server.Api.Controllers
             }
         }
         
-        [HttpGet("odata/login-github()")]
-        public IActionResult GitHubLogin()
+        [HttpGet("odata/login.github(returnUrl={returnUrl})")]
+        public IActionResult GitHubLogin([FromODataUri] string? returnUrl)
         {
             _logger.TraceMethodEntry();
 
@@ -86,7 +87,7 @@ namespace RebacExperiments.Server.Api.Controllers
 
                 var authenticationProperties = new AuthenticationProperties
                 {
-                    RedirectUri = "/odata/signin-external-github",
+                    RedirectUri = $"/odata/signin.github(returnUrl='{returnUrl}')",
                 };
 
                 return Challenge(authenticationProperties, GitHubAuthenticationDefaults.AuthenticationScheme);
@@ -97,8 +98,8 @@ namespace RebacExperiments.Server.Api.Controllers
             }
         }
 
-        [HttpGet("odata/signin-external-github")]
-        public async Task<IActionResult> GitHubSignIn([FromServices] IUserService userService, CancellationToken cancellationToken)
+        [HttpGet("odata/signin.github(returnUrl={returnUrl})")]
+        public async Task<IActionResult> GitHubSignIn([FromServices] IUserService userService, [FromODataUri] string? returnUrl, CancellationToken cancellationToken)
         {
             _logger.TraceMethodEntry();
 
@@ -111,6 +112,12 @@ namespace RebacExperiments.Server.Api.Controllers
                         ModelStateDictionary = ModelState
                     };
                 }
+
+                // Redirect to Home if no Return Url.
+                if(string.IsNullOrWhiteSpace(returnUrl))
+                {
+                    returnUrl = "/";
+                }                
 
                 // Evaluates the Response GitHub has sent to us. This basically resolves 
                 // the Authentication Scheme we have registered in the Program.cs and
@@ -172,7 +179,7 @@ namespace RebacExperiments.Server.Api.Controllers
                 // Delete all Correlation Cookies set during the OAuth Dance.
                 await HttpContext.SignOutAsync(AuthenticationSchemes.ExternalScheme);
 
-                return Redirect("/RedirectExternal");
+                return Redirect($"/RedirectExternal?returnUrl={returnUrl}");
             }
             catch (Exception exception)
             {

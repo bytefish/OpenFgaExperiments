@@ -71,7 +71,11 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
         private static void RegisterLogInGitHubFunction(ODataConventionModelBuilder modelBuilder)
         {
-            var logInGitHubFunction = modelBuilder.Function("login-github");
+            var logInGitHubFunction = modelBuilder.Function("login.github");
+
+            logInGitHubFunction
+                .Parameter<string>("returnUrl")
+                .Optional();
 
             logInGitHubFunction
                 .Returns<bool>();
@@ -82,7 +86,11 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
         private static void RegisterSignInGitHubFunction(ODataConventionModelBuilder modelBuilder)
         {
-            var signInGitHubFunction = modelBuilder.Function("signin-github");
+            var signInGitHubFunction = modelBuilder.Function("signin.github");
+
+            signInGitHubFunction
+                .Parameter<string>("returnUrl")
+                .Optional();
 
             signInGitHubFunction.Returns<bool>();
 

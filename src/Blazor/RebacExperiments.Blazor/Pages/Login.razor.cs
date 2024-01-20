@@ -62,6 +62,11 @@ namespace RebacExperiments.Blazor.Pages
         private string? ReturnUrl { get; set; }
 
         /// <summary>
+        /// Logs in with Github.
+        /// </summary>
+        private string LoginGitHubUrl = "/odata/login.github(returnUrl='')";
+
+        /// <summary>
         /// The Model the Form is going to bind to.
         /// </summary>
         [SupplyParameterFromForm]
@@ -71,6 +76,14 @@ namespace RebacExperiments.Blazor.Pages
             Password = Defaults.Philipp.Password,
             RememberMe = Defaults.Philipp.RememberMe
         };
+
+        protected override void OnParametersSet()
+        {
+            if(ReturnUrl != null) 
+            {
+                LoginGitHubUrl = $"/odata/login.github(returnUrl='{ReturnUrl}')";
+            }
+        }
 
         /// <summary>
         /// Signs in the User to the Service using Cookie Authentication.
@@ -104,6 +117,7 @@ namespace RebacExperiments.Blazor.Pages
                 ApplicationErrorMessageService.ShowErrorMessage(e);
             }
         }
+
 
         private string GetNavigationUrl()
         {
