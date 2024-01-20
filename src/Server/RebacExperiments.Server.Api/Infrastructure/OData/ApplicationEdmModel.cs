@@ -50,7 +50,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
 
             // Extenal Authentication
             RegisterLogInGitHubFunction(modelBuilder);
-            //RegisterSignInGitHubFunction(modelBuilder);
+            RegisterSignInGitHubFunction(modelBuilder);
 
             // Send as Lower Camel Case Properties, so the JSON looks better:
             modelBuilder.EnableLowerCamelCase();
@@ -74,7 +74,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             var logInGitHubFunction = modelBuilder.Function("login.github");
 
             logInGitHubFunction
-                .Parameter<string>("returnUrl")
+                .Parameter<string>("redirectUrl")
                 .Optional();
 
             logInGitHubFunction
@@ -89,7 +89,7 @@ namespace RebacExperiments.Server.Api.Infrastructure.OData
             var signInGitHubFunction = modelBuilder.Function("signin.github");
 
             signInGitHubFunction
-                .Parameter<string>("returnUrl")
+                .Parameter<string>("redirectUrl")
                 .Optional();
 
             signInGitHubFunction.Returns<bool>();

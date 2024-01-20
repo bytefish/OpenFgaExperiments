@@ -5,6 +5,8 @@ using RebacExperiments.Shared.ApiSdk.Odata.SignInUser;
 using System.ComponentModel.DataAnnotations;
 using RebacExperiments.Blazor.Infrastructure;
 using Microsoft.Extensions.Localization;
+using System.Text.Encodings.Web;
+using System.Collections.ObjectModel;
 
 namespace RebacExperiments.Blazor.Pages
 {
@@ -64,7 +66,7 @@ namespace RebacExperiments.Blazor.Pages
         /// <summary>
         /// Logs in with Github.
         /// </summary>
-        private string LoginGitHubUrl = "/odata/login.github(returnUrl='')";
+        private string LoginGitHubUrl = "https://localhost:5000/odata/login.github(returnUrl='')";
 
         /// <summary>
         /// The Model the Form is going to bind to.
@@ -79,10 +81,28 @@ namespace RebacExperiments.Blazor.Pages
 
         protected override void OnParametersSet()
         {
-            if(ReturnUrl != null) 
+            // We need to navigate to the RedirectExternal, after the OAuth Dance. This is 
+            // needed, because this Page sets the User in the CustomAuthenticationStore.
+            var redirectExternalUri = NavigationManager.ToAbsoluteUri("RedirectExternal");
+
+            // After the Login is done, we want to navigate to the Page the user originally 
+            // came from. We need to encode this in the Url.
+            var parameters = new Dictionary<string, object?>()
             {
-                LoginGitHubUrl = $"/odata/login.github(returnUrl='{ReturnUrl}')";
-            }
+                { "returnUrl", ReturnUrl}
+            };
+
+            // The Backend needs to redirect to the page "http://<host>:<port>/RedirectExternal?returnUrl=<returnUrl>", let's 
+            // construct the Url with the Query Parameters.
+            var redirectUrl = NavigationManager.GetUriWithQueryParameters(redirectExternalUri.AbsoluteUri, parameters.AsReadOnly());
+
+            // We send this Redirect URI as parameter to the login.github method. This will encode 
+            // the given Redirect URI, so it can be safely used in the Authentication dance.
+            var encodedRedirectUrl = UrlEncoder.Default.Encode(redirectUrl);
+
+            // Finally set the GitHub URL for the Button. We need to resolve the Backend URL from somewhere
+            // else probably...
+            LoginGitHubUrl = $"https://localhost:5000/odata/login.github(redirectUrl='{encodedRedirectUrl}')";
         }
 
         /// <summary>

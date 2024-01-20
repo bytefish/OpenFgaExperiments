@@ -190,7 +190,7 @@ try
             options.Select().OrderBy().Filter().SetMaxTop(250).Count();
         });
 
-    builder.Services.AddRazorPages();;
+    //builder.Services.AddRazorPages();;
 
     builder.Services.AddSwaggerGen();
 
@@ -239,7 +239,7 @@ try
 
     if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
-        app.UseWebAssemblyDebugging();
+        //app.UseWebAssemblyDebugging();
 
         app.UseSwagger();
         app.UseSwaggerUI(options =>
@@ -248,8 +248,8 @@ try
         });
     }
     
-    app.UseBlazorFrameworkFiles();
-    app.UseStaticFiles();
+    //app.UseBlazorFrameworkFiles();
+    //app.UseStaticFiles();
 
     app.UseExceptionHandler("/error");
     app.UseStatusCodePagesWithReExecute("/error/{0}");
@@ -261,7 +261,7 @@ try
 
     app.MapControllers();
 
-    app.MapFallbackToFile("index.html");
+    //app.MapFallbackToFile("index.html");
 
     app.Run();
 }
