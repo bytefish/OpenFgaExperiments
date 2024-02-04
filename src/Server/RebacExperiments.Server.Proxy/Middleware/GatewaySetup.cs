@@ -27,6 +27,7 @@ namespace RebacExperiments.Server.Proxy.Middleware
         private static void AddTokenExchangeService(this WebApplicationBuilder builder, GatewayConfig config)
         {
             var strategy = config.TokenExchangeStrategy;
+
             if (string.IsNullOrEmpty(strategy))
             {
                 strategy = "none";
@@ -34,21 +35,12 @@ namespace RebacExperiments.Server.Proxy.Middleware
 
             switch (strategy.ToLower())
             {
-                case "none":
-                    builder.Services.AddSingleton<ITokenExchangeService, NullTokenExchangeService>();
-                    break;
-
-                case "azuread":
-                    builder.Services.AddSingleton<ITokenExchangeService, AzureAdTokenExchangeService>();
-                    break;
-
                 case "default":
                     builder.Services.AddSingleton<ITokenExchangeService, TokenExchangeService>();
                     break;
 
                 default:
                     throw new ArgumentException($"Unsupported TokenExchangeStrategy in config found: {config.TokenExchangeStrategy}. Possible values: none, AzureAd, default");
-
             }
         }
 
