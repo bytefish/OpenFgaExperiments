@@ -19,15 +19,21 @@
         <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
     </PropertyGroup>
 
+
     <ItemGroup>
-      <None Remove="Components\LinkButton\LinkButton.razor.js" />
+      <Compile Remove="Components\LinkButton\**" />
+      <Content Remove="Components\LinkButton\**" />
+      <EmbeddedResource Remove="Components\LinkButton\**" />
+      <None Remove="Components\LinkButton\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Remove="Components\Markdown\MainLayout.razor.js" />
       <None Remove="Shared\MainLayout - Copy.razor.js" />
       <None Remove="Shared\MainLayout.razor.js" />
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="Components\LinkButton\LinkButton.razor.js" />
       <Content Include="Shared\MainLayout.razor.js" />
     </ItemGroup>
 

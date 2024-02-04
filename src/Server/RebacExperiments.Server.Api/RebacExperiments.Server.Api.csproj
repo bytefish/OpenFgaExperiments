@@ -40,7 +40,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Blazor\RebacExperiments.Blazor\RebacExperiments.Blazor.csproj" />
       <ProjectReference Include="..\RebacExperiments.Server.Database\RebacExperiments.Server.Database.csproj" />
       <ProjectReference Include="..\RebacExperiments.Server.OpenFga\RebacExperiments.Server.OpenFga.csproj" />
     </ItemGroup>

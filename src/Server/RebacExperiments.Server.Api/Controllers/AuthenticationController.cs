@@ -86,7 +86,8 @@ namespace RebacExperiments.Server.Api.Controllers
                     };
                 }
 
-                // Encode it again for the dance ...
+                // Encode the Redirect URL again, because the GitHub OAuth Server 
+                // calls this endpoint, when the Authentication is done.
                 redirectUrl = UrlEncoder.Default.Encode(redirectUrl);
 
                 var authenticationProperties = new AuthenticationProperties
@@ -152,7 +153,7 @@ namespace RebacExperiments.Server.Api.Controllers
                 // This signals, that we authenticated the user against an external provider.
                 authenticationProperties.SetString("ExternalProviderName", GitHubAuthenticationDefaults.AuthenticationScheme);
 
-                // If we have received a token (we should have), we can add it to the Cookie.
+                // If we have received a token, we can add it to the Cookie.
                 var accessToken = await HttpContext
                     .GetTokenAsync("access_token")
                     .ConfigureAwait(false);
@@ -176,6 +177,8 @@ namespace RebacExperiments.Server.Api.Controllers
 
                 // Delete all Correlation Cookies set during the OAuth Dance.
                 await HttpContext.SignOutAsync(AuthenticationSchemes.ExternalScheme);
+
+                
 
                 redirectUrl = Uri.UnescapeDataString(redirectUrl);
 
@@ -202,8 +205,6 @@ namespace RebacExperiments.Server.Api.Controllers
             {
                 return _exceptionToODataErrorMapper.CreateODataErrorResult(HttpContext, exception);
             }
-
-
         }
     }
 }
